@@ -17,8 +17,6 @@ class RequestSendBar extends React.Component {
     }
 
     render() {
-     
-       
         return (
             <Row gutter={[16, 16]}>
                 
