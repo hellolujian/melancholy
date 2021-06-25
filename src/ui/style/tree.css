@@ -1,0 +1,25 @@
+.ant-tree-switcher {
+  line-height: 50px;
+}
+
+.ant-tree-node-content-wrapper {
+  width: 100%;
+}
+
+.ant-tree .ant-tree-treenode-switcher-close {
+  width: 100%;
+  border-top: 1px solid lightgrey;
+  padding: 0; 
+}
+
+.ant-tree-treenode-switcher-open {
+  width: 100%;
+  border-top: 1px solid lightgrey;
+  padding: 0; 
+}
+
+
+.site-drawer-render-in-current-wrapper {
+  position: relative;
+  
+}
