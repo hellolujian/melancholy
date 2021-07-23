@@ -66,6 +66,10 @@ const COOKIE_LEARN_MORE_TIPS = (
 const REQUEST_EXAMPLES_TIPS = (
     <Text>Save responses and associated requests as Examples. <Link href="https://blog.postman.com/mock-responses-in-postman-by-using-examples/">Learn More</Link></Text>
 )
+
+const PRE_REQUEST_SCRIPTS_CODE_TIPS = (
+    <Text>Pre-request scripts are written in JavaScript, and are run before the request is sent. <Link href="https://learning.postman.com/docs/writing-scripts/pre-request-scripts/">Learn more about pre-request scripts</Link></Text>
+)
 export { 
     VARIABLE_TIPS,
     VARIABLE_VALUE_TIPS,
@@ -80,5 +84,6 @@ export {
     ENVIRONMENT_TIPS,
     NO_ENVIRONMENT_VARIABLES_TIPS,
     COOKIE_LEARN_MORE_TIPS,
-    REQUEST_EXAMPLES_TIPS
+    REQUEST_EXAMPLES_TIPS,
+    PRE_REQUEST_SCRIPTS_CODE_TIPS
 }

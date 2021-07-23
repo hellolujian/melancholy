@@ -37,3 +37,7 @@
 .postman-button-class:hover {
   background-color: lightgray
 }
+
+.border {
+  border: 1px solid red;
+}
