@@ -1,0 +1,17 @@
+.workspace-card-list {
+  width: 300px
+}
+
+.workspace-card-list .workspace-card-list-item {
+  cursor: pointer;
+  padding: 6px;
+  
+}
+
+.workspace-card-list .workspace-card-list-item:hover {
+  background-color: lightgrey;
+}
+
+.workspace-card-tab > .ant-tabs-nav {
+  margin-bottom: 10px;
+}

@@ -1,0 +1,81 @@
+.request-tabs-class .ant-tabs-tab-btn {
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between
+}
+
+.request-tabs-class .ant-tabs-tab-btn .anticon {
+  margin: 0px;
+}
+
+.close-tab-icon-none {
+  display: none;
+}
+
+.close-tab-icon-hide {
+  visibility: hidden;
+}
+
+.request-tabs-class .ant-tabs-nav-list .ant-tabs-tab {
+  padding: 4px 4px 4px 12px;
+}
+
+.request-tab-right-icon:hover .unsaved-dot-icon {
+  display: none
+}
+
+
+.request-tab-right-icon:hover .close-tab-icon-none {
+  display: block
+}
+
+.request-tabs-class .ant-tabs-nav-list .ant-tabs-tab:hover .close-tab-icon-hide {
+  display: block;
+  visibility: visible
+}
+/* 
+.request-tabs-class .ant-tabs-nav-list .ant-tabs-tab:hover .unsaved-dot-icon {
+  display: none
+} */
+
+.request-tabs-class  > .ant-tabs-nav .ant-tabs-nav-more {
+  display: none
+}
+
+.request-tabs-class > .ant-tabs-nav .ant-tabs-nav-add {
+  padding: 0px;
+  margin-left: 4px;
+  border: 0px;
+}
+
+.request-tabs-class .ant-tabs-tab-remove {
+  display: none
+}
+.request-tabs-add .ant-btn {
+
+  padding: 0px 8px;
+}
+
+.request-tabs-class .ant-tabs-nav {
+
+  margin: 0px 
+}
+
+.request-tab-confirm-footer {
+  margin: 5px 5px 10px 5px;
+}
+
+.request-tab-confirm-modal .ant-modal-footer {
+  border-top: 0px;
+}
+
+.request-tabs-class .ant-tabs-tab {
+  background: #fff !important
+}
+
+.request-tabs-class .ant-tabs-tab-active {
+  background: #fafafa !important;
+  border-bottom: 1px solid #fafafa !important;
+}
+

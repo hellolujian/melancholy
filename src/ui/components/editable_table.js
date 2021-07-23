@@ -111,7 +111,7 @@ class EditableTable extends React.Component {
 
   render() {
     const { dataSource, currentHoverCell, currentEditCell, hideColumns } = this.state;
-    const {columns, cellOperations, rowKey} = this.props;
+    const {columns, cellOperations, rowKey, tableProps} = this.props;
     const components = {
       body: {
         wrapper: this.DraggableContainer,
@@ -195,11 +195,11 @@ class EditableTable extends React.Component {
                   onChange={(e) => this.handleCellInputChange(record, col.dataIndex, e.target.value, cellId)}
                 />
                 {
-                  currentHoverCell && currentHoverCell.split("_")[0] === (index + "") && 
-                  (!currentEditCell || currentEditCell.split("_")[0] !== (index + "")) && (colIndex === columns.length - 1) && (
+                  currentHoverCell && currentHoverCell.split("_")[0] === (index + "") && index < dataSource.length &&
+                  (!currentEditCell || currentEditCell.split("_")[0] !== (index + "")) && (colIndex === renderColumns.length - 1) && (
                     <>
                       <Button size="small" type="text" icon={<CloseOutlined />} style={{height: 10}} onClick={(e) => this.handleCloseBtnClick(e, record)} />
-                      { cellOperations(record, dataSource) }
+                      { cellOperations && cellOperations(record, dataSource) }
                     </>
                   )
                 }
@@ -253,6 +253,9 @@ class EditableTable extends React.Component {
           </Row>
          
         )
+        if (!col.width) {
+          extraObj.width = parseInt(1 / renderColumns.length * 100) + '%';
+        }
       
       }
       realColumns.push({...col, ...extraObj})
@@ -268,7 +271,8 @@ class EditableTable extends React.Component {
           columns={realColumns}
           rowKey={rowKey}
           pagination={false}
-          scroll={{y: 250 }}
+          // scroll={{y: 250 }}
+          {...tableProps}
         />
     );
   }

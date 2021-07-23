@@ -1,0 +1,10 @@
+.edit-icon-after-title {
+  /* display: none; */
+  border: 1px solid red !important
+}
+
+.title-before-edit-icon:hover ~ .edit-icon-after-title {
+  display: none !important;
+  visibility: hidden
+  /* border: 1px solid red !important */
+}

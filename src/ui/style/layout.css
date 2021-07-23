@@ -1,3 +1,18 @@
 .header {
-  line-height: 2.3;
+  padding: 0px 10px;
+  display: flex;
+  justify-content: space-between;
+  z-index: 3;
+}
+
+.ant-layout-header {
+  height: 54px;
+  box-shadow: 0px 4px 4px -4px #5E5E5E;
+}
+
+
+.site-drawer-render-in-current-wrapper {
+  position: relative;
+  background: #fff;
+  padding: 20px 10px
 }

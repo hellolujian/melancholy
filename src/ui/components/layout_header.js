@@ -2,11 +2,11 @@ import React from 'react';
 import { Layout, 
     Menu, 
     Space,Popover, Col ,
-    Tabs, Input,Tree,
+    Tabs, Input,List,
     Button, Rate,Drawer,
     Dropdown } from 'antd';
 import { UserOutlined, AppstoreFilled , PlusOutlined, CaretDownFilled, PlusSquareFilled,SyncOutlined,
-  ReadOutlined, SearchOutlined,EllipsisOutlined,
+  ReadOutlined, ToolFilled ,EllipsisOutlined,
                     SettingFilled,NotificationFilled , EnvironmentFilled ,FolderViewOutlined ,DatabaseOutlined  , PullRequestOutlined  } from '@ant-design/icons';
 
 import TooltipButton from './tooltip_button'
@@ -15,11 +15,12 @@ import TooltipButton from './tooltip_button'
 import CollectionModal from './collection_modal'
 import RequestModal from './request_modal'
 import WorkspaceModal from './workspace_modal'
+import WorkspaceCard from './workspace_card'
 import EnvironmentModal from './environment_modal'
 
 import {IMPORT_TITLE, SYNC_DATA_TITLE, CREATE_NEW, ACCOUNT_TITLE, NOTIFICATIONS_TITLE, SETTINGS_TITLE, RUNNER_TITLE} from '@/ui/constants/titles'
 const { Header, Content, Sider } = Layout;
-
+const { TabPane } = Tabs;
 
 class LayoutHeader extends React.Component {
 
@@ -40,9 +41,9 @@ class LayoutHeader extends React.Component {
 
     render() {
      
-        const {visibleModal} = this.state;
+        const {visibleModal, workspaceList} = this.state;
         return (
-            <Header style={{display: 'flex', justifyContent: 'space-between', padding: 0}}>
+            <Header className="header">
                 <Space>
                     <Dropdown.Button 
                         overlay={
@@ -70,13 +71,11 @@ class LayoutHeader extends React.Component {
                     <TooltipButton title={RUNNER_TITLE} label="Runner" />
                 </Space>
                 <Space>
-                    <Popover content={null} title="Title">
-                        <Button type="text" style={{color: 'white'}} icon={<AppstoreFilled />}>My Workspace <CaretDownFilled /></Button>
-                    </Popover>
+                    <WorkspaceCard />
                 </Space>
                 <Space>
                     <TooltipButton shape="circle" title={SYNC_DATA_TITLE} icon={<SyncOutlined />} />
-                    <TooltipButton shape="circle" title={SETTINGS_TITLE} icon={<SettingFilled />} />
+                    <TooltipButton shape="circle" title={SETTINGS_TITLE} icon={<ToolFilled  />} />
                     <TooltipButton shape="circle" title={NOTIFICATIONS_TITLE} icon={<NotificationFilled  />} />
                     <TooltipButton shape="circle" icon={<UserOutlined />} title={ACCOUNT_TITLE} />
                     <Button type="primary">Upgrade</Button>

@@ -1,0 +1,13 @@
+.header-presets-list {
+  height: 450px;
+
+  overflow: auto;
+}
+
+.header-presets-list .ant-list-item {
+  padding-bottom: 0px;
+}
+
+.header-presets-modal .ant-modal-footer {
+  border-top: 0px
+}

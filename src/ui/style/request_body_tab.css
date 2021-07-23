@@ -1,0 +1,9 @@
+.request-body-checkbox .ant-radio-inner {
+  height: 14px;
+  width: 14px;
+}
+
+.request-body-checkbox .ant-radio-inner::after {
+  height: 6px;
+  width: 6px;
+}

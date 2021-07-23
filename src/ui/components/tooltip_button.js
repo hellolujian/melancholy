@@ -24,7 +24,7 @@ class TooltipButton extends React.Component {
             <Tooltip title={title} color={color}>
                 {
                     type === 'purelink' ? (
-                        <a style={{display: 'inline-block'}} className="ant-dropdown-link" {...buttonProps}>
+                        <a style={{display: 'inline-block'}} {...buttonProps}>
                             {label ? label : ""}
                         </a>
                     ) : (

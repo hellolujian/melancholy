@@ -42,6 +42,30 @@ const TESTS_TIPS = (
     <Text>These tests will execute after every request in this collection. <Link href="https://learning.postman.com/docs/writing-scripts/test-scripts/" target="_blank">Learn more about Postman’s execution order.</Link></Text>
                         
 )
+
+const ENVIRONMENT_TEXT_TIPS = (
+    <Text>An environment is a set of variables that allow you to switch the context of your requests.</Text>
+)
+const ENVIRONMENT_LINK_TIPS = (
+    <Link>Learn more about environments</Link>
+)
+const ENVIRONMENT_TIPS = (
+    <Text>
+        An environment is a set of variables that allow you to switch the context of your requests. Environments can be shared between multiple workspaces. {ENVIRONMENT_LINK_TIPS}
+    </Text>
+)
+
+const NO_ENVIRONMENT_VARIABLES_TIPS = (
+    <Text strong>No Environment variables</Text>
+)
+
+const COOKIE_LEARN_MORE_TIPS = (
+    <Link href="https://learning.postman.com/docs/sending-requests/cookies/">Learn More</Link>
+)
+
+const REQUEST_EXAMPLES_TIPS = (
+    <Text>Save responses and associated requests as Examples. <Link href="https://blog.postman.com/mock-responses-in-postman-by-using-examples/">Learn More</Link></Text>
+)
 export { 
     VARIABLE_TIPS,
     VARIABLE_VALUE_TIPS,
@@ -50,5 +74,11 @@ export {
     DESCRIPTION_MARKDOWN_TIPS,
     AUTHORIZATION_TIPS,
     PRE_REQUEST_SCRIPTS_TIPS,
-    TESTS_TIPS
+    TESTS_TIPS,
+    ENVIRONMENT_LINK_TIPS,
+    ENVIRONMENT_TEXT_TIPS,
+    ENVIRONMENT_TIPS,
+    NO_ENVIRONMENT_VARIABLES_TIPS,
+    COOKIE_LEARN_MORE_TIPS,
+    REQUEST_EXAMPLES_TIPS
 }

@@ -1,36 +1,34 @@
 import React from 'react';
-import {Input, Tabs, Button, Form, Modal, Space, Typography} from 'antd';
+import {Input, Alert, Button, Form, Modal, Typography, List, Space, Upload, Select } from 'antd';
+import {
+    ENVIRONMENT_TIPS,
+    VARIABLE_VALUE_TIPS,
+} from 'ui/constants/tips'
+import {
+    SHARE_COLLECTION_ICON, ELLIPSIS_ICON, RENAME_ICON, EDIT_ICON, CREATE_FORK_ICON, 
+    MERGE_CHANGES_ICON, ADD_REQUEST_ICON, ADD_FOLDER_ICON, DUPLICATE_ICON,
+    EXPORT_ICON, MOCK_COLLECTION, MONITOR_COLLECTION_ICON, PUBLISH_DOCS_ICON, 
+    REMOVE_FROM_WORKSPACE_ICON, DELETE_ICON, COLLECTION_FOLDER_ICON, 
+} from '@/ui/constants/icons'
 
-import AceEditor from "react-ace";
-import "ace-builds/src-noconflict/mode-javascript";
-import "ace-builds/src-noconflict/theme-tomorrow";
-import "ace-builds/src-noconflict/ext-language_tools"
+import VariablesTable from './variables_table';
+import ButtonModal from './button_modal'
+import 'ui/style/environment_modal.css'
 
-
-import MarkdownIt from 'markdown-it'
-import MdEditor from 'react-markdown-editor-lite'
-// 导入编辑器的样式
-import 'react-markdown-editor-lite/lib/index.css';
-
-import EditableTable from './editable_table';
-
-// 注册插件（如果有的话）
-// MdEditor.use(YOUR_PLUGINS_HERE);
-
-// 初始化Markdown解析器
-const mdParser = new MarkdownIt(/* Markdown-it options */);
-
-const { TabPane } = Tabs;
-const { Text, Link } = Typography;
-
-const { TextArea } = Input;
+const { Link, Text, Paragraph } = Typography;
+const { Option } = Select;
 class EnvironmentModal extends React.Component {
 
     constructor(props) {
         super(props);
         this.state = {
             visible: props.visible,
-            lastPropsVisible: false
+            lastPropsVisible: false, 
+            environments: [
+                {id: 'qa', name: 'qa',},
+                {id: 'qa1', name: 'qa1',},
+            ],
+            scene: 'view'
         }
     }
 
@@ -52,40 +50,173 @@ class EnvironmentModal extends React.Component {
         this.setState({visible: false, lastPropsVisible: false})
     }
 
+    handleEnvironmentItemClick = () => {
+        this.setState({scene: 'update'})
+    }
+
+    handleAddClick = () => {
+        this.setState({scene: 'add'})
+    }
+
+    handleImportClick = () => {
+        this.setState({scene: 'import'})
+    }
+
+    handleCancelClick = () => {
+        this.setState({scene: 'view'})
+    }
+
+    handleGlobalClick = () => {
+        this.setState({scene: 'update'})
+    }
+
     render() {
      
         const {workspaceId, collectionId, folderId} = this.props;
-        const {visible} = this.state;
+        const {visible, environments, scene} = this.state;
         return (
             <Modal 
                 title="MANAGE ENVIRONMENTS" 
                 centered
-                // bodyStyle={{ height: 600}}
+                bodyStyle={{ height: 600}}
                 okButtonProps={{}}
-                okText="Create Workspace"
-                // width={800}
-                visible={visible} onOk={this.handleOk} onCancel={this.handleModalCancel}>
-                <Form
-                layout="vertical"
-                //   onFinish={onFinish}
-                //   onFinishFailed={onFinishFailed}
-                >
-                <Form.Item
-                    label="Add Environment"
-                    rules={[{ required: true, message: 'Please input name!' }]}
-                >
-                    <Input placeholder="Environment Name" />
-                </Form.Item>
+                footer={(
+                    <div className="justify-content-flex-end">
+                        {
+                            scene === 'view' && (
+                                <Button type="text" className="postman-button-class" onClick={this.handleGlobalClick}>Globals</Button>
+                            )
+                        }
+                        {
+                            scene === 'view' && (
+                                <Button type="text" className="postman-button-class" onClick={this.handleImportClick}>Import</Button>
+                            )
+                        }
+                        {
+                            (scene === 'import' || scene === 'add' || scene === 'update') && (
+                                <Button type="text" className="postman-button-class" onClick={this.handleCancelClick}>Cancel</Button>
+                            )
+                        }
+                        {
+                            (scene === 'view' || scene === 'add') && (
+                                <Button type="primary" onClick={this.handleAddClick}>Add</Button>
+                            )
+                        }
+                        {
+                            scene === 'update' && (
+                                <Button type="primary">Update</Button>
+                            )
+                        }
+                    </div>
+                )}
+                width={800}
+                visible={visible} 
+                onOk={this.handleOk} 
+                onCancel={this.handleModalCancel}>
+                {
+                    scene === 'import' && (
+                        <div direction="vertical">
+                            <Paragraph strong>Import Environment</Paragraph>
 
-                <Form.Item label="Summary">
-                    
-                    <Input />
-                        
-                </Form.Item>
+                            <Paragraph>Select environment files from your computer</Paragraph>
+                            
+                            <Upload >
+                                <Button>Select File</Button>
+                            </Upload>
 
-
+                        </div>
+                    )
+                }
                 
-                </Form>
+                {
+                    scene === 'view' && (
+                        <>
+                            {ENVIRONMENT_TIPS}
+                            <List
+                                className="environment_modal_list"
+                                size="small"
+                                //   header={<div>Header</div>}
+                                //   footer={<div>Footer</div>}
+                                //   bordered
+                                dataSource={environments}
+                                renderItem={item => (
+                                    <List.Item actions={[
+                                        (
+                                            <Space>
+                                                <ButtonModal 
+                                                    buttonLabel="share"
+                                                    buttonProps={{
+                                                        className: "postman-button-class", type: "text", icon: SHARE_COLLECTION_ICON, 
+                                                    }} 
+                                                    modalProps={{
+                                                        okText: 'Share', cancelText: 'Cancel', title: 'SHARE ENVIRONMENT'
+                                                    }} 
+                                                    modalContent={
+                                                        <>
+                                                            <p>Share in Workspace</p>
+                                                            <Select defaultValue="lucy" style={{ width: '100%' }} onChange={this.handleChange}>
+                                                                <Option value="jack">Jack</Option>
+                                                                <Option value="lucy">Lucy</Option>
+                                                                <Option value="disabled" disabled>
+                                                                    Disabled
+                                                                </Option>
+                                                                <Option value="Yiminghe">yiminghe</Option>
+                                                            </Select>
+                                                        </>
+                                                    }
+                                                />
+                                                {/* <Button className="postman-button-class" type="text" icon={SHARE_COLLECTION_ICON}>share</Button> */}
+                                                <span>
+                                                    <Button type="text" icon={DUPLICATE_ICON} className="postman-button-class" />
+                                                    <Button type="text" icon={EXPORT_ICON} className="postman-button-class" />
+                                                    <Button type="text" icon={ELLIPSIS_ICON} className="postman-button-class" />
+                                                </span>
+                                            </Space>
+                                            
+                                        )
+                                    ]}>
+                                        <Button type="text" size="small" onClick={this.handleEnvironmentItemClick}>{item.id}</Button>
+                                    </List.Item>
+                                )}
+                            />
+                        </>
+                    )
+                }
+                {
+                    (scene === 'update' || scene === 'add') && (
+                        <>
+                            <Form
+                                layout="vertical"
+                                //   onFinish={onFinish}
+                                //   onFinishFailed={onFinishFailed}
+                                >
+                                <Form.Item
+                                    label="Add Environment"
+                                    rules={[{ required: true, message: 'Please input name!' }]}
+                                >
+                                    <Input placeholder="Environment Name" />
+                                </Form.Item>
+
+                                {/* <Form.Item label="Summary">
+                                    
+                                    <Input />
+                                        
+                                </Form.Item> */}
+                            
+                            </Form>
+
+                            <VariablesTable />
+                            <Alert
+                                style={{position: 'absolute', bottom: 70, left: 20, right: 20}}
+                                description={VARIABLE_VALUE_TIPS}
+                                type="info"
+                                showIcon
+                                closable
+                                onClose={this.handleVariableValuesTipClose}
+                            />
+                        </>
+                    )
+                }
             </Modal>
         );
     }

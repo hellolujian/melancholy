@@ -1,29 +1,7 @@
 import React from 'react';
 import {Input, Tabs, Button, Form, Modal, Space, Typography} from 'antd';
 
-import AceEditor from "react-ace";
-import "ace-builds/src-noconflict/mode-javascript";
-import "ace-builds/src-noconflict/theme-tomorrow";
-import "ace-builds/src-noconflict/ext-language_tools"
-
-
-import MarkdownIt from 'markdown-it'
-import MdEditor from 'react-markdown-editor-lite'
-// 导入编辑器的样式
-import 'react-markdown-editor-lite/lib/index.css';
-
-import EditableTable from './editable_table';
-
-// 注册插件（如果有的话）
-// MdEditor.use(YOUR_PLUGINS_HERE);
-
-// 初始化Markdown解析器
-const mdParser = new MarkdownIt(/* Markdown-it options */);
-
-const { TabPane } = Tabs;
-const { Text, Link } = Typography;
-
-const { TextArea } = Input;
+import ScriptEditor from './script_editor'
 class RequestModal extends React.Component {
 
     constructor(props) {
@@ -33,20 +11,32 @@ class RequestModal extends React.Component {
         }
     }
 
+    componentWillReceiveProps (nextProps) {
+        const { isModalVisible: newVisibleValue } = nextProps;
+        const { lastPropsVisible } = this.state;
+        if (lastPropsVisible !== newVisibleValue) {
+            this.setState({isModalVisible: newVisibleValue, lastPropsVisible: newVisibleValue})
+        } 
+    }
+
     componentDidMount() {
       
     }
 
     handleOk = () => {}
 
-    handleCancel = () => {}
+    handleCancel = () => {
+        this.setState({isModalVisible: false})
+    }
 
     render() {
      
-        const {workspaceId, collectionId, folderId, isModalVisible = true} = this.props;
+        const {workspaceId, collectionId, folderId} = this.props;
+        const {isModalVisible} = this.state
         return (
             <Modal 
                 title="CREATE NEW WORKSPACE" 
+                zIndex={999999}
                 centered
                 // bodyStyle={{ height: 600}}
                 okButtonProps={{}}
@@ -71,7 +61,7 @@ class RequestModal extends React.Component {
                         
                 </Form.Item>
 
-
+                <ScriptEditor />
                 
                 </Form>
             </Modal>

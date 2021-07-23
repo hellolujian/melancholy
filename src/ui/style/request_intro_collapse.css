@@ -1,0 +1,13 @@
+.request-intro-edit-icon  {
+  display: none;
+}
+.site-collapse-custom-collapse-panel:hover .request-intro-edit-icon {
+  display: inline-block;
+}
+.site-collapse-custom-collapse-panel > .ant-collapse-header {
+  padding-bottom: 0px !important
+}
+
+.site-collapse-custom-collapse-panel .ant-collapse-content-box {
+  padding-top: 0px !important
+}

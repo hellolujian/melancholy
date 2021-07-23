@@ -1,11 +1,7 @@
 import React from 'react';
 import {Input, Tabs, Button, Form, Modal, Space, Typography, Alert} from 'antd';
 
-import AceEditor from "react-ace";
-import "ace-builds/src-noconflict/mode-javascript";
-import "ace-builds/src-noconflict/theme-tomorrow";
-import "ace-builds/src-noconflict/ext-language_tools"
-
+import ScriptEditor from './script_editor'
 
 import MarkdownIt from 'markdown-it'
 import MdEditor from 'react-markdown-editor-lite'
@@ -110,25 +106,7 @@ class CollectionModal extends React.Component {
                     </TabPane>
                     <TabPane tab="Pre-request Scripts" key="prerequestscripts">
                         {PRE_REQUEST_SCRIPTS_TIPS}
-                         <AceEditor
-                            style={{border: '1px solid gray', width: '100%', height: 400}}
-                            mode="javascript"
-                            theme="tomorrow"
-                            name="blah2"
-                            onLoad={this.onLoad}
-                            onChange={this.onChange}
-                            // fontSize={14}
-                            showPrintMargin={true}
-                            showGutter={true}
-                            highlightActiveLine={true}
-                            value={`console.log('sdfsd')`}
-                            setOptions={{
-                            enableBasicAutocompletion: true,
-                            enableLiveAutocompletion: true,
-                            enableSnippets: true,
-                            showLineNumbers: true
-                            }}
-                        />
+                         <ScriptEditor />
                     </TabPane>
                     <TabPane tab="Tests" key="tests">
                         {TESTS_TIPS}

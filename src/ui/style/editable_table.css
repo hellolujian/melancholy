@@ -12,22 +12,6 @@
     margin: 1px;*/
   }
 
-  /* .editable-cell-value-wrap:empty::before{
-    color:lightgrey;
-    content:attr(placeholder);
-  } */
-/*   
-   .editable-row:hover .editable-cell-value-wrap {
-    padding: 0px 0px;
-    border: 1px solid #d9d9d9;
-    border-radius: 2px;
-    margin: 0px;
-    -webkit-border-radius: 2px;
-    -moz-border-radius: 2px;
-    -ms-border-radius: 2px;
-    -o-border-radius: 2px;
-} */
-
 .editable-cell-value-wrap-edit {
   padding: 0px 0px;
   border: 1px solid #d9d9d9;
@@ -80,5 +64,11 @@
 
 .ant-table-body {
   overflow-y: auto !important;
-  max-width: 750px;
+  /* max-width: 751px; */
 }
+
+tr.ant-table-measure-row{
+   /* display: none; */
+  visibility: collapse;
+}
+

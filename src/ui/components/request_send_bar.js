@@ -18,13 +18,13 @@ class RequestSendBar extends React.Component {
 
     render() {
         return (
-            <Row gutter={[16, 16]}>
+            <Row gutter={[16, 16]} style={{marginTop: 5, marginBottom: 5}}>
                 
                 <Col flex='auto'>
-                    <Input addonBefore={
-                        <Select defaultValue="Zhejiang">
-                            <Option value="Zhejiang">Zhejiang</Option>
-                            <Option value="Jiangsu">Jiangsu</Option>
+                    <Input size="large" addonBefore={
+                        <Select defaultValue="GET">
+                            <Option value="get">GET</Option>
+                            <Option value="post">POST</Option>
                         </Select>
                     } defaultValue="Xihu District, Hangzhou" />
                 </Col>
@@ -39,6 +39,7 @@ class RequestSendBar extends React.Component {
                                 </Menu>)
                             } 
                             type="primary"
+                            size="large"
                             placement="bottomCenter" icon={<CaretDownOutlined />}>
                             Send
                         </Dropdown.Button>
@@ -49,6 +50,7 @@ class RequestSendBar extends React.Component {
                                     </Menu.Item>
                                 </Menu>)
                             } 
+                            size="large"
                             placement="bottomCenter" icon={<CaretDownOutlined />}>
                             Save
                         </Dropdown.Button>
