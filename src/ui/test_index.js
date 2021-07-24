@@ -1,14 +1,10 @@
 import React from 'react';
 import { 
-    Layout, 
-    Menu, 
+    Layout, Menu, 
     Space,Row, Col ,
     Tabs, Input,Tree,
-    Button, Rate,Drawer,
-    Dropdown } from 'antd';
-import { UserOutlined, CaretRightOutlined, PlusOutlined, CaretDownFilled, PlusSquareFilled,SyncOutlined,
-  ReadOutlined, SearchOutlined,EllipsisOutlined,
-                    SettingFilled,NotificationFilled , EnvironmentFilled ,FolderViewOutlined ,DatabaseOutlined  , PullRequestOutlined  } from '@ant-design/icons';
+} from 'antd';
+import { PlusOutlined, SearchOutlined,} from '@ant-design/icons';
 
 import TooltipButton from 'ui/components/tooltip_button';
 import RequestIntroCollapse from 'ui/components/request_intro_collapse'
@@ -17,9 +13,9 @@ import RequestTabs from 'ui/components/request_tabs'
 import RequestSendSetting from 'ui/components/request_send_setting'
 import LayoutHeader from 'ui/components/layout_header'
 import CollectionTree from 'ui/components/collection_tree'
+import ResponseTab from 'ui/components/response_tab'
 import { Resizable } from 'react-resizable';
 
-import { UNSAVED_DOT_ICON, POST_REQUEST_ICON, GET_REQUEST_ICON } from 'ui/constants/icons'
 import 'ui/style/resizable.css'
 import 'ui/style/common.css'
 import 'ui/style/layout.css'
@@ -114,6 +110,7 @@ class Home extends React.Component {
 
                     <RequestSendBar />
                     <RequestSendSetting />
+                    <ResponseTab />
                   </Content>
                 </Layout>
             </Layout>

@@ -23,7 +23,7 @@ class ScriptEditor extends React.Component {
      
         return (
             <AceEditor
-                            style={{border: '1px solid lightgray', width: '100%', height: '100%'}}
+                            style={{border: '1px solid lightgray', width: '100%', height: '100%',}}
                             mode="javascript"
                             theme="tomorrow"
                             name="blah2"

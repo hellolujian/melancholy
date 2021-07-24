@@ -70,6 +70,10 @@ const REQUEST_EXAMPLES_TIPS = (
 const PRE_REQUEST_SCRIPTS_CODE_TIPS = (
     <Text>Pre-request scripts are written in JavaScript, and are run before the request is sent. <Link href="https://learning.postman.com/docs/writing-scripts/pre-request-scripts/">Learn more about pre-request scripts</Link></Text>
 )
+
+const TEST_SCRIPTS_CODE_TIPS = (
+    <Text>Test scripts are written in JavaScript, and are run after the response is received. <div><Link href="https://learning.postman.com/docs/writing-scripts/test-scripts/">Learn more about tests scripts</Link></div></Text>
+)
 export { 
     VARIABLE_TIPS,
     VARIABLE_VALUE_TIPS,
@@ -85,5 +89,6 @@ export {
     NO_ENVIRONMENT_VARIABLES_TIPS,
     COOKIE_LEARN_MORE_TIPS,
     REQUEST_EXAMPLES_TIPS,
-    PRE_REQUEST_SCRIPTS_CODE_TIPS
+    PRE_REQUEST_SCRIPTS_CODE_TIPS,
+    TEST_SCRIPTS_CODE_TIPS
 }

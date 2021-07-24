@@ -2,9 +2,20 @@ import React from 'react';
 import { message, Button, Upload, Radio , Collapse, Tabs } from 'antd';
 import { EyeOutlined, CaretDownOutlined  } from '@ant-design/icons';
 import KeyValueTable from './key_value_table'
-
+import JSONInput from 'react-json-editor-ajrm';
+import locale    from 'react-json-editor-ajrm/locale/en';
 import ScriptEditor from './script_editor'
+import JsonEditor from './json_editor'
 import 'ui/style/request_body_tab.css'
+
+
+import AceEditor from "react-ace";
+import "ace-builds/src-noconflict/mode-json";
+import "ace-builds/src-noconflict/theme-tomorrow";
+import "ace-builds/src-noconflict/ext-language_tools"
+
+
+
 const { TabPane } = Tabs;
 
 const { Panel } = Collapse;
@@ -43,7 +54,9 @@ class RequestBodyTab extends React.Component {
       { label: 'none', value: 'none', content: 'This request does not have a body' },
       { label: 'form-data', value: 'formdata', content: 'Content of Tab Pane 2'},
       { label: 'x-www-form-urlencoded', value: 'xwwwformurlencoded', content: null},
-      { label: 'raw', value: 'raw', content: null},
+      { label: 'raw', value: 'raw', content: (
+        <JsonEditor />
+      )},
       { label: 'binary', value: 'binary', content: (
         <Upload {...this.props}>
      <Button type="text">Select File</Button>

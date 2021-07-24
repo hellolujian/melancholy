@@ -1,26 +1,27 @@
 import React from 'react';
 import { Layout, 
     Menu, 
-    Space,Popover, Col ,
-    Tabs, Input,List,
-    Button, Rate,Drawer,
-    Dropdown } from 'antd';
-import { UserOutlined, AppstoreFilled , PlusOutlined, CaretDownFilled, PlusSquareFilled,SyncOutlined,
-  ReadOutlined, ToolFilled ,EllipsisOutlined,
-                    SettingFilled,NotificationFilled , EnvironmentFilled ,FolderViewOutlined ,DatabaseOutlined  , PullRequestOutlined  } from '@ant-design/icons';
+    Space,
+    Tabs,
+    Button, 
+    Dropdown 
+} from 'antd';
+import { 
+    UserOutlined, CaretDownFilled, PlusSquareFilled,SyncOutlined,
+    ReadOutlined, ToolFilled ,NotificationFilled , EnvironmentFilled ,
+    FolderViewOutlined ,DatabaseOutlined  , PullRequestOutlined  
+} from '@ant-design/icons';
 
 import TooltipButton from './tooltip_button'
 
 
 import CollectionModal from './collection_modal'
 import RequestModal from './request_modal'
-import WorkspaceModal from './workspace_modal'
 import WorkspaceCard from './workspace_card'
 import EnvironmentModal from './environment_modal'
 
 import {IMPORT_TITLE, SYNC_DATA_TITLE, CREATE_NEW, ACCOUNT_TITLE, NOTIFICATIONS_TITLE, SETTINGS_TITLE, RUNNER_TITLE} from '@/ui/constants/titles'
-const { Header, Content, Sider } = Layout;
-const { TabPane } = Tabs;
+const { Header,} = Layout;
 
 class LayoutHeader extends React.Component {
 
