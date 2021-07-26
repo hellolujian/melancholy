@@ -74,6 +74,18 @@ const PRE_REQUEST_SCRIPTS_CODE_TIPS = (
 const TEST_SCRIPTS_CODE_TIPS = (
     <Text>Test scripts are written in JavaScript, and are run after the response is received. <div><Link href="https://learning.postman.com/docs/writing-scripts/test-scripts/">Learn more about tests scripts</Link></div></Text>
 )
+
+const AUTH_LEARN_TIPS = (
+    <Link href="https://learning.postman.com/docs/sending-requests/authorization/">Learn more about authorization</Link>
+)
+
+const NO_AUTH_TIPS = (
+    <Text>This request does not use any authorization. {AUTH_LEARN_TIPS}</Text>
+)
+
+const HAVE_AUTH_TIPS = (
+    <Text type="secondary ">The authorization header will be automatically generated when you send the request. {AUTH_LEARN_TIPS}</Text>
+)
 export { 
     VARIABLE_TIPS,
     VARIABLE_VALUE_TIPS,
@@ -90,5 +102,7 @@ export {
     COOKIE_LEARN_MORE_TIPS,
     REQUEST_EXAMPLES_TIPS,
     PRE_REQUEST_SCRIPTS_CODE_TIPS,
-    TEST_SCRIPTS_CODE_TIPS
+    TEST_SCRIPTS_CODE_TIPS,
+    NO_AUTH_TIPS, 
+    HAVE_AUTH_TIPS
 }

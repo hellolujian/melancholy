@@ -2,7 +2,7 @@ import React from 'react';
 import {Modal, Button, Dropdown, Menu} from 'antd';
 
 import { EllipsisOutlined, InfoCircleFilled ,CaretDownOutlined } from '@ant-design/icons';
-
+import TooltipButton from './tooltip_button'
 class ButtonModal extends React.Component {
 
     constructor(props) {
@@ -26,22 +26,23 @@ class ButtonModal extends React.Component {
 
     render() {
     
-        let {buttonProps, modalProps, modalContent, buttonLabel = ""} = this.props;
+        let {buttonProps = true, modalProps, modalContent, label = ""} = this.props;
         let {modalVisible} = this.state;
         return (
             <>
             {
                 buttonProps && (
-                    <Button {...buttonProps} onClick={this.handletriggerBtnClick}>
-                        {buttonLabel}
-                    </Button>
+                    <TooltipButton 
+                        label={label} 
+                        buttonProps={{...buttonProps}} 
+                        onClick={this.handletriggerBtnClick} 
+                    />
                 )
             }
             <Modal 
                 title="CREATE A NEW COLLECTION" 
                 // centered
                 // bodyStyle={{ height: 600}}
-                okButtonProps={{}}
                 okText="Create"
                 // width={800}
                 visible={modalVisible} onOk={this.handleOk} onCancel={this.handleModalCancel}

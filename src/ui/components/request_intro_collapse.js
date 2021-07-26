@@ -17,7 +17,7 @@ const text = `
   it can be found as a welcome guest in many households across the world.
 `;
 
-class TooltipButton extends React.Component {
+class RequestIntro extends React.Component {
 
     constructor(props) {
         super(props);
@@ -68,7 +68,7 @@ class TooltipButton extends React.Component {
     }
 }
 
-export default TooltipButton;
+export default RequestIntro;
 
 
 

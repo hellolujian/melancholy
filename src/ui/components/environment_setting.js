@@ -2,6 +2,7 @@ import React from 'react';
 import { Select, Button, Space } from 'antd';
 import { EyeOutlined, SettingFilled  } from '@ant-design/icons';
 import EnvironmentDetailCard from './environment_detail_card'
+import EnvironmentModal from './environment_modal'
 
 const { Option } = Select;
 class EnvironmentSetting extends React.Component {
@@ -57,7 +58,9 @@ class EnvironmentSetting extends React.Component {
 
             <EnvironmentDetailCard />
             
-            <Button icon={<SettingFilled  />} />
+            <Button icon={<SettingFilled  />} onClick={() => this.setState({environmentModalVisible: true})} />
+
+            <EnvironmentModal visible={this.state.environmentModalVisible} />
             </Space>
         )
     }

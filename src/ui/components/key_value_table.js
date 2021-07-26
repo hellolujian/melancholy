@@ -98,10 +98,8 @@ class VariablesTable extends React.Component {
                     let operations = [
                         (
                             <TooltipButton 
-                                type="link" 
                                 label="Bulk Edit" 
-                                size="small"
-                                onClick={() => this.handlePersistAllBtnClick(dataSource)}
+                                buttonProps={{type: 'link', size: 'small', onClick: () => this.handlePersistAllBtnClick(dataSource)}}
                             />
                         )
                     ];

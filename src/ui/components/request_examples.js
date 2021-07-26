@@ -4,7 +4,7 @@ import { CaretRightOutlined, CaretDownOutlined } from '@ant-design/icons';
 
 import {stopClickPropagation} from '@/utils/global_utils';
 import { REQUEST_EXAMPLES_TIPS } from '@/ui/constants/tips'
-class TooltipButton extends React.Component {
+class RequestExample extends React.Component {
 
     constructor(props) {
         super(props);
@@ -34,7 +34,7 @@ class TooltipButton extends React.Component {
     }
 }
 
-export default TooltipButton;
+export default RequestExample;
 
 
 

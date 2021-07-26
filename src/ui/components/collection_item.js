@@ -166,14 +166,19 @@ class CollectionItem extends React.Component {
                             </div>
                             <Space direction="vertical" size={0} style={{borderLeft: '1px solid rgba(0, 0, 0, 0.1)'}} className={collectionDrawerVisible ? "" : "collection-item-display"}>
                                 <TooltipButton 
-                                    title="View more actions" 
-                                    type="text" 
-                                    icon={<CaretRightOutlined rotate={collectionDrawerVisible ? 180 : 0} />} 
-                                    onClick={this.handleCollectionDrawerShow} 
+                                    tooltipProps={{title: "View more actions"}}
+                                    buttonProps={{
+                                        type: 'text', 
+                                        icon: <CaretRightOutlined rotate={collectionDrawerVisible ? 180 : 0} />, 
+                                        onClick: this.handleCollectionDrawerShow
+                                    }}
                                 />
                                 <Divider style={{margin: 0}} />
                                 <Dropdown overlay={menu} placement="bottomRight">
-                                    <TooltipButton title="View more actions" type="text" icon={<EllipsisOutlined />} onClick={stopClickPropagation} />
+                                    <TooltipButton 
+                                        tooltipProps={{title: "View more actions"}}
+                                        buttonProps={{type: 'text', icon: <EllipsisOutlined />, onClick: stopClickPropagation}}
+                                    />
                                 </Dropdown>
                             </Space>
                         </Space>

@@ -115,7 +115,13 @@ class CookiesModal extends React.Component {
                         <>
                             <Row gutter={[16, 16]}>
                                 <Col flex='auto'><Input placeholder="Type a domain name" value={domainName} onChange={this.handleDomainNameChange} /></Col>
-                                <Col flex='none'><TooltipButton label="Add" title="Add domain" onClick={this.handleAddDomain} /></Col>
+                                <Col flex='none'>
+                                    <TooltipButton 
+                                        label="Add" 
+                                        tooltipProps={{title: "Add domain"}}
+                                        buttonProps={{onClick: this.handleAddDomain}}
+                                    />
+                                </Col>
                             </Row>
 
                             <Collapse

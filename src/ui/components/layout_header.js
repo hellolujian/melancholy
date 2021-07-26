@@ -12,6 +12,7 @@ import {
     FolderViewOutlined ,DatabaseOutlined  , PullRequestOutlined  
 } from '@ant-design/icons';
 
+import ImportModal from './import_modal'
 import TooltipButton from './tooltip_button'
 
 
@@ -63,12 +64,16 @@ class LayoutHeader extends React.Component {
                         }
                         buttonsRender={([leftButton, rightButton]) => {
                             return [
-                                <TooltipButton title={CREATE_NEW} key="leftButton" icon={<PlusSquareFilled />} label="New" />,
+                                <TooltipButton 
+                                    key="leftButton"
+                                    label="New"
+                                    tooltipProps={{title: CREATE_NEW, icon: <PlusSquareFilled />}}
+                                />,
                                 <Button type="primary" icon={<CaretDownFilled />} />
                             ]
                         }}
                     />
-                    <TooltipButton title={IMPORT_TITLE} label="Import" />
+                    <ImportModal />
                     <TooltipButton title={RUNNER_TITLE} label="Runner" />
                 </Space>
                 <Space>

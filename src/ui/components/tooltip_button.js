@@ -16,19 +16,17 @@ class TooltipButton extends React.Component {
 
     render() {
      
-        const {title, color = 'gray', label, type} = this.props
-        let buttonProps = {...this.props};
-        delete buttonProps.title;
-        delete buttonProps.color;
+        const {label, type, buttonProps = {}, tooltipProps = {}, title, icon, shape, size, onClick} = this.props;
+      
         return (
-            <Tooltip title={title} color={color}>
+            <Tooltip color='gray' title={title} {...tooltipProps}>
                 {
                     type === 'purelink' ? (
                         <a style={{display: 'inline-block'}} {...buttonProps}>
                             {label ? label : ""}
                         </a>
                     ) : (
-                        <Button type="primary" {...buttonProps}>
+                        <Button type="primary" icon={icon} shape={shape} size={size} onClick={onClick} {...buttonProps}>
                             {label ? label : ""}
                         </Button>
                     )

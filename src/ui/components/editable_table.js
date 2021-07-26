@@ -230,7 +230,10 @@ class EditableTable extends React.Component {
           } 
           
           trigger="click">
-            <TooltipButton type="purelink" title="View more actions" label={<EllipsisOutlined className="ant-dropdown-link" />} />
+            <TooltipButton 
+              type="purelink" 
+              tooltipProps={{title: "View more actions"}}
+              label={<EllipsisOutlined className="ant-dropdown-link" />} />
           </Dropdown>,
           ...this.props.operations(dataSource), 
         ]

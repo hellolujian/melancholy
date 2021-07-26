@@ -78,8 +78,16 @@ class Home extends React.Component {
                       </TabPane>
                       <TabPane tab="Collections" key="collections">
                         <Space style={{display: 'flex', justifyContent: 'space-between'}}>
-                          <TooltipButton title="Create new Collection" icon={<PlusOutlined />} label="New Collection" type="link" />
-                          <TooltipButton title="Recover your deleted collections" label="Trash" type="text" />
+                          <TooltipButton 
+                            label="New Collection"
+                            tooltipProps={{title: 'Create new Collection'}}
+                            buttonProps={{icon: <PlusOutlined />, type: 'link'}}
+                           />
+                          <TooltipButton 
+                            label="Trash" 
+                            tooltipProps={{title: "Recover your deleted collections"}}
+                            buttonProps={{type: 'text'}}
+                          />
                         </Space>
                         
                         <CollectionTree />

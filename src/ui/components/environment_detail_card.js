@@ -122,8 +122,10 @@ class EnvironmentDetailCard extends React.Component {
             
         );
         return (
-            <Popover content={cardContent} overlayStyle={{width: 800}}>
-                <TooltipButton type="default" icon={<EyeOutlined />} />
+            <Popover content={cardContent} overlayStyle={{width: 800}} trigger="click">
+                <TooltipButton title="Environment quick look"
+                    buttonProps={{type: 'default', icon: <EyeOutlined />}}
+                />
             </Popover>
         )
     }
