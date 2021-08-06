@@ -49,3 +49,34 @@
 .postman-main-color {
   color: #F26b3a
 }
+
+.text-align-center-class {
+  text-align: center;
+}
+
+.padding-10-class {
+  padding: 10px
+}
+
+.margin-10-class {
+  margin: 10px
+}
+
+.light-gray-clas {
+  color: lightgray
+}
+
+.remove-table-border .ant-table-tbody > tr:last-child > td{
+  border-bottom: none !important;
+}
+
+
+
+.common-tabs-class .ant-tabs-tab {
+  padding: 12px 24px;
+}
+
+.common-tabs-class .ant-tabs-tab + .ant-tabs-tab {
+  margin: 0px;
+}
+

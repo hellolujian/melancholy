@@ -58,10 +58,13 @@ class VariablesTable extends React.Component {
 
     render() {
      
-        const {scene} = this.props;
+        const {scene, editable = true, draggable = true, tableProps} = this.props;
         return (
             <EditableTable 
                 rowKey='index'
+                tableProps={tableProps}
+                draggable={draggable}
+                editable={editable} 
                 ref={ref => this.editableTableRef = ref}
                 columns={
                 [
@@ -69,7 +72,7 @@ class VariablesTable extends React.Component {
                         title: 'KEY',
                         dataIndex: 'name',
                         // width: '33%',
-                        editable: true,
+                        editable: editable,
                         className: 'drag-visible',
                         placeholder: 'Key'
                     },
@@ -78,7 +81,7 @@ class VariablesTable extends React.Component {
                         title: 'VALUE',
                         dataIndex: 'initialValue',
                         // width: '33%',
-                        editable: true,
+                        editable: editable,
                         className: 'drag-visible',
                         placeholder: 'Value'
                     },
@@ -87,7 +90,7 @@ class VariablesTable extends React.Component {
                         title: 'DESCRIPTION',
                         dataIndex: 'currentValue',
                         // width: '33%',
-                        editable: true,
+                        editable: editable,
                         className: 'drag-visible',
                         placeholder: 'Description'
                     }
@@ -95,6 +98,9 @@ class VariablesTable extends React.Component {
             } 
             operations = {
                 (dataSource) => {
+                    if (!editable) {
+                        return []
+                    }
                     let operations = [
                         (
                             <TooltipButton 

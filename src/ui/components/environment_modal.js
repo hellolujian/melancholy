@@ -22,22 +22,12 @@ class EnvironmentModal extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            visible: props.visible,
-            lastPropsVisible: false, 
             environments: [
                 {id: 'qa', name: 'qa',},
                 {id: 'qa1', name: 'qa1',},
             ],
             scene: 'view'
         }
-    }
-
-    componentWillReceiveProps (nextProps) {
-        const { visible: newVisibleValue } = nextProps;
-        const { lastPropsVisible } = this.state;
-        if (lastPropsVisible !== newVisibleValue) {
-            this.setState({visible: newVisibleValue, lastPropsVisible: newVisibleValue})
-        } 
     }
 
     componentDidMount() {
@@ -47,7 +37,7 @@ class EnvironmentModal extends React.Component {
     handleOk = () => {}
 
     handleModalCancel = () => {
-        this.setState({visible: false, lastPropsVisible: false})
+        this.props.onVisibleChange(false);
     }
 
     handleEnvironmentItemClick = () => {
@@ -72,8 +62,8 @@ class EnvironmentModal extends React.Component {
 
     render() {
      
-        const {workspaceId, collectionId, folderId} = this.props;
-        const {visible, environments, scene} = this.state;
+        const {workspaceId, collectionId, folderId, visible} = this.props;
+        const { environments, scene} = this.state;
         return (
             <Modal 
                 title="MANAGE ENVIRONMENTS" 
@@ -224,6 +214,9 @@ class EnvironmentModal extends React.Component {
 
 export default EnvironmentModal;
 
+EnvironmentModal.defaultProps = {
+    onVisibleChange: () => {},
+}
 
 
 

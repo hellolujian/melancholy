@@ -8,7 +8,7 @@ class ButtonModal extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            modalVisible: props.modalVisible
+            modalVisible: props.defaultVisible ? true : false,
         }
     }
 
@@ -16,25 +16,45 @@ class ButtonModal extends React.Component {
       
     }
 
+    componentWillReceiveProps (nextProps) {
+        const { modalVisible: newVisibleValue } = nextProps;
+        const { modalVisible: currentVisibleValue } = this.state;
+        // console.log('newVisibleValue: %s, currentVisibleValue: %s', newVisibleValue, currentVisibleValue);
+        // if (currentVisibleValue !== newVisibleValue) {
+        //     this.setState({modalVisible: newVisibleValue, currentVisibleValue: newVisibleValue})
+        // } 
+    }
+
+    handleModalVisible = (visible) => {
+        this.setState({modalVisible: visible});
+        this.props.onVisibleChange(visible)
+    }
+ 
     handletriggerBtnClick = () => {
-        this.setState({modalVisible: true});
+        this.handleModalVisible(true)
     }
 
     handleModalCancel = () => {
-        this.setState({modalVisible: false});
+        this.handleModalVisible(false)
     }
 
     render() {
     
-        let {buttonProps = true, modalProps, modalContent, label = ""} = this.props;
+        let {buttonProps = true, modalProps, modalContent, label = "", tooltipProps, icon, title} = this.props;
         let {modalVisible} = this.state;
+        if (this.props.hasOwnProperty('modalVisible')) {
+            modalVisible = this.props.modalVisible;
+        }
         return (
             <>
             {
                 buttonProps && (
                     <TooltipButton 
+                        buttonProps={buttonProps}
+                        tooltipProps={tooltipProps}
                         label={label} 
-                        buttonProps={{...buttonProps}} 
+                        title={title}
+                        icon={icon}
                         onClick={this.handletriggerBtnClick} 
                     />
                 )
@@ -58,6 +78,10 @@ class ButtonModal extends React.Component {
 }
 
 export default ButtonModal;
+
+ButtonModal.defaultProps = {
+    onVisibleChange: () => {},
+}
 
 
 

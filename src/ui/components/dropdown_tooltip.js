@@ -1,8 +1,8 @@
 import React from 'react';
-import {Tooltip, Button, Typography} from 'antd';
+import {Tooltip, Button, Typography, Dropdown, Menu} from 'antd';
 
 const {Link} = Typography;
-class TooltipButton extends React.Component {
+class DropdownTooltip extends React.Component {
 
     constructor(props) {
         super(props);
@@ -24,6 +24,7 @@ class TooltipButton extends React.Component {
         this.setState({visible: false});
     }
 
+
     handleMouseLeave = (e) => {
         this.setState({visible: false});
     }
@@ -34,28 +35,30 @@ class TooltipButton extends React.Component {
 
     render() {
      
-        const {label, type = 'primary', buttonProps = {}, tooltipProps = {}, title, icon, shape, size, onClick} = this.props;
+        const {label, type = 'primary', buttonProps = {}, tooltipProps = {}, title, icon, shape, size, trigger, dropdownProps, overlay} = this.props;
       
         const {visible} = this.state;
         return (
-            <Tooltip visible={visible} color='gray' title={title} {...tooltipProps}>
-                {
-                    type === 'purelink' ? (
-                        <Link onClick={this.handleBtnClick} onMouseEnter={this.handleMouseEnter} onMouseLeave={this.handleMouseLeave}>
-                            {label ? label : ""}
-                        </Link>
-                    ) : (
+
+            <Dropdown 
+                trigger={trigger}
+                overlay={overlay}
+                {...dropdownProps}>
+                <Tooltip visible={visible} color='gray' title={title} {...tooltipProps}>
+                    {
                         <Button type={type} icon={icon} shape={shape} size={size} onClick={this.handleBtnClick} {...buttonProps} onMouseEnter={this.handleMouseEnter} onMouseLeave={this.handleMouseLeave}>
                             {label ? label : ""}
                         </Button>
-                    )
-                }
-            </Tooltip>
+                    }
+                </Tooltip>
+                
+            </Dropdown>
+            
         )
     }
 }
 
-export default TooltipButton;
+export default DropdownTooltip;
 
 
 

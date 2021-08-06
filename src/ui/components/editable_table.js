@@ -1,5 +1,5 @@
 import React from 'react';
-import { Table, Input, Button, Divider, Row, Col,Space, Typography,Dropdown, Menu, Checkbox } from 'antd';
+import { Table, Input, Button, Divider, Row, Col,Space, Typography,Dropdown, Menu, Checkbox, Tooltip } from 'antd';
 import {stopClickPropagation} from '@/utils/global_utils';
 import { sortableContainer, sortableElement, sortableHandle } from 'react-sortable-hoc';
 import { EllipsisOutlined, CloseOutlined ,MenuOutlined } from '@ant-design/icons';
@@ -7,6 +7,7 @@ import TooltipButton from './tooltip_button';
 import 'ui/style/editable_table.css'
 import arrayMove from 'array-move';
 
+const {Link} = Typography;
 const SortableItem = sortableElement(props => <tr {...props} />);
 const SortableContainer = sortableContainer(props => <tbody {...props} />);
 
@@ -111,7 +112,7 @@ class EditableTable extends React.Component {
 
   render() {
     const { dataSource, currentHoverCell, currentEditCell, hideColumns } = this.state;
-    const {columns, cellOperations, rowKey, tableProps} = this.props;
+    const {columns, cellOperations, rowKey, tableProps, draggable = true, editable = true} = this.props;
     const components = {
       body: {
         wrapper: this.DraggableContainer,
@@ -132,7 +133,7 @@ class EditableTable extends React.Component {
          
           const DragHandle = sortableHandle(() => <MenuOutlined style={dragStyle} />);
           
-          return index < dataSource.length ? (
+          return index < dataSource.length && draggable ? (
             <Space size={4}>
               <DragHandle />
               <Checkbox defaultChecked />
@@ -209,34 +210,42 @@ class EditableTable extends React.Component {
         }
         }
       if (colIndex === renderColumns.length - 1) {
-        let operations = [
-          <Dropdown overlay={
-            <Menu>
-              <Menu.ItemGroup title="SHOW COLLUMNS">
-                {
-                  columns.filter(column => !!column.name).map(column => (
-                    <Menu.Item key={column.name}>
-                      <Checkbox 
-                        checked={!hideColumns.includes(column.name)} 
-                        onChange={(e) => this.onColumnChkChange(column, e.target.checked)}>
-                        {column.name}
-                      </Checkbox>
-                    </Menu.Item>
-                  ))
-                }
-                
-              </Menu.ItemGroup>
-            </Menu>
-          } 
-          
-          trigger="click">
-            <TooltipButton 
-              type="purelink" 
-              tooltipProps={{title: "View more actions"}}
-              label={<EllipsisOutlined className="ant-dropdown-link" />} />
-          </Dropdown>,
-          ...this.props.operations(dataSource), 
-        ]
+        let operations = [];
+        if (editable) {
+          operations.push(
+            <Dropdown overlay={
+              <Menu>
+                <Menu.ItemGroup title="SHOW COLLUMNS">
+                  {
+                    columns.filter(column => !!column.name).map(column => (
+                      <Menu.Item key={column.name}>
+                        <Checkbox 
+                          checked={!hideColumns.includes(column.name)} 
+                          onChange={(e) => this.onColumnChkChange(column, e.target.checked)}>
+                          {column.name}
+                        </Checkbox>
+                      </Menu.Item>
+                    ))
+                  }
+                  
+                </Menu.ItemGroup>
+              </Menu>
+            } 
+            
+            trigger="click">
+              {/* <TooltipButton 
+                type="purelink" title="View more actions"
+                label={<EllipsisOutlined className="ant-dropdown-link" />} 
+              /> */}
+              <Tooltip title="View more actions">
+                <Link>
+                  <EllipsisOutlined className="ant-dropdown-link" />
+                </Link>
+              </Tooltip>
+              
+            </Dropdown>
+          )
+        }
         extraObj.title = (
           <Row style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingRight: 10}}>
             
@@ -244,7 +253,7 @@ class EditableTable extends React.Component {
             
             <Col>
             {
-              operations.map((operation, index) => (
+              [...operations, ...this.props.operations(dataSource)].map((operation, index) => (
                 <span key={index}>
                   <Divider type="vertical" />
                   {operation}
@@ -270,7 +279,7 @@ class EditableTable extends React.Component {
           size="small"
           rowClassName={() => 'editable-row'}
           bordered
-          dataSource={[...dataSource, {}]}
+          dataSource={editable ? [...dataSource, {}] : dataSource}
           columns={realColumns}
           rowKey={rowKey}
           pagination={false}

@@ -35,17 +35,8 @@ class CollectionModal extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            visible: props.visible,
-            lastPropsVisible: false
+            
         }
-    }
-
-    componentWillReceiveProps (nextProps) {
-        const { visible: newVisibleValue } = nextProps;
-        const { lastPropsVisible } = this.state;
-        if (lastPropsVisible !== newVisibleValue) {
-            this.setState({visible: newVisibleValue, lastPropsVisible: newVisibleValue})
-        } 
     }
 
     componentDidMount() {
@@ -55,13 +46,12 @@ class CollectionModal extends React.Component {
     handleOk = () => {}
 
     handleModalCancel = () => {
-        this.setState({visible: false, lastPropsVisible: false})
+        this.props.onVisibleChange(false);
     }
 
     render() {
      
-        const {workspaceId, collectionId, folderId} = this.props;
-        const {visible} = this.state;
+        const {workspaceId, collectionId, folderId, visible} = this.props;
         return (
             <Modal 
                 title="CREATE A NEW COLLECTION" 
@@ -135,6 +125,9 @@ class CollectionModal extends React.Component {
 
 export default CollectionModal;
 
+CollectionModal.defaultProps = {
+    onVisibleChange: () => {},
+}
 
 
 

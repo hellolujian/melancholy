@@ -4,6 +4,8 @@ const {
   addLessLoader,override, addWebpackAlias } = require('customize-cra');
 const path = require("path");
  
+const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
+
 module.exports = override(
   fixBabelImports('import', { //配置按需加载
     libraryName: 'antd',
@@ -22,4 +24,10 @@ module.exports = override(
       utils: path.resolve(__dirname, 'src/utils'),
       ui: path.resolve(__dirname, 'src/ui')
     }),
+    (config) => {
+      config.plugins.push(new MonacoWebpackPlugin({
+        languages: ['json']
+      }));
+      return config;
+    }
 );

@@ -86,6 +86,10 @@ const NO_AUTH_TIPS = (
 const HAVE_AUTH_TIPS = (
     <Text type="secondary ">The authorization header will be automatically generated when you send the request. {AUTH_LEARN_TIPS}</Text>
 )
+
+const POSTMAN_DOCS_TIPS = (
+    <Link href="https://learning.postman.com/docs/getting-started/introduction/">Learn more on Postman Docs</Link>
+)
 export { 
     VARIABLE_TIPS,
     VARIABLE_VALUE_TIPS,
@@ -104,5 +108,6 @@ export {
     PRE_REQUEST_SCRIPTS_CODE_TIPS,
     TEST_SCRIPTS_CODE_TIPS,
     NO_AUTH_TIPS, 
+    POSTMAN_DOCS_TIPS,
     HAVE_AUTH_TIPS
 }

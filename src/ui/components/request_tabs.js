@@ -10,7 +10,8 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 import EnvironmentSetting from './environment_setting';
 import RequestTabConfirm from './request_tab_confirm';
 import { UNSAVED_DOT_ICON, POST_REQUEST_ICON, GET_REQUEST_ICON, CLOSE_SVG, UNSAVED_DOT_SVG } from 'ui/constants/icons'
-
+import Pubsub from 'pubsub-js'
+import {OPEN_NEW_TAB_EVENT} from '@/ui/constants/events'
 import 'ui/style/request_tabs.css'
 
 const { TabPane } = Tabs;
@@ -208,6 +209,12 @@ class DraggableTabs extends React.Component {
       event: this.handleCloseAllTabs
     }
   ]
+
+  componentDidMount = () => {
+    Pubsub.subscribe(OPEN_NEW_TAB_EVENT, (msg, data) => {
+      this.handleAddTabClick()
+    })
+  }
 
   handleRequestTabItemMenuClick = (menuKey, tabKey) => {
     const menuItem = this.requestItemMenuArr.find(item => item.key === menuKey);

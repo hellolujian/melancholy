@@ -1,0 +1,23 @@
+.request-send-setting-tab .ant-tabs-nav {
+  margin: 0;
+  border-top: 1px solid #f0f0f0;
+}
+
+.request-header-form .ant-form-item {
+  margin-bottom: 12px;
+}
+
+.request-header-setting-collapse .ant-collapse-content-box {
+  padding: 0px !important
+}
+
+.request-header-setting-collapse .ant-collapse-item {
+  border: none
+}
+.request-setting-tab-param-panel .ant-table-tbody > tr:last-child > td{
+  border-bottom: none !important;
+}
+
+.request-setting-tab-param-panel .ant-table.ant-table-bordered > .ant-table-title {
+  border: none;
+}

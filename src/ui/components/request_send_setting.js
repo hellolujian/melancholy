@@ -8,7 +8,7 @@ import CookieModal from './cookies_modal'
 import RndScriptEditor from './rnd_script_editor'
 import ScriptEditor from './script_editor'
 import AuthorizationSetting from './authorization_setting'
-
+import RequestHeaderSetting from './request_headers_setting'
 import 'ui/style/request_send_setting.css'
 const { TabPane } = Tabs;
 const { Text, Link } = Typography;
@@ -39,21 +39,22 @@ class RequestSendSetting extends React.Component {
             <Tabs 
                 // type="card" 
                 className="request-send-setting-tab"
-                size='small' defaultActiveKey="authorization" onChange={this.callback} tabBarExtraContent={
+                size='small' defaultActiveKey="body" onChange={this.callback} tabBarExtraContent={
                 <>
                 <CookieModal />
                 <Button type="link">Code</Button>
                 
                 </>
             }>
-                <TabPane tab="Params" key="params">
-                <KeyValueTable scene="params" />
+                <TabPane className="request-setting-tab-param-panel" tab="Params" key="params">
+                {/* <Typography.Paragraph strong style={{margin: '5px 10px',}}>Query Params</Typography.Paragraph> */}
+                <KeyValueTable tableProps={{title: () => "Query Params"}} scene="params" />
                 </TabPane>
                 <TabPane tab="Authorization" key="authorization">
                     <AuthorizationSetting />
                 </TabPane>
                 <TabPane tab="Headers" key="headers">
-                <KeyValueTable scene="headers" />
+                <RequestHeaderSetting />
                 </TabPane>
                 <TabPane tab="Body" key="body">
                 <RequestBodyTab />

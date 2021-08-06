@@ -4,7 +4,8 @@ import { Layout,
     Space,
     Tabs,
     Button, 
-    Dropdown 
+    Dropdown,
+    Tooltip
 } from 'antd';
 import { 
     UserOutlined, CaretDownFilled, PlusSquareFilled,SyncOutlined,
@@ -12,9 +13,14 @@ import {
     FolderViewOutlined ,DatabaseOutlined  , PullRequestOutlined  
 } from '@ant-design/icons';
 
+import {SQUARE_PLUS_ICON, ADD_REQUEST_ICON, COLLECTION_ICON, ENVIRONMENT_ICON,
+    MOCK_COLLECTION, MONITOR_COLLECTION_ICON, DOCUMENTATION_ICON, OPEN_NEW_ICON
+} from 'ui/constants/icons';
+import {OPEN_NEW_TAB_EVENT} from '@/ui/constants/events'
 import ImportModal from './import_modal'
 import TooltipButton from './tooltip_button'
-
+import DropdownTooltip from './dropdown_tooltip'
+import NewButtonModal from './new_button_modal'
 
 import CollectionModal from './collection_modal'
 import RequestModal from './request_modal'
@@ -22,6 +28,7 @@ import WorkspaceCard from './workspace_card'
 import EnvironmentModal from './environment_modal'
 
 import {IMPORT_TITLE, SYNC_DATA_TITLE, CREATE_NEW, ACCOUNT_TITLE, NOTIFICATIONS_TITLE, SETTINGS_TITLE, RUNNER_TITLE} from '@/ui/constants/titles'
+import Pubsub from 'pubsub-js'
 const { Header,} = Layout;
 
 class LayoutHeader extends React.Component {
@@ -41,40 +48,43 @@ class LayoutHeader extends React.Component {
         this.setState({visibleModal: key})
     }
 
+    handleOpenNewBtnClick = () => {
+        
+    }
+
+    handleOpenNewBtnClick = ({key}) => {
+        if (key === 'tab') {
+            Pubsub.publish(OPEN_NEW_TAB_EVENT)
+        }
+    }
+
     render() {
      
         const {visibleModal, workspaceList} = this.state;
         return (
             <Header className="header">
                 <Space>
-                    <Dropdown.Button 
+                    <NewButtonModal />
+                    <ImportModal />
+                    <TooltipButton title={RUNNER_TITLE} label="Runner" />
+                 
+                    <DropdownTooltip 
+                        trigger="click"
                         overlay={
-                            <Menu mode="horizontal" onClick={this.handleNewMenuClick}>
-                                <Menu.ItemGroup title="BUILDING BLOCKS">
-                                    <Menu.Item key="request" icon={<PullRequestOutlined />}>Request</Menu.Item>
-                                    <Menu.Item key="collection" icon={<EnvironmentFilled />}>Collection</Menu.Item>
-                                    <Menu.Item key="environment" icon={<EnvironmentFilled />}>Environment</Menu.Item>
-                                </Menu.ItemGroup>
-                                <Menu.ItemGroup title="ADVANCED">
-                                    <Menu.Item key="documentation" icon={<ReadOutlined /> }>Documentation</Menu.Item>
-                                    <Menu.Item key="mockServer" icon={<DatabaseOutlined />}>Mock Server</Menu.Item>
-                                    <Menu.Item key="monitor" icon={<FolderViewOutlined />}>Monitor</Menu.Item>
+                            <Menu mode="horizontal" onClick={this.handleOpenNewBtnClick}>
+                                <Menu.ItemGroup title="OPEN NEW">
+                                    <Menu.Item key="tab">Tab</Menu.Item>
+                                    <Menu.Item key="melancholywindow">Melancholy Window</Menu.Item>
+                                    <Menu.Item key="runnerwindow">Runner Window</Menu.Item>
                                 </Menu.ItemGroup>
                             </Menu>
                         }
-                        buttonsRender={([leftButton, rightButton]) => {
-                            return [
-                                <TooltipButton 
-                                    key="leftButton"
-                                    label="New"
-                                    tooltipProps={{title: CREATE_NEW, icon: <PlusSquareFilled />}}
-                                />,
-                                <Button type="primary" icon={<CaretDownFilled />} />
-                            ]
-                        }}
+                        title="Open New"
+                        type="primary" 
+                        onClick={this.handleOpenNewBtnClick} 
+                        buttonProps={{className: "open-new-button"}} 
+                        label={<>{OPEN_NEW_ICON} <CaretDownFilled /></>}
                     />
-                    <ImportModal />
-                    <TooltipButton title={RUNNER_TITLE} label="Runner" />
                 </Space>
                 <Space>
                     <WorkspaceCard />
@@ -86,10 +96,6 @@ class LayoutHeader extends React.Component {
                     <TooltipButton shape="circle" icon={<UserOutlined />} title={ACCOUNT_TITLE} />
                     <Button type="primary">Upgrade</Button>
                 </Space>
-
-                <RequestModal visible={visibleModal === 'request'} />
-                <CollectionModal visible={visibleModal === 'collection'} />
-                <EnvironmentModal visible={visibleModal === 'environment'} />
             </Header>
 
         )

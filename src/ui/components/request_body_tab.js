@@ -1,5 +1,5 @@
 import React from 'react';
-import { message, Button, Upload, Radio , Collapse, Tabs } from 'antd';
+import { message, Button, Upload, Radio , Collapse, Tabs, Typography, Space } from 'antd';
 import { EyeOutlined, CaretDownOutlined  } from '@ant-design/icons';
 import KeyValueTable from './key_value_table'
 import JSONInput from 'react-json-editor-ajrm';
@@ -24,7 +24,7 @@ class RequestBodyTab extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-          checkboxValue: 'none'
+          checkboxValue: 'formdata'
         }
     }
 
@@ -51,15 +51,30 @@ class RequestBodyTab extends React.Component {
     };
 
     checkboxOptions = [
-      { label: 'none', value: 'none', content: 'This request does not have a body' },
-      { label: 'form-data', value: 'formdata', content: 'Content of Tab Pane 2'},
+      { 
+        label: 'none', 
+        value: 'none', 
+        content: (
+          <Typography.Paragraph type="secondary" className="text-align-center-class">
+            This request does not have a body
+          </Typography.Paragraph>
+          
+        ) 
+      },
+      { 
+        label: 'form-data', 
+        value: 'formdata', 
+        content: (
+          <KeyValueTable scene="formdata" />
+        )
+      },
       { label: 'x-www-form-urlencoded', value: 'xwwwformurlencoded', content: null},
       { label: 'raw', value: 'raw', content: (
         <JsonEditor />
       )},
       { label: 'binary', value: 'binary', content: (
         <Upload {...this.props}>
-     <Button type="text">Select File</Button>
+     <Button type="text" className="postman-button-class">Select File</Button>
    </Upload>
       )},
       { label: 'GraphQL', value: 'graphql', content: null},
@@ -74,21 +89,21 @@ class RequestBodyTab extends React.Component {
           
        let text = "wertwere"
         return (
-          <>
-          <Radio.Group value={checkboxValue} className="request-body-checkbox" onChange={this.handleCheckboxChange}>
-          {
-            this.checkboxOptions.map((option => (
-              <Radio key={option.value} value={option.value}>{option.label}</Radio>
-            )))
-          }
-        </Radio.Group>
+          <Space direction="vertical" className="full-width">
+          <Radio.Group value={checkboxValue} style={{padding: 10, borderBottom: '1px solid #f0f0f0'}} className="full-width request-body-checkbox" onChange={this.handleCheckboxChange}>
+            {
+              this.checkboxOptions.map((option => (
+                <Radio key={option.value} value={option.value}>{option.label}</Radio>
+              )))
+            }
+          </Radio.Group>
         <div>
         {
           this.checkboxOptions.find(option => option.value === checkboxValue).content
         }
         </div>
         
-          </>
+          </Space>
 
   //           <Tabs defaultActiveKey="binary" onChange={this.callback} tabBarExtraContent={
   //               <Button type="link">Beautify</Button>

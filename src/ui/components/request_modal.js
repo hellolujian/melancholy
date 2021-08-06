@@ -40,17 +40,8 @@ class RequestModal extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            visible: props.visible,
-            lastPropsVisible: false
+            // visible: props.visible
         }
-    }
-
-    componentWillReceiveProps (nextProps) {
-        const { visible: newVisibleValue } = nextProps;
-        const { lastPropsVisible } = this.state;
-        if (lastPropsVisible !== newVisibleValue) {
-            this.setState({visible: newVisibleValue, lastPropsVisible: newVisibleValue})
-        } 
     }
 
     componentDidMount() {
@@ -60,13 +51,12 @@ class RequestModal extends React.Component {
     handleOk = () => {}
 
     handleModalCancel = () => {
-        this.setState({visible: false, lastPropsVisible: false})
+        this.props.onVisibleChange(false);
     }
 
     render() {
      
-        const {workspaceId, collectionId, folderId} = this.props;
-        const {visible} = this.state;
+        const {workspaceId, collectionId, folderId, visible} = this.props;
         return (
             <Modal 
                 title="CREATE A NEW COLLECTION" 
@@ -76,11 +66,12 @@ class RequestModal extends React.Component {
                 okText="Create"
                 width={500}
                 visible={visible} 
-                onOk={this.handleOk} onCancel={this.handleModalCancel}>
+                onOk={this.handleOk} 
+                onCancel={this.handleModalCancel}>
                 <Form
-                layout="vertical"
-                //   onFinish={onFinish}
-                //   onFinishFailed={onFinishFailed}
+                    layout="vertical"
+                    //   onFinish={onFinish}
+                    //   onFinishFailed={onFinishFailed}
                 >
                 <Form.Item
                     label="Request name"
@@ -116,6 +107,9 @@ class RequestModal extends React.Component {
 
 export default RequestModal;
 
+RequestModal.defaultProps = {
+    onVisibleChange: () => {},
+}
 
 
 
