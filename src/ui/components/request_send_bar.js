@@ -1,7 +1,7 @@
 import React from 'react';
 import { Select, Button, Space, Input, Dropdown, Menu, Row, Col } from 'antd';
 import { EyeOutlined, CaretDownOutlined  } from '@ant-design/icons';
-
+import RequestMethodSelect from './request_method_select'
 const { Option } = Select;
 class RequestSendBar extends React.Component {
 
@@ -21,12 +21,11 @@ class RequestSendBar extends React.Component {
             <Row gutter={[16, 16]} style={{marginTop: 5, marginBottom: 5}}>
                 
                 <Col flex='auto'>
-                    <Input size="large" addonBefore={
-                        <Select defaultValue="GET">
-                            <Option value="get">GET</Option>
-                            <Option value="post">POST</Option>
-                        </Select>
-                    } defaultValue="Xihu District, Hangzhou" />
+                    <Input 
+                        size="large" 
+                        addonBefore={<RequestMethodSelect />} 
+                        defaultValue="Xihu District, Hangzhou" 
+                    />
                 </Col>
 
                 <Col flex='none'>

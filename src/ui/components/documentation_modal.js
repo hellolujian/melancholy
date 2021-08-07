@@ -18,6 +18,8 @@ import {SQUARE_PLUS_ICON, ADD_REQUEST_ICON, ADD_REQUEST_ICON_48, COLLECTION_ICON
     MOCK_COLLECTION, MOCK_COLLECTION_48, MONITOR_COLLECTION_ICON, CIRCLE_DOT_ICON, DOCUMENTATION_ICON, DOCUMENTATION_ICON_48, CLOSE_SVG,CLOSE_ICON
 } from 'ui/constants/icons';
 
+
+import ApiTable from './api_table'
 const { Step } = Steps;
 const { Meta } = Card;
 const {Text, Link} = Typography;
@@ -27,13 +29,18 @@ class DocumentationModal extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            groupSize: 2
+            groupSize: 2,
+            currentStep: 0,
             // visible: props.visible
         }
     }
 
     componentDidMount() {
         
+    }
+
+    componentWillUnmount() {
+        console.log('adasdasd');
     }
 
     handleOk = () => {}
@@ -77,21 +84,42 @@ class DocumentationModal extends React.Component {
         }
     ]
 
+    handleNextBtnClick = () => {
+        this.setState({
+            currentStep: 1
+        })
+    }
+
+    handleCreateBtnClick = () => {
+        this.setState({
+            currentStep: 2
+        })
+    }
+
+    handleBackBtnClick = () => {
+        let {currentStep} = this.state;
+        if (currentStep === 0) {
+            this.props.onVisibleChange(false, true);
+        }
+    }
+
     render() {
      
         const {workspaceId, collectionId, folderId, visible} = this.props;
-        const {groupSize} = this.state;
+        const {groupSize, currentStep} = this.state;
         return (
+            <div>
+                
             <Modal 
                 centered
-                // bodyStyle={{ height: 600}}
-                okButtonProps={{}}
+                // bodyStyle={{ height: 400}}
+                destroyOnClose={true}
                 okText="Create"
                 width={800}
                 visible={visible} 
                 onOk={this.handleOk} 
                 title={
-                    <Steps style={{width: 650}} size="small" current={1}>
+                    <Steps style={{width: 650}} size="small" current={currentStep}>
                         <Step title="Select requests to document"  />
                         <Step title="Configure documentation" />
                         <Step title="Next steps"  />
@@ -99,71 +127,110 @@ class DocumentationModal extends React.Component {
                 }
                 footer={
                     <Space>
-                        <PostmanButton>Back</PostmanButton>
-                        <Button type="primary">Next</Button>
-                        <Button type="primary">Close</Button>
+                        {
+                            currentStep !== 2 && (
+                                <PostmanButton onClick={this.handleBackBtnClick}>Back</PostmanButton>
+                            )
+                        }
+                        {
+                            currentStep === 0 && (
+                                <Button type="primary" onClick={this.handleNextBtnClick}>Next</Button>
+                            )
+                        }
+                        {
+                            currentStep === 1 && (
+                                <Button type="primary" onClick={this.handleCreateBtnClick}>Create</Button>
+                            )
+                        }
+                        {
+                            currentStep === 2 && (
+                                <Button type="primary" onClick={this.handleModalCancel}>Close</Button>
+                            )
+                        }
                     </Space>
                 }
                 onCancel={this.handleModalCancel}>
                     
-                 <MultiToggle
-                    options={[
-                        {
-                          displayName: 'Create a new API',
-                          value: 2
-                        },
-                        {
-                          displayName: 'Use collection from this workspace',
-                          value: 4
-                        },
-                      ]}
-                    selectedOption={groupSize}
-                    onSelectOption={this.onGroupSizeSelect}
-                />
-                <Typography.Paragraph type="secondary">
-                Enter the requests you want to document. Add headers and sample responses to these requests by clicking on the (•••) icon.
-                </Typography.Paragraph>
+                {
+                    currentStep === 0 && (
+                        <>
+                            <MultiToggle
+                                options={[
+                                    {
+                                    displayName: 'Create a new API',
+                                    value: 2
+                                    },
+                                    {
+                                    displayName: 'Use collection from this workspace',
+                                    value: 4
+                                    },
+                                ]}
+                                selectedOption={groupSize}
+                                onSelectOption={this.onGroupSizeSelect}
+                            />
+                            <Typography.Paragraph type="secondary">
+                            Enter the requests you want to document. Add headers and sample responses to these requests by clicking on the (•••) icon.
+                            </Typography.Paragraph>
 
-                <Card>
-                    <Space wrap>
-                    {
-                        [1,3,4,5,6].map((item, index) => (
-                            <Card bordered={false} hoverable key={index}>
-                                <Meta
-                                    avatar={COLLECTION_ICON_32}
-                                    title="collection 1"
-                                    description="6 requests"
-                                />
-                            </Card>
-                        ))
-                    }
-                    </Space>
-                    
-                </Card>
-
-                <Card bordered={false}>
-                    <Meta
-                        avatar={DOCUMENTATION_ICON_48}
-                        title="collection 1 documentation created"
-                        description="This documentation is generated based on your inputs and is private."
-                    />
-                </Card>
-
-                <Divider orientation="left">NEXT STEPS</Divider>
+                            {
+                                groupSize === 4 ? (
+                                    <Card>
+                                        <Space wrap>
+                                        {
+                                            [1,3,4,5,6].map((item, index) => (
+                                                <Card bordered={false} hoverable key={index}>
+                                                    <Meta
+                                                        avatar={COLLECTION_ICON_32}
+                                                        title="collection 1"
+                                                        description="6 requests"
+                                                    />
+                                                </Card>
+                                            ))
+                                        }
+                                        </Space>
+                                        
+                                    </Card>
+                                ) : (
+                                    <ApiTable />
+                                )
+                                
+                            }
+                        </>
+                    )
+                }
 
                 {
-                        this.NEXT_STEPS.map((item, index) => (
-                            <Card bordered={false} key={index}>
+                    currentStep === 2 && (
+                        <>
+                            <Card bordered={false}>
                                 <Meta
-                                    avatar={CIRCLE_DOT_ICON}
-                                    title={item.title}
-                                    description={item.desc}
+                                    avatar={DOCUMENTATION_ICON_48}
+                                    title="collection 1 documentation created"
+                                    description="This documentation is generated based on your inputs and is private."
                                 />
                             </Card>
-                        ))
-                    }
-                
+
+                            <Divider orientation="left">NEXT STEPS</Divider>
+
+                            {
+                                this.NEXT_STEPS.map((item, index) => (
+                                    <Card bordered={false} key={index}>
+                                        <Meta
+                                            avatar={CIRCLE_DOT_ICON}
+                                            title={item.title}
+                                            description={item.desc}
+                                        />
+                                    </Card>
+                                ))
+                            }
+                        
+                        </>
+                    )
+                    
+                }
             </Modal>
+        
+            </div>
         );
     }
 }

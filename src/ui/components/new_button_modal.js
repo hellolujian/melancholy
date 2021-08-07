@@ -67,7 +67,7 @@ class NewButtonModal extends React.Component {
     }
 
     // 处理rce弹框显示或隐藏
-    handleRCEModalVisibleChange = (key, visible) => {
+    handleRCEModalVisibleChange = (key, visible, parentModalVisible) => {
         switch (key) {
             case 'request':
                 this.setState({requestModalVisible: visible, newModalVisible: false});
@@ -79,7 +79,7 @@ class NewButtonModal extends React.Component {
                 this.setState({environmentModalVisible: visible, newModalVisible: false});
                 break;
             case 'documentation': 
-                this.setState({documentationModalVisible: visible, newModalVisible: false})
+                this.setState({documentationModalVisible: visible, newModalVisible: parentModalVisible ? true : false})
                 break;
             default: break
         }
@@ -248,6 +248,7 @@ class NewButtonModal extends React.Component {
                                 icon={SQUARE_PLUS_ICON}
                                 modalContent={modalContent}
                                 modalProps={{
+                                    destroyOnClose: true,
                                     className: 'new-button-modal-class',
                                     closable: false,
                                     title: null,
@@ -274,7 +275,11 @@ class NewButtonModal extends React.Component {
                 <RequestModal visible={requestModalVisible} onVisibleChange={(visible) => this.handleRCEModalVisibleChange('request', visible)} />
                 <CollectionModal visible={collectionModalVisible} onVisibleChange={(visible) => this.handleRCEModalVisibleChange('collection', visible)} />
                 <EnvironmentModal visible={environmentModalVisible} onVisibleChange={(visible) => this.handleRCEModalVisibleChange('environment', visible)} />
-                <DocumentationModal visible={documentationModalVisible} onVisibleChange={(visible) => this.handleRCEModalVisibleChange('documentation', visible)}/>
+                {
+                    documentationModalVisible && (
+                        <DocumentationModal visible={documentationModalVisible} onVisibleChange={(visible, parentModalVisible) => this.handleRCEModalVisibleChange('documentation', visible, parentModalVisible)}/>
+                    )
+                }
             </>
         )
     }

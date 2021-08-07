@@ -24,7 +24,7 @@
 }
 
 .toggleContainer {
-  width: 100%;
+  width: 500px;
   position: relative;
   background: #ffffff;
   border: 1px solid #eeeeee;
@@ -37,6 +37,7 @@
   text-align: center;
   height: 40px;
   line-height: 40px;
+  /* padding: 10px 0px; */
   cursor: pointer;
   transition: all 0.5s ease-in-out;
   color: #807b77;
@@ -54,7 +55,7 @@
   bottom: 0;
   left: 0;
   transition: all 0.4s ease-in-out;
-  background: #df5d5d;
+  background: gray;
 }
 
 .optionDisabled {

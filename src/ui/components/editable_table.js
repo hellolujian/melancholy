@@ -1,15 +1,17 @@
 import React from 'react';
-import { Table, Input, Button, Divider, Row, Col,Space, Typography,Dropdown, Menu, Checkbox, Tooltip } from 'antd';
+import { Select, Table, Input, Button, Divider, Row, Col,Space, Typography,Dropdown, Menu, Checkbox, Tooltip } from 'antd';
 import {stopClickPropagation} from '@/utils/global_utils';
 import { sortableContainer, sortableElement, sortableHandle } from 'react-sortable-hoc';
 import { EllipsisOutlined, CloseOutlined ,MenuOutlined } from '@ant-design/icons';
 import TooltipButton from './tooltip_button';
 import 'ui/style/editable_table.css'
 import arrayMove from 'array-move';
+import RequestMethodSelect from './request_method_select'
 
 const {Link} = Typography;
 const SortableItem = sortableElement(props => <tr {...props} />);
 const SortableContainer = sortableContainer(props => <tbody {...props} />);
+const {Option} = Select;
 
 class EditableTable extends React.Component {
   constructor(props) {
@@ -18,7 +20,7 @@ class EditableTable extends React.Component {
     this.state = {
       dataSource: [...props.dataSource],
       currentEditCell: null,     // 当前处于编辑的单元格
-      hideColumns: [],    // 表格隐藏列名称
+      hideColumns: props.columns.filter(item => item.hide).map(item => item.name),    // 表格隐藏列名称
     };
   }
   
@@ -112,7 +114,7 @@ class EditableTable extends React.Component {
 
   render() {
     const { dataSource, currentHoverCell, currentEditCell, hideColumns } = this.state;
-    const {columns, cellOperations, rowKey, tableProps, draggable = true, editable = true} = this.props;
+    const {columns, showCheckbox = true, cellOperations, rowKey, tableProps, draggable = true, editable = true} = this.props;
     const components = {
       body: {
         wrapper: this.DraggableContainer,
@@ -124,7 +126,7 @@ class EditableTable extends React.Component {
         title: '',
         dataIndex: 'sort',
         className: 'drag-visible',
-        width: 45,
+        // width: 45,
         render: (text, record, index) => {
           let dragStyle = {
             cursor: 'grab', color: '#999', 
@@ -136,7 +138,11 @@ class EditableTable extends React.Component {
           return index < dataSource.length && draggable ? (
             <Space size={4}>
               <DragHandle />
-              <Checkbox defaultChecked />
+              {
+                showCheckbox && (
+                  <Checkbox defaultChecked />
+                )
+              }
             </Space>
           ) : null
         },
@@ -184,17 +190,25 @@ class EditableTable extends React.Component {
             }
             return (
               <div className={className} style={{display: 'flex'}}>
-                <Input 
-                  id={cellId}
-                  bordered={false}
-                  onFocus={() => this.handleEditCellInputFocus(cellId)} 
-                  size="small" 
-                  value={text}
-                  placeholder={index === dataSource.length ? col.placeholder : ''} 
-                  // onPressEnter={this.save} 
-                  onBlur={() => this.handleEditCellInputBlur(cellId)} 
-                  onChange={(e) => this.handleCellInputChange(record, col.dataIndex, e.target.value, cellId)}
-                />
+                
+                {
+                  col.type === 'select' ? (
+                    <RequestMethodSelect bordered={false} style={{width: 200}} size="small" />
+                  ) : (
+                    <Input 
+                      id={cellId}
+                      defaultValue={col.defaultValue}
+                      bordered={false}
+                      onFocus={() => this.handleEditCellInputFocus(cellId)} 
+                      size="small" 
+                      value={text}
+                      placeholder={index === dataSource.length ? col.placeholder : ''} 
+                      // onPressEnter={this.save} 
+                      onBlur={() => this.handleEditCellInputBlur(cellId)} 
+                      onChange={(e) => this.handleCellInputChange(record, col.dataIndex, e.target.value, cellId)}
+                    />
+                  )
+                }
                 {
                   currentHoverCell && currentHoverCell.split("_")[0] === (index + "") && index < dataSource.length &&
                   (!currentEditCell || currentEditCell.split("_")[0] !== (index + "")) && (colIndex === renderColumns.length - 1) && (
@@ -293,5 +307,6 @@ class EditableTable extends React.Component {
 export default EditableTable
 
 EditableTable.defaultProps = {
-  onCellValueChange: () => {}
+  onCellValueChange: () => {},
+  operations: () => [],
 }
