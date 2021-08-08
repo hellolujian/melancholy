@@ -5,7 +5,7 @@ import {
     Tabs, Input,Tree,
 } from 'antd';
 import { PlusOutlined, SearchOutlined,} from '@ant-design/icons';
-
+import CollectionModal from 'ui/components/collection_modal'
 import TooltipButton from 'ui/components/tooltip_button';
 import RequestIntroCollapse from 'ui/components/request_intro_collapse'
 import RequestSendBar from 'ui/components/request_send_bar'
@@ -15,7 +15,7 @@ import LayoutHeader from 'ui/components/layout_header'
 import CollectionTree from 'ui/components/collection_tree'
 import ResponseTab from 'ui/components/response_tab'
 import { Resizable } from 'react-resizable';
-
+import {ADD_ICON} from 'ui/constants/icons'
 import 'ui/style/resizable.css'
 import 'ui/style/common.css'
 import 'ui/style/layout.css'
@@ -49,7 +49,15 @@ class Home extends React.Component {
       this.setState({expandedKeys: selectedKeys});
     }
 
+    handleCollectionModalVisibleChange = (visible) => {
+      this.setState({collectionModalVisible: visible})
+    }
+
+    handleCollectionNewBtnClick = () => {}
+
     render() {
+
+      const {collectionModalVisible} = this.state;
      
         return (
             <Layout>
@@ -82,14 +90,18 @@ class Home extends React.Component {
                         <Space className="justify-content-space-between" style={{margin: '8px 0px'}}>
                           <TooltipButton 
                             label="New Collection"
+                            onClick={() => this.handleCollectionModalVisibleChange(true)}
                             tooltipProps={{title: 'Create new Collection'}}
-                            buttonProps={{icon: <PlusOutlined />, type: 'link'}}
+                            buttonProps={{icon: ADD_ICON, type: 'link'}}
                            />
                           <TooltipButton 
                             label="Trash" 
                             tooltipProps={{title: "Recover your deleted collections"}}
                             buttonProps={{type: 'text'}}
                           />
+
+                        <CollectionModal visible={collectionModalVisible} onVisibleChange={(visible) => this.handleCollectionModalVisibleChange(visible)} />
+
                         </Space>
                         
                         <CollectionTree />

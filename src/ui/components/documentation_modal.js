@@ -1,6 +1,7 @@
 import React from 'react';
-import {Input, Tabs, Button, Steps , Modal, Space, Typography, Card, Divider} from 'antd';
+import {Input, Row, Col, Button, Steps , Modal, Space, Typography, Card, Divider, Form} from 'antd';
 
+import MarkdownEditor from 'ui/components/markdown_editor'
 import MultiToggle from 'react-multi-toggle';
 import PostmanButton from './postman_button';
 import {
@@ -115,7 +116,7 @@ class DocumentationModal extends React.Component {
                 // bodyStyle={{ height: 400}}
                 destroyOnClose={true}
                 okText="Create"
-                width={800}
+                width={900}
                 visible={visible} 
                 onOk={this.handleOk} 
                 title={
@@ -200,6 +201,42 @@ class DocumentationModal extends React.Component {
                 }
 
                 {
+                    currentStep === 1 && (
+                        <Form layout="vertical">
+                            <Form.Item label="Name">
+                                <Row gutter={[16, 16]}>
+                                    <Col span={14}><Input /></Col>
+                                    <Col span={10} style={{padding: '0px 8px'}}>
+                                    <Typography.Text type="secondary">
+                                    Enter a title to describe your requests. This will help you identify your documentation and API collection in Postman.
+                                    </Typography.Text>
+                                    </Col>
+                                </Row>
+                                
+                            </Form.Item>
+                            <Form.Item label="Add a description">
+                                <Row gutter={[16, 16]}>
+                                    <Col span={14}>
+                                        <MarkdownEditor />
+                                    </Col>
+                                    <Col span={10} style={{padding: '0px 8px'}}>
+                                        <Space direction="vertical">
+                                        <Typography.Text type="secondary">
+                                        Add a general description for your requests, eg. overview and authentication details. 
+                                        </Typography.Text>
+                                        <Typography.Text type="secondary">
+                                        You can use <Typography.Link href="https://learning.postman.com/docs/collaborating-in-postman/commenting-on-collections/">markdowon</Typography.Link> for adding headings, lists, code snippets etc. in your description.
+                                        </Typography.Text>
+                                        </Space>
+                                    
+                                    </Col>
+                                </Row>
+                            </Form.Item>
+                        </Form>
+                    )
+                }
+
+                {
                     currentStep === 2 && (
                         <>
                             <Card bordered={false}>
@@ -214,7 +251,7 @@ class DocumentationModal extends React.Component {
 
                             {
                                 this.NEXT_STEPS.map((item, index) => (
-                                    <Card bordered={false} key={index}>
+                                    <Card bodyStyle={{padding: '24px 0px 0px 24px'}} className="next-steps-item-card" bordered={false} key={index}>
                                         <Meta
                                             avatar={CIRCLE_DOT_ICON}
                                             title={item.title}
