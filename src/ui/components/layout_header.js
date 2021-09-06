@@ -22,7 +22,7 @@ import TooltipButton from './tooltip_button'
 import DropdownTooltip from './dropdown_tooltip'
 import NewButtonModal from './new_button_modal'
 
-import CollectionModal from './collection_modal'
+import SettingsModal from './settings_modal'
 import RequestModal from './request_modal'
 import WorkspaceCard from './workspace_card'
 import EnvironmentModal from './environment_modal'
@@ -91,7 +91,7 @@ class LayoutHeader extends React.Component {
                 </Space>
                 <Space>
                     <TooltipButton shape="circle" title={SYNC_DATA_TITLE} icon={<SyncOutlined />} />
-                    <TooltipButton shape="circle" title={SETTINGS_TITLE} icon={<ToolFilled  />} />
+                    <SettingsModal />
                     <TooltipButton shape="circle" title={NOTIFICATIONS_TITLE} icon={<NotificationFilled  />} />
                     <TooltipButton shape="circle" icon={<UserOutlined />} title={ACCOUNT_TITLE} />
                     <Button type="primary">Upgrade</Button>

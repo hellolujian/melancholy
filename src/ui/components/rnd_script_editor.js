@@ -11,10 +11,10 @@ class RndScriptEditor extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            height: 250,
+            height: 300,
             showScripts: true,
-            snippetContainerHeight: 150,
-            outContainerHeight: 250
+            snippetContainerHeight: 200,
+            outContainerHeight: 300
         }
     }
 
@@ -45,7 +45,7 @@ class RndScriptEditor extends React.Component {
             <div style={{width: '100%', height: outContainerHeight,  margin: '10px 0px'}}> 
                 <Rnd
                     minHeight={200}
-                    // style={{border: '1px solid red', }}
+                    maxHeight={600}
                     disableDragging
                     enableResizing={{ 
                         top:false, right:false, 
@@ -57,14 +57,14 @@ class RndScriptEditor extends React.Component {
                     onResizeStop={this.handleResizeStop}
                     onResize={this.handleResize}>
                     <Row style={{height: '100%', marginRight: 20}}>
-                        <Col flex="auto"><ScriptEditor /></Col>
+                        <Col flex="auto"><ScriptEditor height={outContainerHeight + 'px'} /></Col>
                         <Col flex="none" style={{fontSize: 11, paddingLeft: 10}}>
                             
                             <Space direction="vertical">
                                 <Space align="start">
                                     {
                                         showScripts && (
-                                            <div style={{width: 214, }}>
+                                            <div style={{width: 233, }}>
                                                 {scriptType === 'tests' ? TEST_SCRIPTS_CODE_TIPS : PRE_REQUEST_SCRIPTS_CODE_TIPS} 
                                             </div>
                                         )
@@ -74,10 +74,10 @@ class RndScriptEditor extends React.Component {
                                 </Space>
                                 {
                                     showScripts && (
-                                        <Space direction='vertical' style={{width: 240}}>
+                                        <Space direction='vertical' style={{width: 250}}>
                                             <div style={{paddingTop: 10}}>SNIPPETS</div>
-                                            <div style={{height: snippetContainerHeight, overflowY: 'auto' }}>
-                                                <Space direction="vertical" >
+                                            <div style={{height: snippetContainerHeight, overflowY: 'auto'}}>
+                                                <Space direction="vertical" size={10}>
                                                     <Link>Get an environment</Link>
                                                     <Link>Get a global variable</Link>
                                                     <Link>Get a variable</Link>

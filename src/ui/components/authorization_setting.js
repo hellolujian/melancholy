@@ -159,7 +159,7 @@ class AuthorizationSetting extends React.Component {
       
         return (
             <Row>
-                <Col span={8} style={{borderRight: '1px solid #f0f0f0', padding: '15px 10px'}}>
+                <Col span={10} style={{borderRight: '1px solid #f0f0f0', padding: '15px 10px'}}>
                     <Space direction="vertical" size={16}>
                         <Space direction="vertical" size={2}>
                             <Text strong>TYPE</Text>
@@ -176,7 +176,7 @@ class AuthorizationSetting extends React.Component {
                     </Space>
                     
                 </Col>
-                <Col span={16} className="horizontal-center vertical-center request-header-form" style={{padding: 20}}>
+                <Col span={14} className="horizontal-center vertical-center request-header-form" style={{padding: 20}}>
                     {
                         authorizationTypes.find(type => type.value === selectedValue).content
                     }

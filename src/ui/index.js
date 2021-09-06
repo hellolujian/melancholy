@@ -41,6 +41,9 @@ class Home extends React.Component {
     }
 
     onResize = (event, {element, size, handle}) => {
+      if (size.width < 250) {
+        return;
+      }
       this.setState({width: size.width, height: size.height});
     }
 

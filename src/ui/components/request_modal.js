@@ -1,17 +1,8 @@
 import React from 'react';
 import {Input, Tabs, Button, Form, Modal, Space, Typography} from 'antd';
+import CollectionSelectCard from './collection_select_card'
 
-import AceEditor from "react-ace";
-import "ace-builds/src-noconflict/mode-javascript";
-import "ace-builds/src-noconflict/theme-tomorrow";
-import "ace-builds/src-noconflict/ext-language_tools"
-
-
-import MarkdownIt from 'markdown-it'
-import MdEditor from 'react-markdown-editor-lite'
-// 导入编辑器的样式
-import 'react-markdown-editor-lite/lib/index.css';
-
+import DescriptionEditor from './description_editor'
 import EditableTable from './editable_table';
 
 import {
@@ -22,20 +13,17 @@ import {
     DESCRIPTION_MARKDOWN_TIPS,
     AUTHORIZATION_TIPS,
     PRE_REQUEST_SCRIPTS_TIPS,
-    TESTS_TIPS
+    TESTS_TIPS,
+    SAVE_REQUEST_TIPS
 } from 'ui/constants/tips'
-
-// 注册插件（如果有的话）
-// MdEditor.use(YOUR_PLUGINS_HERE);
-
-// 初始化Markdown解析器
-const mdParser = new MarkdownIt(/* Markdown-it options */);
 
 const { TabPane } = Tabs;
 const { Text, Link } = Typography;
 
 const { TextArea } = Input;
 class RequestModal extends React.Component {
+
+    formRef = React.createRef();
 
     constructor(props) {
         super(props);
@@ -48,57 +36,73 @@ class RequestModal extends React.Component {
         
     }
 
-    handleOk = () => {}
-
     handleModalCancel = () => {
         this.props.onVisibleChange(false);
     }
 
+    handleModalOk = () => {
+        this.formRef.current.submit()   
+    }
+
+    handleFormFinish = (values) => {
+        this.handleModalCancel()
+    }
+
     render() {
      
-        const {workspaceId, collectionId, folderId, visible} = this.props;
+        const {workspaceId, collectionId, folderId, visible, scene = 'add', initialValues = {name: 'name', description: 'description'}} = this.props;
         return (
             <Modal 
-                title="CREATE A NEW COLLECTION" 
+                title={(scene === 'edit' ? "SAVE" : "EDIT") + " REQUEST"} 
                 centered
                 // bodyStyle={{ height: 600}}
-                okButtonProps={{}}
-                okText="Create"
-                width={500}
+                // footer={null}
+                okText="Save"
+                width={560}
                 visible={visible} 
-                onOk={this.handleOk} 
+                onOk={this.handleModalOk} 
                 onCancel={this.handleModalCancel}>
                 <Form
                     layout="vertical"
-                    //   onFinish={onFinish}
-                    //   onFinishFailed={onFinishFailed}
+                    ref={this.formRef}
+                    onFinish={this.handleFormFinish}
+                    initialValues={initialValues}
                 >
-                <Form.Item
-                    label="Request name"
-                    rules={[{ required: true, message: 'Please input Request name!' }]}
-                >
-                    <Input placeholder="Request Name" />
-                </Form.Item>
 
-                <Form.Item label="Request description (Optional)" extra={DESCRIPTION_MARKDOWN_TIPS}>
-                    
-                    <MdEditor
-                        style={{ height: "120px" }}
-                        config={{view: {menu: false, html: false}}}
-                        placeholder={DESCRIPTION_TIPS}
-                        renderHTML={(text) => mdParser.render(text)}
-                        onChange={this.handleEditorChange}
-                    />
-                        
-                </Form.Item>
+                    {
+                        scene === 'add' && (
+                            <Form.Item>
+                                {SAVE_REQUEST_TIPS}
+                            </Form.Item>
+                        )
+                    }
 
-                <Form.Item label="Select a collection or folder to save to:">
-                    
-                
-                </Form.Item>
+                    <Form.Item
+                        label={scene === 'edit' ? 'Name' : 'Request name'}
+                        name="name"
+                        rules={[{ required: true, message: '' }]}
+                    >
+                        <Input placeholder="Request Name" />
+                    </Form.Item>
 
+                    <Form.Item name="description" label={scene === 'edit' ? 'description' : "Request description (Optional)"}>
 
-                
+                        <DescriptionEditor 
+                            scene="form" 
+                            mdEditorShow 
+                            mdEditorProps={{style: {height: "120px"}}}
+                        />
+                            
+                    </Form.Item>
+
+                    {
+                        scene === 'add' && (
+                            <Form.Item label="Select a collection or folder to save to:">
+                                <CollectionSelectCard />
+                            </Form.Item>
+                        )
+                    }
+                   
                 </Form>
             </Modal>
         );

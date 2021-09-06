@@ -5,16 +5,13 @@ import {
     Space,Row, Col ,
     Divider , Input,Form,
     Button, Rate,Drawer,
-    Dropdown 
+    Dropdown, Tabs, Tooltip
 } from 'antd';
 import Icon from '@ant-design/icons';
-import { 
-    ShareAltOutlined , CaretRightOutlined, BranchesOutlined , PullRequestOutlined , 
-    FolderAddOutlined ,CloseOutlined, LockFilled , EditFilled, EllipsisOutlined,
-    DownloadOutlined ,FolderFilled , FontColorsOutlined ,DeleteFilled ,
-    InsertRowLeftOutlined, MonitorOutlined ,CopyOutlined ,PicCenterOutlined    } from '@ant-design/icons';
+import { CaretRightOutlined,  EllipsisOutlined,} from '@ant-design/icons';
 import TooltipButton from 'ui/components/tooltip_button'
 import RequiredInput from './required_input'
+import PostmanButton from './postman_button'
 import {stopClickPropagation} from '@/utils/global_utils';
 import {
     SHARE_COLLECTION_ICON, MANAGE_ROLES_ICON, RENAME_ICON, EDIT_ICON, CREATE_FORK_ICON, 
@@ -23,7 +20,7 @@ import {
     REMOVE_FROM_WORKSPACE_ICON, DELETE_ICON, COLLECTION_FOLDER_ICON, 
 } from '@/ui/constants/icons'
 import 'ui/style/tree.css'
-
+const { TabPane } = Tabs;
 const { Paragraph, Text } = Typography;
 class CollectionItem extends React.Component {
 
@@ -45,8 +42,8 @@ class CollectionItem extends React.Component {
 
     // 处理详情抽屉的显示
     handleCollectionDrawerShow = (e) => {
-        let {collectionDrawerVisible} = this.props;
-        this.props.onDrawerVisibleChange(collectionDrawerVisible ? null : this.state.item.id)
+        let {collectionDrawerVisible} = this.state;
+        this.setState({collectionDrawerVisible: !collectionDrawerVisible})
         stopClickPropagation(e);
     }
 
@@ -108,6 +105,11 @@ class CollectionItem extends React.Component {
         stopClickPropagation(domEvent )
     }
 
+    // 详情抽屉的变更
+    handleDrawerVisibleClose = () => {
+        this.setState({collectionDrawerVisible: false})
+    }
+
     render() {
 
         const menu = (
@@ -123,68 +125,72 @@ class CollectionItem extends React.Component {
                 }
             </Menu>
         );
-        const {showCollectionNameInput, item} = this.state;
-        const {collectionDrawerVisible} = this.props;
+        const {showCollectionNameInput, item, collectionDrawerVisible} = this.state;
       
+        const viewMoreActionButton = (
+            <Dropdown overlay={menu} placement="bottomRight" trigger="click">
+                <Tooltip title="View more actions">
+                    <PostmanButton onClick={stopClickPropagation} icon={<EllipsisOutlined />} />
+                </Tooltip>
+            </Dropdown>
+        )
         return (
-            <Dropdown 
-                overlay={menu} 
-                trigger={['contextMenu']}>
-                <Row align="middle" gutter={[12]}>
-                    <Col flex="none" style={{display: 'flex'}}>{COLLECTION_FOLDER_ICON}</Col>
-                    <Col flex="auto" style={{paddingLeft: 0}}>
-                        <Space style={{display: 'flex', flexdirection: 'row', justifyContent: 'space-between', width: '100%'}}>
-                            <div>
-                                {
-                                    showCollectionNameInput ? (
-                                        <RequiredInput 
-                                            onBlur={this.saveCollectionName}
-                                            onPressEnter={this.saveCollectionName}
-                                            size="small"
-                                            editing={true}
-                                            editIcon={null}
-                                            defaultValue={item.name}
-                                            onClick={stopClickPropagation} 
-                                        />
-                                        
-                                    ) : (
-                                        <Space align="center">
-                                            <span style={{display: 'inline-block', border: '1px solid rgb(0,0,0,0)'}}>{item.name}</span>
-                                            <span onClick={stopClickPropagation}>
-                                                <Rate 
-                                                    style={{fontSize: 16}} 
-                                                    count={1} 
-                                                    value={item.starred}
-                                                    onChange={this.handleRateChange} 
-                                                    className={item.starred ? '' : 'collection-item-display'} 
-                                                />
-                                            </span>
-                                        </Space>
-                                    )
-                                }
-                                <div>{item.count} requests</div>
-                            </div>
-                            <Space direction="vertical" size={0} style={{borderLeft: '1px solid rgba(0, 0, 0, 0.1)'}} className={collectionDrawerVisible ? "" : "collection-item-display"}>
-                                <TooltipButton 
-                                    tooltipProps={{title: "View more actions"}}
-                                    buttonProps={{
-                                        type: 'text', 
-                                        icon: <CaretRightOutlined rotate={collectionDrawerVisible ? 180 : 0} />, 
-                                        onClick: this.handleCollectionDrawerShow
-                                    }}
-                                />
-                                <Divider style={{margin: 0}} />
-                                <Dropdown overlay={menu} placement="bottomRight">
+            <>
+                <Dropdown 
+                    overlay={menu} 
+                    trigger={['contextMenu']}>
+                    <Row align="middle" gutter={[12]}>
+                        <Col flex="none" style={{display: 'flex'}}>{COLLECTION_FOLDER_ICON}</Col>
+                        <Col flex="auto" style={{paddingLeft: 0}}>
+                            <Space style={{display: 'flex', flexdirection: 'row', justifyContent: 'space-between', width: '100%'}}>
+                                <div>
+                                    {
+                                        showCollectionNameInput ? (
+                                            <RequiredInput 
+                                                onBlur={this.saveCollectionName}
+                                                onPressEnter={this.saveCollectionName}
+                                                size="small"
+                                                editing={true}
+                                                editIcon={null}
+                                                defaultValue={item.name}
+                                                onClick={stopClickPropagation} 
+                                            />
+                                            
+                                        ) : (
+                                            <Space align="center">
+                                                <span style={{display: 'inline-block', border: '1px solid rgb(0,0,0,0)'}}>{item.name}</span>
+                                                <span onClick={stopClickPropagation}>
+                                                    <Rate 
+                                                        style={{fontSize: 16}} 
+                                                        count={1} 
+                                                        value={item.starred}
+                                                        onChange={this.handleRateChange} 
+                                                        className={item.starred ? '' : 'collection-item-display'} 
+                                                    />
+                                                </span>
+                                            </Space>
+                                        )
+                                    }
+                                    <div>{item.count} requests</div>
+                                </div>
+                                <Space direction="vertical" size={0} style={{borderLeft: '1px solid rgba(0, 0, 0, 0.1)'}} className={collectionDrawerVisible ? "" : "collection-item-display"}>
                                     <TooltipButton 
                                         tooltipProps={{title: "View more actions"}}
-                                        buttonProps={{type: 'text', icon: <EllipsisOutlined />, onClick: stopClickPropagation}}
+                                        buttonProps={{
+                                            type: 'text', 
+                                            icon: <CaretRightOutlined rotate={collectionDrawerVisible ? 180 : 0} />, 
+                                            onClick: this.handleCollectionDrawerShow
+                                        }}
                                     />
-                                </Dropdown>
+                                    <Divider style={{margin: 0}} />
+                                    {viewMoreActionButton}
+                                </Space>
                             </Space>
-                        </Space>
-                    </Col>
-                </Row>
-            </Dropdown>
+                        </Col>
+                    </Row>
+                </Dropdown>
+            </>
+            
         )
     }
 }

@@ -1,0 +1,64 @@
+.collection-select-card {
+  padding: 0px !important;
+  border: 1px solid lightgrey;
+  border-radius: 4px;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  -ms-border-radius: 4px;
+  -o-border-radius: 4px;
+}
+
+.collection-select-card .ant-page-header-content {
+  padding-top: 0px;
+}
+
+.collection-select-card .collection-select-card-item {
+  padding: 6px 8px;
+  border-bottom: none;
+}
+
+.collection-select-card .ant-page-header-heading-left {
+  padding-left: 8px;
+}
+
+.collection-select-card .collection-select-card-item .collection-select-card-item-right {
+  display: none;
+}
+
+.collection-select-card .collection-select-card-item:hover {
+  background-color: lightgray;  
+  cursor: pointer;
+}
+
+.collection-select-card .collection-select-card-item:hover .collection-select-card-item-right {
+  display: block;
+}
+
+.collection-select-card .collection-select-card-top {
+  padding: 8px 8px 0px 8px;
+  background-color: #e6e6e6;
+}
+
+.collection-select-card .collection-select-card-create-collection-input {
+  padding: 4px 8px 4px 8px;
+}
+
+.collection-select-card .ant-page-header-heading {
+  border-bottom: 1px solid lightgray;
+  background-color: #e6e6e6;
+  border-bottom-right-radius:4px;
+  border-bottom-left-radius:4px;
+  padding-left: 4px;
+}
+
+.collection-select-card .ant-page-header-content {
+  max-height: 120px;
+  overflow: auto
+}
+
+.collection-select-card .collection-select-card-create-collection-input .ant-input-group-addon {
+  background-color: #40a9ff;
+  border: none;
+  cursor: pointer;
+  padding: 0px 7px;
+}

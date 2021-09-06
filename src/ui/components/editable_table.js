@@ -126,7 +126,7 @@ class EditableTable extends React.Component {
         title: '',
         dataIndex: 'sort',
         className: 'drag-visible',
-        // width: 45,
+        width: 45,
         render: (text, record, index) => {
           let dragStyle = {
             cursor: 'grab', color: '#999', 

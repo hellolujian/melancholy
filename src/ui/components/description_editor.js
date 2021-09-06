@@ -29,7 +29,7 @@ class DescriptionEditor extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-           
+            mdEditorShow: props.mdEditorShow,
         }
     }
 
@@ -49,8 +49,14 @@ class DescriptionEditor extends React.Component {
         this.setState({mdEditorShow: false});
     }
 
+    handleEditorChange = ({text}) => {
+        console.log('text: %s', text);
+        this.props.onChange(text);
+    }
+
     render() {
         const {mdEditorShow} = this.state;
+        const {mdEditorProps, scene = "single", value} = this.props;
         return mdEditorShow ? (
             <>
                 <MdEditor
@@ -58,15 +64,22 @@ class DescriptionEditor extends React.Component {
                     config={{view: {menu: false, html: false}}}
                     placeholder={DESCRIPTION_TIPS}
                     renderHTML={(text) => mdParser.render(text)}
+                    value={value}
                     onChange={this.handleEditorChange}
+                    {...mdEditorProps}
                 />
                 <div className="justify-content-space-between description-md-editor-footer">
                     <span style={{fontSize: 12}}>{DESCRIPTION_MARKDOWN_TIPS}</span>
-                    <span>
-                        <Button type="link" onClick={this.handleCancelClick}>Cancel</Button>
-                        <Button type="primary" onClick={this.handleSaveClick}>Save</Button>
-                    </span>
+                    {
+                        scene === 'single' && (
+                            <span>
+                                <Button type="link" onClick={this.handleCancelClick}>Cancel</Button>
+                                <Button type="primary" onClick={this.handleSaveClick}>Save</Button>
+                            </span>
+                        )
+                    }
                 </div>
+                
             </>
         ) : (
             <Button size="small" type="link" onClick={this.handleAddDescriptionClick}>Add a description</Button>
@@ -75,6 +88,10 @@ class DescriptionEditor extends React.Component {
 }
 
 export default DescriptionEditor;
+
+DescriptionEditor.defaultProps = {
+    onChange: () => {},
+}
 
 
 

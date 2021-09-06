@@ -5,7 +5,7 @@ import {
     Space,Row, Col ,
     Divider , Input,Tree,
     Button, Rate,Drawer,
-    Dropdown 
+    Tabs 
 } from 'antd';
 import Icon from '@ant-design/icons';
 import { 
@@ -16,11 +16,14 @@ import {
 import { GET_REQUEST_ICON, POST_REQUEST_ICON } from '@/ui/constants/icons'
 import TooltipButton from 'ui/components/tooltip_button'
 import CollectionItem from './collection_item'
+import PostmanButton from './postman_button'
+import RequiredInput from './required_input'
 import {stopClickPropagation} from '@/utils/global_utils';
 import 'ui/style/resizable.css'
 import 'ui/style/tree.css'
 
 const { Paragraph, Text } = Typography;
+const { TabPane } = Tabs;
 class CollectionTree extends React.Component {
 
     constructor(props) {
@@ -127,7 +130,7 @@ class CollectionTree extends React.Component {
             if (node.items) {
                 treeItem.children = this.traverseCollectionItems(node.items);
                 treeItem.title = (
-                    <Space>
+                    <Space style={{padding: '4px 0px'}}>
                         <FolderFilled />
                         {node.name}
                     </Space>
@@ -135,7 +138,7 @@ class CollectionTree extends React.Component {
             } else {
                 treeItem.isLeaf = true;
                 treeItem.title = (
-                    <Space align="center">
+                    <Space align="center" style={{padding: '4px 0px', display: 'flex',alignItems: 'center'}}>
                         <div style={{width: 28, textAlign: 'center', lineHeight: 0}}>
                             {
                                 node.method === 'POST' ? POST_REQUEST_ICON : GET_REQUEST_ICON
@@ -173,18 +176,6 @@ class CollectionTree extends React.Component {
         
         return (
             <>
-                <Drawer
-                    title="Basic Drawer"
-                    mask={false}
-                    placement="left"
-                    zIndex={1}
-                    closable
-                    onClose={() => this.handleDrawerVisibleChange(null)}
-                    visible={collectionDrawerVisibleItem ? true : false}
-                    getContainer='.site-drawer-render-in-current-wrapper'
-                    style={{ position: 'absolute'}}>
-                    <p>Some contents...</p>
-                </Drawer>
                 <Tree autoExpandParent={true} 
                     expandedKeys={this.state.expandedKeys}
                     treeData={treeData}

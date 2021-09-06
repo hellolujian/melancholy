@@ -2,9 +2,6 @@ import React from 'react';
 import { message, Button, Upload, Radio , Collapse, Tabs, Typography, Space } from 'antd';
 import { EyeOutlined, CaretDownOutlined  } from '@ant-design/icons';
 import KeyValueTable from './key_value_table'
-import JSONInput from 'react-json-editor-ajrm';
-import locale    from 'react-json-editor-ajrm/locale/en';
-import ScriptEditor from './script_editor'
 import JsonEditor from './json_editor'
 import 'ui/style/request_body_tab.css'
 

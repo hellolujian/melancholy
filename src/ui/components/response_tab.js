@@ -4,22 +4,14 @@ import ReactDOM from "react-dom";
 import { Divider, Menu, Popover, Empty, Space, Typography , Collapse, Tabs, Dropdown } from 'antd';
 import { EyeOutlined, CaretDownOutlined  } from '@ant-design/icons';
 import KeyValueTable from './key_value_table'
-import JSONInput from 'react-json-editor-ajrm';
-import locale    from 'react-json-editor-ajrm/locale/en';
-import ScriptEditor from './script_editor'
-import JsonEditor from './json_editor'
 
 import ResponseBody from './response_body'
 import 'ui/style/request_body_tab.css'
 
-
-import AceEditor from "react-ace";
 import "ace-builds/src-noconflict/mode-json";
 import "ace-builds/src-noconflict/theme-tomorrow";
 import "ace-builds/src-noconflict/ext-language_tools"
 
-
-import Editor from "@monaco-editor/react";
 import ResponseTestResult from "./response_test_result"
 
 import 'ui/style/response_tab.css'

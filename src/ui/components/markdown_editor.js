@@ -33,12 +33,16 @@ class MarkdowonEditor extends React.Component {
         }
     }
 
-    componentDidMount() {
-      
+    componentDidMount() { 
     }
 
     handleSaveClick = () => {
 
+    }
+
+    handleEditorChange = ({text}) => {
+        console.log('text: %s', text);
+        this.props.onChange(text);
     }
 
     handleAddDescriptionClick = () => {
@@ -50,19 +54,26 @@ class MarkdowonEditor extends React.Component {
     }
 
     render() {
+        const {mdEditorProps, value} = this.props;
         return (
             <MdEditor
-                    markdownClass="description-md-editor"
-                    config={{view: {menu: false, html: false}}}
-                    placeholder={DESCRIPTION_TIPS}
-                    renderHTML={(text) => mdParser.render(text)}
-                    onChange={this.handleEditorChange}
-                />
+                value={value}
+                markdownClass="description-md-editor"
+                config={{view: {menu: false, html: false}}}
+                placeholder={DESCRIPTION_TIPS}
+                renderHTML={(text) => mdParser.render(text)}
+                onChange={this.handleEditorChange}
+                {...mdEditorProps}
+            />
         )
     }
 }
 
 export default MarkdowonEditor;
+
+MarkdowonEditor.defaultProps = {
+    onChange: () => {},
+}
 
 
 

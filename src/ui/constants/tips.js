@@ -90,6 +90,36 @@ const HAVE_AUTH_TIPS = (
 const POSTMAN_DOCS_TIPS = (
     <Link href="https://learning.postman.com/docs/getting-started/introduction/">Learn more on Postman Docs</Link>
 )
+
+const SAVE_REQUEST_TIPS = (
+    <Text>
+        Requests in Postman are saved in collections (a group of requests). <br />
+        <Link href="https://learning.postman.com/docs/sending-requests/intro-to-collections/">Learn more about creating collections</Link>
+    </Text>
+)
+
+const INITIAL_VALUE_TIPS = "This value is shared with your team when you share the variable in a collection, environment or globals." ;
+
+const CURRENT_VALUE_TIPS = "This value is used while sending a request. Current values are never synced to Postman's servers. If left untouched, the current value automatically assumes the initial value." ;
+
+const PERSIST_ALL_TIPS = "Persisting all values will replace all initial values with the current values of the variables." ;
+
+const RESET_ALL_TIPS = "Resetting all values will replace all current values with the initial values of the variables." ;
+
+const DOCUMENTATION_DESC_TIPS = <Text type="secondary">Add a general description for your requests, eg. overview and authentication details. </Text>
+
+const DOCUMENTATION_DESC_MARKDOWN_TIPS = (
+    <Text type="secondary">
+        You can use <Link href="https://learning.postman.com/docs/collaborating-in-postman/commenting-on-collections/">markdowon</Link> for adding headings, lists, code snippets etc. in your description.
+    </Text>
+)
+
+const DOCUMENTATION_NAME_TIPS = (
+    <Text type="secondary">
+        Enter a title to describe your requests. This will help you identify your documentation and API collection in Postman.
+    </Text>
+)
+
 export { 
     VARIABLE_TIPS,
     VARIABLE_VALUE_TIPS,
@@ -109,5 +139,13 @@ export {
     TEST_SCRIPTS_CODE_TIPS,
     NO_AUTH_TIPS, 
     POSTMAN_DOCS_TIPS,
-    HAVE_AUTH_TIPS
+    HAVE_AUTH_TIPS,
+    SAVE_REQUEST_TIPS,
+    INITIAL_VALUE_TIPS,
+    CURRENT_VALUE_TIPS,
+    PERSIST_ALL_TIPS,
+    RESET_ALL_TIPS,
+    DOCUMENTATION_DESC_TIPS,
+    DOCUMENTATION_DESC_MARKDOWN_TIPS,
+    DOCUMENTATION_NAME_TIPS
 }

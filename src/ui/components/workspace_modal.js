@@ -2,8 +2,10 @@ import React from 'react';
 import {Input, Tabs, Button, Form, Modal, Space, Typography} from 'antd';
 
 import ScriptEditor from './script_editor'
-class RequestModal extends React.Component {
+import DAPTVSettingTabs from './DAPTV_setting_tabs'
+class WorkspaceModal extends React.Component {
 
+    formRef = React.createRef();
     constructor(props) {
         super(props);
         this.state = {
@@ -12,64 +14,64 @@ class RequestModal extends React.Component {
     }
 
     componentWillReceiveProps (nextProps) {
-        const { isModalVisible: newVisibleValue } = nextProps;
-        const { lastPropsVisible } = this.state;
-        if (lastPropsVisible !== newVisibleValue) {
-            this.setState({isModalVisible: newVisibleValue, lastPropsVisible: newVisibleValue})
-        } 
+      
     }
 
     componentDidMount() {
       
     }
 
-    handleOk = () => {}
-
-    handleCancel = () => {
-        this.setState({isModalVisible: false})
+    handleModalCancel = () => {
+        this.props.onVisibleChange(false);
     }
+
+    handleModalOk = () => {
+        this.formRef.current.submit()   
+    }
+
+    handleFormFinish = (values) => {
+        this.handleModalCancel()
+    }
+
 
     render() {
      
-        const {workspaceId, collectionId, folderId} = this.props;
+        const {workspaceId, collectionId, folderId, visible, initialValues} = this.props;
         const {isModalVisible} = this.state
         return (
             <Modal 
                 title="CREATE NEW WORKSPACE" 
                 zIndex={999999}
                 centered
-                // bodyStyle={{ height: 600}}
+                bodyStyle={{ height: 600}}
                 okButtonProps={{}}
                 okText="Create Workspace"
-                // width={800}
-                visible={isModalVisible} onOk={this.handleOk} onCancel={this.handleCancel}>
+                width={800}
+                visible={visible} 
+                onOk={this.handleModalOk} 
+                onCancel={this.handleModalCancel}>
                 <Form
-                layout="vertical"
-                //   onFinish={onFinish}
-                //   onFinishFailed={onFinishFailed}
+                    layout="vertical"
+                    initialValues={initialValues}
+                    onFinish={this.handleFormFinish}
                 >
                 <Form.Item
                     label="Name"
+                    name="name"
                     rules={[{ required: true, message: 'Please input name!' }]}
                 >
                     <Input />
                 </Form.Item>
 
-                <Form.Item label="Summary">
-                    
-                    <Input />
-                        
-                </Form.Item>
-
-                <ScriptEditor />
                 
                 </Form>
+                <DAPTVSettingTabs />
             </Modal>
         );
     }
 }
 
-export default RequestModal;
+export default WorkspaceModal;
 
 
 

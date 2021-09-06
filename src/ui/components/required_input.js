@@ -45,7 +45,7 @@ class RequiredInput extends React.Component {
     }
     render() {
      
-        const {title, color = 'gray', label, type, editable = {}, editIcon = {}} = this.props;
+        const {title, color = 'gray', label, type, editable = {}, editIcon = {}, editWhenHover} = this.props;
         
         let inputProps = {...this.props};
         delete inputProps.divProps;
@@ -75,9 +75,9 @@ class RequiredInput extends React.Component {
                             
                         </div>
                     ) : (
-                        <Space>
-                            <span style={{border: '1px solid rgb(0,0,0,0)', display: 'inline-block'}}>{inputValue}</span>
-                            {editIcon && (<span className={editIcon.className} onClick={this.handleEditIconClick}>{EDIT_ICON}</span>)}
+                        <Space className={editWhenHover ? "not-edit-container" : ""}>
+                            <span className={editWhenHover ? "not-editing-text" : ""} style={{border: '1px solid rgb(0,0,0,0)', display: 'inline-block'}}>{inputValue}</span>
+                            {editIcon && (<span className={'not-editing-edit-icon ' + (editIcon.className ? editIcon.className : "")} onClick={this.handleEditIconClick}>{EDIT_ICON}</span>)}
                         </Space>
                     )
                 }

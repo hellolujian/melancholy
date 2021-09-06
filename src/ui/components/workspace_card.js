@@ -60,6 +60,10 @@ class WorkspaceCard extends React.Component {
         this.setState({workspaceId: id})
     }
 
+    handleModalVisibleChange = (visible) => {
+        this.setState({isModalVisible: visible})
+    }
+
     render() {
      
         
@@ -129,7 +133,7 @@ class WorkspaceCard extends React.Component {
                 <Button type="text" style={{color: 'white'}} icon={<AppstoreFilled />}>My Workspace <CaretDownFilled /></Button>
             </Popover>
 
-            <WorkspaceModal isModalVisible={isModalVisible} />
+            <WorkspaceModal visible={isModalVisible} onVisibleChange={this.handleModalVisibleChange} />
             </>
         )
     }

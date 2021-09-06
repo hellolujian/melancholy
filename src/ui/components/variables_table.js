@@ -1,9 +1,10 @@
 import React from 'react';
 import {Tooltip, Button, Dropdown, Menu} from 'antd';
 
-import { EllipsisOutlined, InfoCircleFilled ,MenuOutlined } from '@ant-design/icons';
+import { EllipsisOutlined, InfoCircleFilled ,CloseOutlined } from '@ant-design/icons';
 import EditableTable from './editable_table'
 import TooltipButton from './tooltip_button'
+import {INITIAL_VALUE_TIPS, CURRENT_VALUE_TIPS, PERSIST_ALL_TIPS, RESET_ALL_TIPS} from 'ui/constants/tips'
 class VariablesTable extends React.Component {
 
     constructor(props) {
@@ -80,7 +81,7 @@ class VariablesTable extends React.Component {
                                     type="text" 
                                     size="small"
                                     icon={<InfoCircleFilled style={{fontSize: 5}} />} 
-                                    title="This value is shared with your team when you share the variable in a collection, environment or globals." 
+                                    title={INITIAL_VALUE_TIPS}
                                 />
                             </>
                         ),
@@ -98,7 +99,7 @@ class VariablesTable extends React.Component {
                                     type="text" 
                                     size="small"
                                     icon={<InfoCircleFilled style={{fontSize: 5}} />} 
-                                    title="This value is used while sending a request. Current values are never synced to Postman's servers. If left untouched, the current value automatically assumes the initial value." 
+                                    title={CURRENT_VALUE_TIPS}
                                 />
                             </>
                         ),
@@ -116,7 +117,7 @@ class VariablesTable extends React.Component {
                             type="purelink" 
                             label="Persist All" 
                             onClick={() => this.handlePersistAllBtnClick(dataSource)}
-                            title="Persisting all values will replace all initial values with the current values of the variables." 
+                            title={PERSIST_ALL_TIPS}
                         />
                     ),
                     (
@@ -124,7 +125,7 @@ class VariablesTable extends React.Component {
                             type="purelink" 
                             label="Reset All" 
                             onClick={() => this.handleResetAllBtnClick(dataSource)}
-                            title="Resetting all values will replace all current values with the initial values of the variables." 
+                            title={RESET_ALL_TIPS}
                         />
                     )
                 ]
@@ -141,11 +142,15 @@ class VariablesTable extends React.Component {
                             </Menu.Item>
                         </Menu>
                       } 
-                      
                       trigger="click">
-                        
-                        <TooltipButton size="small" type="text" style={{height: 10}} title="View more actions" label={<EllipsisOutlined />} onClick={this.stopClickPropagation} />
-                          
+                        <TooltipButton 
+                            size="small" 
+                            type="text" 
+                            buttonProps={{style: {height: 10}}} 
+                            title="View more actions" 
+                            label={<EllipsisOutlined />} 
+                            onClick={this.stopClickPropagation} 
+                        />
                       </Dropdown>
                 )
             }

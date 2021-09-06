@@ -26,3 +26,7 @@
   border-radius: 4px;
  
 }
+
+textarea::placeholder {
+  font-size: 10px;
+}

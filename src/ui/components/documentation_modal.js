@@ -5,8 +5,9 @@ import MarkdownEditor from 'ui/components/markdown_editor'
 import MultiToggle from 'react-multi-toggle';
 import PostmanButton from './postman_button';
 import {
-    VARIABLE_TIPS,
-    VARIABLE_VALUE_TIPS,
+    DOCUMENTATION_NAME_TIPS,
+    DOCUMENTATION_DESC_TIPS,
+    DOCUMENTATION_DESC_MARKDOWN_TIPS,
     COLLECTION_DESCRIPTION_TIPS,
     DESCRIPTION_TIPS,
     DESCRIPTION_MARKDOWN_TIPS,
@@ -32,7 +33,22 @@ class DocumentationModal extends React.Component {
         this.state = {
             groupSize: 2,
             currentStep: 0,
-            // visible: props.visible
+            // visible: props.visible,
+            description: `# Introduction
+What does your API do?
+
+# Overview
+Things that the developers should know about
+
+# Authentication
+What is the preferred way of using the API?
+
+# Error Codes
+What errors and status codes can a user expect?
+
+# Rate limit
+Is there a limit to the number of requests an user can send?`
+            
         }
     }
 
@@ -102,12 +118,27 @@ class DocumentationModal extends React.Component {
         if (currentStep === 0) {
             this.props.onVisibleChange(false, true);
         }
+        if (currentStep === 1) {
+            this.setState({currentStep: 0})
+        }
+    }
+
+    handleDescriptionChange = (value) => {
+        this.setState({description: value})
+    }
+
+    handleCollectionItemClick = (item) => {
+        this.setState({currentStep: 1, documentationName: 'nameistest'})
+    }
+
+    handleDomainNameChange = (e) => {
+        this.setState({documentationName: e.target.value})
     }
 
     render() {
      
         const {workspaceId, collectionId, folderId, visible} = this.props;
-        const {groupSize, currentStep} = this.state;
+        const {groupSize, currentStep, description, documentationName} = this.state;
         return (
             <div>
                 
@@ -179,7 +210,7 @@ class DocumentationModal extends React.Component {
                                         <Space wrap>
                                         {
                                             [1,3,4,5,6].map((item, index) => (
-                                                <Card bordered={false} hoverable key={index}>
+                                                <Card bordered={false} hoverable key={index} onClick={() => this.handleCollectionItemClick(item)}>
                                                     <Meta
                                                         avatar={COLLECTION_ICON_32}
                                                         title="collection 1"
@@ -205,28 +236,26 @@ class DocumentationModal extends React.Component {
                         <Form layout="vertical">
                             <Form.Item label="Name">
                                 <Row gutter={[16, 16]}>
-                                    <Col span={14}><Input /></Col>
+                                    <Col span={14}><Input value={documentationName} onChange={this.handleDomainNameChange}/></Col>
                                     <Col span={10} style={{padding: '0px 8px'}}>
-                                    <Typography.Text type="secondary">
-                                    Enter a title to describe your requests. This will help you identify your documentation and API collection in Postman.
-                                    </Typography.Text>
+                                    {DOCUMENTATION_NAME_TIPS}
                                     </Col>
                                 </Row>
                                 
                             </Form.Item>
-                            <Form.Item label="Add a description">
+                            <Form.Item label="Add a description" name="description">
                                 <Row gutter={[16, 16]}>
                                     <Col span={14}>
-                                        <MarkdownEditor />
+                                        <MarkdownEditor 
+                                            mdEditorProps={{style: {height: "300px"}}} 
+                                            value={description} 
+                                            onChange={this.handleDescriptionChange}
+                                        />
                                     </Col>
                                     <Col span={10} style={{padding: '0px 8px'}}>
                                         <Space direction="vertical">
-                                        <Typography.Text type="secondary">
-                                        Add a general description for your requests, eg. overview and authentication details. 
-                                        </Typography.Text>
-                                        <Typography.Text type="secondary">
-                                        You can use <Typography.Link href="https://learning.postman.com/docs/collaborating-in-postman/commenting-on-collections/">markdowon</Typography.Link> for adding headings, lists, code snippets etc. in your description.
-                                        </Typography.Text>
+                                        {DOCUMENTATION_DESC_TIPS}
+                                        {DOCUMENTATION_DESC_MARKDOWN_TIPS}
                                         </Space>
                                     
                                     </Col>

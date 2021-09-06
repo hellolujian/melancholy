@@ -8,3 +8,14 @@
   visibility: hidden
   /* border: 1px solid red !important */
 }
+
+.not-editing-edit-icon {
+  display: none;
+}
+
+.not-edit-container:hover {
+  cursor: pointer;
+}
+.not-edit-container:hover .not-editing-edit-icon {
+  display: inline-block;
+}

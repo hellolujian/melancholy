@@ -1,6 +1,6 @@
 import React from 'react';
 import {HashRouter, Route, Switch} from 'react-router-dom';
-// import Home from 'pages/test_index';
+// import Home from 'ui/test_index';
 import Home from 'ui/index';
 
 

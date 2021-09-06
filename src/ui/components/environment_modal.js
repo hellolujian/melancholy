@@ -56,8 +56,16 @@ class EnvironmentModal extends React.Component {
         this.setState({scene: 'view'})
     }
 
+    handleSaveClick = () => {
+        this.setState({scene: 'view'})
+    }
+
+    handleUpdateClick = () => {
+        this.setState({scene: 'view'})
+    }
+
     handleGlobalClick = () => {
-        this.setState({scene: 'update'})
+        this.setState({scene: 'global'})
     }
 
     render() {
@@ -83,6 +91,16 @@ class EnvironmentModal extends React.Component {
                             )
                         }
                         {
+                            scene === 'global' && (
+                                <Button type="text" className="postman-button-class" onClick={this.handleCancelClick}>Download as JSON</Button>
+                            )
+                        }
+                        {
+                            scene === 'global' && (
+                                <Button type="link" onClick={this.handleCancelClick}>Cancel</Button>
+                            )
+                        }
+                        {
                             (scene === 'import' || scene === 'add' || scene === 'update') && (
                                 <Button type="text" className="postman-button-class" onClick={this.handleCancelClick}>Cancel</Button>
                             )
@@ -93,8 +111,13 @@ class EnvironmentModal extends React.Component {
                             )
                         }
                         {
+                            scene === 'global' && (
+                                <Button type="primary" onClick={this.handleSaveClick}>Save</Button>
+                            )
+                        }
+                        {
                             scene === 'update' && (
-                                <Button type="primary">Update</Button>
+                                <Button type="primary" onClick={this.handleUpdateClick}>Update</Button>
                             )
                         }
                     </div>
@@ -182,7 +205,8 @@ class EnvironmentModal extends React.Component {
                                 >
                                 <Form.Item
                                     label="Add Environment"
-                                    rules={[{ required: true, message: 'Please input name!' }]}
+                                    name="name"
+                                    rules={[{ required: true, message: '' }]}
                                 >
                                     <Input placeholder="Environment Name" />
                                 </Form.Item>
