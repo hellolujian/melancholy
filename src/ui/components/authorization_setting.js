@@ -9,7 +9,7 @@ class AuthorizationSetting extends React.Component {
         super(props);
         this.state = {
             collectionName: 'api-new',
-            selectedValue: 'apikey'
+            auth: props.auth || {}
         }
     }
 
@@ -17,17 +17,46 @@ class AuthorizationSetting extends React.Component {
       
     }
 
-    handleChange = (value) => {
-        this.setState({ selectedValue: value })
+    handleAuthTypeChange = (value) => {
+        const {auth} = this.state;
+        auth.type = value;
+        
+        this.setState({ auth: auth })
+        this.props.onChange({
+            type: value, 
+            [auth.type]: auth[auth.type]
+        });
+    }
+
+    handleItemChange = (value, key) => {
+        const {auth} = this.state;
+        let keys = auth[auth.type] || [];
+
+        let targetItem = keys.find(keyItem => keyItem.key === key);
+        if (targetItem) {
+            targetItem.value = value;
+        } else {
+            keys.push({key: key, value: value});
+        }
+        auth[auth.type] = keys;
+        this.setState({ auth: auth });
+       
+        this.props.onChange({
+            type: auth.type,
+            [auth.type]: keys
+        });
     }
 
     render() {
 
-        const {collectionName, selectedValue} = this.state;
+        const {collectionName, auth} = this.state;
+        let {type: authType = 'noauth'} = auth;
+        let authValue = auth[authType] || [];
 
         const authorizationTypes = [
             {
-                label: 'Inherit auth from parent', value: 'inherit',
+                label: 'Inherit auth from parent', 
+                value: 'inherit',
                 content: (
                     <Typography.Paragraph>
                         This request is using an authorization helper from collection <Typography.Link underline>{this.state.collectionName}</Typography.Link>
@@ -35,107 +64,34 @@ class AuthorizationSetting extends React.Component {
                 )
             },
             {
-                label: 'No Auth', value: 'noauth',
+                label: 'No Auth', 
+                value: 'noauth',
                 content: NO_AUTH_TIPS
             },
             {
-                label: 'API Key', value: 'apikey',
-                content: (
-                    <Form
-                        className="full-width"
-                        labelAlign="left"
-                        name="basic"
-                        labelCol={{ span: 8 }}
-                        wrapperCol={{ span: 16 }}
-                        initialValues={{ remember: true }}
-                        // onFinish={onFinish}
-                        // onFinishFailed={onFinishFailed}
-                        >
-                        <Form.Item
-                            label="Key"
-                            name="key"
-                            rules={[{ required: true, message: 'Please input your username!' }]}
-                        >
-                            <Input placeholder="Key" />
-                        </Form.Item>
-
-                        <Form.Item
-                            label="Value"
-                            name="value"
-                            rules={[{ required: true, message: 'Please input your password!' }]}
-                        >
-                            <Input placeholder="Value" />
-                        </Form.Item>
-
-                        <Form.Item
-                            label="Add to"
-                            name="position"
-                            rules={[{ required: true, message: 'Please input your password!' }]}
-                        >
-                            <Select 
-                                options={[
-                                    {label: 'Header', value: 'header'}, 
-                                    {label: 'Query Params', value: 'params'}
-                                ]} 
-                            />
-                        </Form.Item>
-                    </Form>
-                )
+                label: 'API Key', 
+                value: 'apikey',
+                items: [
+                    { label: 'Key', key: 'key' },
+                    { label: 'Value', key: 'value' },
+                    { label: 'Add to', key: 'in', type: 'select', defaultValue: 'params', options: [
+                        {label: 'Header', value: 'header'}, 
+                        {label: 'Query Params', value: 'params'}] 
+                    }
+                ],
             },
             {
-                label: 'Bearer Token', value: 'bearertoken',
-                content: (
-                    <Form
-                        name="basic"
-                        labelCol={{ span: 8 }}
-                        wrapperCol={{ span: 16 }}
-                        initialValues={{ remember: true }}
-                        // onFinish={onFinish}
-                        // onFinishFailed={onFinishFailed}
-                        >
-                        <Form.Item
-                            label="Token"
-                            name="token"
-                            rules={[{ required: true, message: 'Please input your username!' }]}
-                        >
-                            <Input placeholder="Token" />
-                        </Form.Item>
-
-                    </Form>
-                )
+                label: 'Bearer Token', value: 'bearer',
+                items: [
+                    { label: 'Token', key: 'token' }
+                ]
             },
             {
                 label: 'Basic Auth', value: 'basic', 
-                content: (
-                    <Form
-                        name="basic"
-                        labelCol={{ span: 8 }}
-                        wrapperCol={{ span: 16 }}
-                        initialValues={{ remember: true }}
-                        
-                        >
-                        <Form.Item
-                            label="Username"
-                            name="username"
-                            rules={[{ required: true, message: 'Please input your username!' }]}
-                        >
-                            <Input placeholder="Username" />
-                        </Form.Item>
-
-                        <Form.Item
-                            label="Password"
-                            name="password"
-                            rules={[{ required: true, message: 'Please input your password!' }]}
-                        >
-                            <Input.Password placeholder="Password" />
-                        </Form.Item>
-
-                        <Form.Item name="remember" valuePropName="checked" wrapperCol={{ offset: 8, span: 16 }}>
-                            <Checkbox>Show Password</Checkbox>
-                        </Form.Item>
-
-                    </Form>
-                )
+                items: [
+                    { label: 'Username', key: 'username' },
+                    { label: 'Password', key: 'password', type: 'password' },
+                ]
             },
             {
                 label: 'Digest Auth', value: 'digest'
@@ -157,16 +113,17 @@ class AuthorizationSetting extends React.Component {
             }
         ]
       
+        let selectedType = authorizationTypes.find(type => type.value === authType);
         return (
             <Row>
                 <Col span={10} style={{borderRight: '1px solid #f0f0f0', padding: '15px 10px'}}>
                     <Space direction="vertical" size={16}>
                         <Space direction="vertical" size={2}>
                             <Text strong>TYPE</Text>
-                            <Select defaultValue="apikey" style={{ width: 200 }} onChange={this.handleChange}>
+                            <Select defaultValue="apikey" style={{ width: 200 }} onChange={this.handleAuthTypeChange} value={authType}>
                                 {
                                     authorizationTypes.map(type => (
-                                        <Option value={type.value}>{type.label}</Option>
+                                        <Option key={type.value} value={type.value}>{type.label}</Option>
                                     ))
                                 }
                                 
@@ -178,8 +135,43 @@ class AuthorizationSetting extends React.Component {
                 </Col>
                 <Col span={14} className="horizontal-center vertical-center request-header-form" style={{padding: 20}}>
                     {
-                        authorizationTypes.find(type => type.value === selectedValue).content
+                        selectedType.content ? selectedType.content : (
+                            <Form
+                                name="basic"
+                                colon={false}
+                                className="full-width"
+                                labelAlign="left"
+                                labelCol={{ span: 8 }}
+                                wrapperCol={{ span: 16 }}
+                                >
+                                {
+                                    selectedType.items && selectedType.items.map((item, index) => {
+                                        const {label, key, content, type, options, defaultValue} = item;
+
+                                        let itemConfig = authValue.find(item => item.key === key);
+                                        let realDefaultValue = (itemConfig && itemConfig.value) || defaultValue;
+                                        let renderComponent;
+                                        switch (type) {
+                                            case 'select': 
+                                                renderComponent = <Select defaultValue={realDefaultValue} options={options} onChange={(value) => this.handleItemChange(value, key)} />;
+                                                break;
+                                            case 'customize': 
+                                                renderComponent = content;
+                                                break;
+                                            case 'password': 
+                                                renderComponent = <Input.Password placeholder={label} defaultValue={realDefaultValue} onChange={(e) => this.handleItemChange(e.target.value, key)} />
+                                                break;
+                                            default:  
+                                                renderComponent = <Input defaultValue={realDefaultValue} placeholder={label} onChange={(e) => this.handleItemChange(e.target.value, key)} />
+                                                break;
+                                        }
+                                        return <Form.Item key={selectedType.value + '-' + key} label={label}>{renderComponent}</Form.Item>;
+                                    })
+                                }
+                            </Form>
+                        )
                     }
+                    
                 </Col>
             </Row>
         )
@@ -187,6 +179,10 @@ class AuthorizationSetting extends React.Component {
 }
 
 export default AuthorizationSetting;
+
+AuthorizationSetting.defaultProps = {
+    onChange: () => {},
+}
 
 
 

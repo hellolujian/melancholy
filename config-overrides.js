@@ -22,7 +22,8 @@ module.exports = override(
       "@": path.resolve(__dirname, "src"),
       components: path.resolve(__dirname, 'src/components'),
       utils: path.resolve(__dirname, 'src/utils'),
-      ui: path.resolve(__dirname, 'src/ui')
+      ui: path.resolve(__dirname, 'src/ui'),
+      database: path.resolve(__dirname, 'src/database')
     }),
     (config) => {
       config.plugins.push(new MonacoWebpackPlugin({

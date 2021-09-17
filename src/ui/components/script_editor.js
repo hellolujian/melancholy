@@ -11,7 +11,7 @@ class ScriptEditor extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-           
+           value: props.value
         }
     }
 
@@ -20,13 +20,14 @@ class ScriptEditor extends React.Component {
     }
 
     handleChange = (newValue) => {
-        console.log(newValue);
+        this.setState({ value: newValue})
         this.props.onChange(newValue);
     }
 
     render() {
      
-        let {value, aceEditorProps, height = '360px'} = this.props;
+        let {aceEditorProps, height = '360px'} = this.props;
+        let {value} = this.state;
         return (
             <AceEditor
                 style={{

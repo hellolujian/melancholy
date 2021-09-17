@@ -59,8 +59,6 @@ class CookieItem extends React.Component {
         )) 
         return (
             <>
-                
-                
                 <Row gutter={[16, 16]}>
                     <Col span={24}>
                         <Space size={[0, 16]} wrap>
@@ -81,9 +79,7 @@ class CookieItem extends React.Component {
                         )
                     }
                     
-                    
                 </Row>
-
             </>
         )
     }

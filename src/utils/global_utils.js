@@ -4,6 +4,11 @@ const stopClickPropagation = (e) => {
     e.nativeEvent.stopImmediatePropagation();
 }
 
+const UUID = () => {
+    const { v4: uuidv4 } = require("uuid");
+    return uuidv4();
+}
+
 export { 
-    stopClickPropagation
+    stopClickPropagation, UUID
 }

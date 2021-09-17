@@ -3,6 +3,8 @@ import {Input, Tabs, Button, Form, Modal, Space, Typography, Alert} from 'antd';
 
 import ScriptEditor from './script_editor'
 
+import {UUID} from '@/utils/global_utils'
+
 import VariablesTable from './variables_table';
 import {
     VARIABLE_TIPS,
@@ -29,7 +31,7 @@ class DAPTVSettingTabs extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            
+            value: props.value || {}
         }
     }
 
@@ -49,53 +51,102 @@ class DAPTVSettingTabs extends React.Component {
         this.handleModalCancel()
     }
 
+    handleDescChange = (value) => {
+        this.props.onChange({description: value});
+    }
+
+    handleAuthChange = (value) => {
+        this.props.onChange({auth: value});
+    }
+
+    handlePrerequestChange = (value) => {
+        let script = {
+            id: UUID(),
+            type: "text/javascript",
+            exec: value.split("\n")
+        }
+        this.props.onChange({
+            prerequest: value
+        })
+    }
+
+    handleTestChange = (value) => {
+        this.props.onChange({
+            test: value
+        })
+    }
+
+    handleVariableChange = (variable) => {
+        this.props.onChange({
+            variable: variable
+        })
+    }
+
     render() {
      
         const {workspaceId, collectionId, folderId, visible, scene = 'add', initialValues} = this.props;
+        const { value, } = this.state;
+        const { description, auth, prerequest, test, variable } = value;
         return (
-            <Tabs defaultActiveKey="variables" onChange={this.handleTabChange} style={{height: '100%', position: 'relative'}}>
-                    <TabPane tab="Description" key="description">
-                        <Space direction="vertical" className="full-width">
-                            {COLLECTION_DESCRIPTION_TIPS}
-                            <DescriptionEditor 
-                                scene="form" 
-                                mdEditorShow 
-                                mdEditorProps={{style: {height: "300px"}}}
-                            />
-                        </Space>
-                        
-                    </TabPane>
-                    <TabPane tab="Authorization" key="authorization">
-                        {AUTHORIZATION_TIPS}
-                        <AuthorizationSetting />
-                    </TabPane>
-                    <TabPane tab="Pre-request Scripts" key="prerequestscripts">
-                        <Space direction="vertical" className="full-width">
-                            {PRE_REQUEST_SCRIPTS_TIPS}
-                            <ScriptEditor name="prerequestscripts" />
-                        </Space>
-                    </TabPane>
-                    <TabPane tab="Tests" key="tests">
-                        <Space direction="vertical" className="full-width">
-                            {TESTS_TIPS}
-                            <ScriptEditor name="tests" />
-                        </Space>
-                    </TabPane>
-                    <TabPane tab="Variables" key="variables">
-                        <Space direction="vertical">
-                            {VARIABLE_TIPS}
-                            <VariablesTable />
-                        </Space>
-                        <Alert
-                            style={{position: 'absolute', top: 380}}
-                            description={VARIABLE_VALUE_TIPS}
-                            type="info"
-                            showIcon
-                            closable
-                            onClose={this.handleVariableValuesTipClose}
+            <Tabs defaultActiveKey="description" onChange={this.handleTabChange} style={{height: '100%', position: 'relative'}}>
+                <TabPane tab="Description" key="description">
+                    <Space direction="vertical" className="full-width">
+                        {COLLECTION_DESCRIPTION_TIPS}
+                        <DescriptionEditor 
+                            scene="form" 
+                            value={description}
+                            mdEditorShow 
+                            mdEditorProps={{style: {height: "300px"}}}
+                            onChange={this.handleDescChange}
                         />
-                    </TabPane>
-                </Tabs>
+                    </Space>
+                </TabPane>
+                <TabPane tab="Authorization" key="authorization">
+                    {AUTHORIZATION_TIPS}
+                    <AuthorizationSetting 
+                        onChange={this.handleAuthChange}
+                        value={auth}
+                    />
+                </TabPane>
+                <TabPane tab="Pre-request Scripts" key="prerequestscripts">
+                    <Space direction="vertical" className="full-width">
+                        {PRE_REQUEST_SCRIPTS_TIPS}
+                        <ScriptEditor 
+                            name="prerequestscripts" 
+                            value={prerequest}
+                            onChange={this.handlePrerequestChange}
+                        />
+                    </Space>
+                </TabPane>
+                <TabPane tab="Tests" key="tests">
+                    <Space direction="vertical" className="full-width">
+                        {TESTS_TIPS}
+                        <ScriptEditor 
+                            name="tests" 
+                            value={test}
+                            onChange={this.handleTestChange}
+                        />
+                    </Space>
+                </TabPane>
+                <TabPane tab="Variables" key="variables">
+                    <Space direction="vertical">
+                        {VARIABLE_TIPS}
+                        <VariablesTable     
+                            value={variable}
+                            source="collection"
+                            onChange={this.handleVariableChange}
+                        />
+                    </Space>
+                    <Alert
+                        style={{position: 'absolute', top: 380}}
+                        description={VARIABLE_VALUE_TIPS}
+                        type="info"
+                        showIcon
+                        closable
+                        onClose={this.handleVariableValuesTipClose}
+                    />
+                </TabPane>
+            </Tabs>
         );
     }
 }
@@ -104,6 +155,7 @@ export default DAPTVSettingTabs;
 
 DAPTVSettingTabs.defaultProps = {
     onVisibleChange: () => {},
+    onChange: () => {},
 }
 
 

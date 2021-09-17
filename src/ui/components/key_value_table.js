@@ -5,7 +5,7 @@ import { EllipsisOutlined, InfoCircleFilled ,CaretDownOutlined } from '@ant-desi
 import EditableTable from './editable_table'
 import TooltipButton from './tooltip_button'
 import HeaderPresets from './header_presets'
-class VariablesTable extends React.Component {
+class KeyValueTable extends React.Component {
 
     constructor(props) {
         super(props);
@@ -272,7 +272,7 @@ class VariablesTable extends React.Component {
     }
 }
 
-export default VariablesTable;
+export default KeyValueTable;
 
 
 

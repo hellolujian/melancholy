@@ -7,6 +7,7 @@ import TooltipButton from './tooltip_button';
 import 'ui/style/editable_table.css'
 import arrayMove from 'array-move';
 import RequestMethodSelect from './request_method_select'
+import {UUID} from '@/utils/global_utils'
 
 const {Link} = Typography;
 const SortableItem = sortableElement(props => <tr {...props} />);
@@ -18,9 +19,10 @@ class EditableTable extends React.Component {
     super(props);
   
     this.state = {
-      dataSource: [...props.dataSource],
+      dataSource: props.dataSource ? [...props.dataSource] : [],
       currentEditCell: null,     // 当前处于编辑的单元格
       hideColumns: props.columns.filter(item => item.hide).map(item => item.name),    // 表格隐藏列名称
+      tableId: UUID()
     };
   }
   
@@ -30,6 +32,8 @@ class EditableTable extends React.Component {
       const newData = arrayMove([].concat(dataSource), oldIndex, newIndex).filter(el => !!el);
       console.log('Sorted items: ', newData);
       this.setState({ dataSource: newData });
+      
+      this.props.onChange(newData);
     }
   };
 
@@ -58,13 +62,21 @@ class EditableTable extends React.Component {
     this.setState({currentHoverCell: cellId, currentEditCell: cellId})
   }
 
-  handleEditCellInputBlur = (cellId) => {
-    this.setState({currentEditCell: null})
+  handleEditCellInputBlur = (record, dataIndex, cellId) => {
+    this.setState({currentEditCell: null});
+    let {dataSource} = this.state;
+    const {rowKey, onCellBlur} = this.props;
+    let changedRecord = dataSource.find(item => item[rowKey] === record[rowKey])
+    if (changedRecord) {
+      changedRecord = onCellBlur(changedRecord, dataIndex);
+      this.setState({dataSource})
+      this.props.onChange(dataSource)
+    }
   }
 
   // 生成当前单元格的唯一标识
   getCellId = (index, dataIndex) => {
-    return index + "_" + dataIndex
+    return index + "_" + dataIndex + "_" + this.state.tableId
   }
 
   // 鼠标移动
@@ -92,7 +104,8 @@ class EditableTable extends React.Component {
   }
 
   setDataSourceState = (dataSource) => {
-    this.setState({dataSource: dataSource})
+    this.setState({dataSource: dataSource});
+    this.props.onChange(dataSource);
   }
 
   // 表格里的input变更
@@ -104,16 +117,26 @@ class EditableTable extends React.Component {
     if (changedRecord) {
       changedRecord[dataIndex] = value;
     } else {
-      dataSource.push({...record, [dataIndex]: value, [rowKey]: dataSource.length + 1})
-      
+      dataSource.push({...record, [dataIndex]: value, [rowKey]: UUID()})
     }
     this.setState({dataSource: dataSource}, () => {
       document.getElementById(cellId).focus()
     })
+    this.props.onChange(dataSource);
+  }
+
+  handleCellCheckboxChange = (checked, record) => {
+    let {dataSource} = this.state;
+    const {rowKey} = this.props;
+    let changedRecord = dataSource.find(item => item[rowKey] === record[rowKey]);
+    if (changedRecord) {
+      changedRecord.disabled = !checked;
+      this.props.onChange(dataSource);
+    } 
   }
 
   render() {
-    const { dataSource, currentHoverCell, currentEditCell, hideColumns } = this.state;
+    const { dataSource, currentHoverCell, currentEditCell, hideColumns, tableId } = this.state;
     const {columns, showCheckbox = true, cellOperations, rowKey, tableProps, draggable = true, editable = true} = this.props;
     const components = {
       body: {
@@ -140,7 +163,7 @@ class EditableTable extends React.Component {
               <DragHandle />
               {
                 showCheckbox && (
-                  <Checkbox defaultChecked />
+                  <Checkbox defaultChecked onChange={(e) => this.handleCellCheckboxChange(e.target.checked, record)} />
                 )
               }
             </Space>
@@ -204,7 +227,7 @@ class EditableTable extends React.Component {
                       value={text}
                       placeholder={index === dataSource.length ? col.placeholder : ''} 
                       // onPressEnter={this.save} 
-                      onBlur={() => this.handleEditCellInputBlur(cellId)} 
+                      onBlur={() => this.handleEditCellInputBlur(record, col.dataIndex, cellId)} 
                       onChange={(e) => this.handleCellInputChange(record, col.dataIndex, e.target.value, cellId)}
                     />
                   )
@@ -307,6 +330,7 @@ class EditableTable extends React.Component {
 export default EditableTable
 
 EditableTable.defaultProps = {
-  onCellValueChange: () => {},
+  onChange: () => {},
   operations: () => [],
+  onCellBlur: (record) => record,
 }

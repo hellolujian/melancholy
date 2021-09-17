@@ -81,9 +81,11 @@ Menu.setApplicationMenu(list)
 
 const isDev = require('electron-is-dev')
 // 全局变量
-// global.__dirname = __dirname
+global.__dirname = __dirname
+log.info('main:    ' +  __dirname);
 // global.fs = require('fs');
 // global.store = store;
+global.nedb = require('nedb')
 isDev && require('electron-debug')({ enabled: true, showDevTools: false });
 
 function createDevTools() {
@@ -120,11 +122,12 @@ function createWindow() {
         width: isDev ? 1500 : 850, 
         height: 680 ,
         webPreferences: {
-            nodeIntegration: true,
+          nodeIntegration: true,
             webSecurity: false,
-            // preload: __dirname + '/preload.js',
+            preload: __dirname + '/preload.js',
             enableRemoteModule: true,
-            title: "Code Generator"
+            contextIsolation: false,
+            title: "Melancholy"
           }
     })
     webContents = win.webContents;
@@ -155,6 +158,7 @@ function createWindow() {
 // 创建浏览器窗口时，调用这个函数。
 // 部分 API 在 ready 事件触发后才能使用。
 app.on('ready', () => {
+  require('@electron/remote/main').initialize();
   createWindow();
   isDev && createDevTools();
 })

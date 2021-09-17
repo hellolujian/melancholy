@@ -3,7 +3,6 @@ import {Input, Tabs, Button, Form, Modal, Space, Typography, Alert} from 'antd';
 
 import ScriptEditor from './script_editor'
 
-import VariablesTable from './variables_table';
 import {
     VARIABLE_TIPS,
     VARIABLE_VALUE_TIPS,
@@ -18,6 +17,11 @@ import {
 import DescriptionEditor from './description_editor'
 import AuthorizationSetting from './authorization_setting'
 import DAPTVSettingTabs from './DAPTV_setting_tabs'
+
+import {addCollection, queryCollection} from '@/database/database'
+
+import {UUID} from '@/utils/global_utils'
+import {subscribeCollectionModalOpen} from '@/utils/event_utils'
 const { TabPane } = Tabs;
 const { Text, Link } = Typography;
 
@@ -29,15 +33,25 @@ class CollectionModal extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            
+            visible: false,
+            collectionSettings: props.initialValues || {}
         }
     }
 
+    getCollectionInfo = async (key, data) => {
+        
+        let result = await queryCollection('76063f0c-a73f-40b4-b359-47b306eb0ded');
+        console.log('====result===')
+        console.log(result);
+        this.setState({visible: true, collectionSettings: result});
+    }
+
     componentDidMount() {
-      
+        subscribeCollectionModalOpen(this.getCollectionInfo) 
     }
 
     handleModalCancel = () => {
+        this.setState({visible: true})
         this.props.onVisibleChange(false);
     }
 
@@ -46,25 +60,54 @@ class CollectionModal extends React.Component {
     }
 
     handleFormFinish = (values) => {
+        
+        const {description, auth, test, prerequest, variable} = this.state.collectionSettings;
+
+        addCollection({
+            id: UUID(),
+            name: values.name,
+            description: description,
+            auth: auth,
+            test: test,
+            prerequest: prerequest,
+            createdTime: new Date(),
+            variable: variable,
+        })
         this.handleModalCancel()
+    }
+
+    handleDAPTVSettingChange = (value) => {
+        console.log('====collection变更-========');
+        console.log(value);
+        const {collectionSettings} = this.state;
+        this.setState({
+            collectionSettings: {
+                ...collectionSettings,
+                ...value
+            }
+        })
     }
 
     render() {
      
-        const {workspaceId, collectionId, folderId, visible, scene = 'add', initialValues} = this.props;
+        const {workspaceId, collectionId, folderId, scene = 'add'} = this.props;
+        const {collectionSettings, visible} = this.state;
         return (
             <Modal 
                 title="CREATE A NEW COLLECTION" 
-                centered
+                // centered
+                destroyOnClose
                 bodyStyle={{ height: 600}}
-                okText="Create"
+                okText={collectionSettings.id ? "Update" : "Create"}
                 width={800}
                 visible={visible} 
                 onOk={this.handleModalOk} 
                 onCancel={this.handleModalCancel}>
                 <Form
                     layout="vertical"
-                    initialValues={initialValues}
+                    preserve={false}
+                    ref={this.formRef}
+                    initialValues={collectionSettings}
                     onFinish={this.handleFormFinish}
                 >
                     <Form.Item
@@ -76,7 +119,7 @@ class CollectionModal extends React.Component {
                     </Form.Item>
                 </Form>
 
-                <DAPTVSettingTabs />
+                <DAPTVSettingTabs value={collectionSettings} onChange={this.handleDAPTVSettingChange} />
                 
                 
             </Modal>

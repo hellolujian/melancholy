@@ -5,6 +5,8 @@ import { EllipsisOutlined, InfoCircleFilled ,CloseOutlined } from '@ant-design/i
 import EditableTable from './editable_table'
 import TooltipButton from './tooltip_button'
 import {INITIAL_VALUE_TIPS, CURRENT_VALUE_TIPS, PERSIST_ALL_TIPS, RESET_ALL_TIPS} from 'ui/constants/tips'
+import {CIRCLE_INFO_ICON} from 'ui/constants/icons';
+
 class VariablesTable extends React.Component {
 
     constructor(props) {
@@ -20,7 +22,6 @@ class VariablesTable extends React.Component {
     }
 
     onEditableTableRef = (ref) => {
-        console.log(ref);
         this.editableTableRef = ref;
     }
     
@@ -39,7 +40,7 @@ class VariablesTable extends React.Component {
     }
 
     handleCellOperationSel = ({key, selectedKeys, domEvent}, record, dataSource) => {
-        let changedColumn = dataSource.find(item => item.index === record.index)
+        let changedColumn = dataSource.find(item => item.id === record.id)
         if (!changedColumn) {
             return;
         }
@@ -56,14 +57,25 @@ class VariablesTable extends React.Component {
         this.stopClickPropagation(domEvent)
     }
 
+    handleVariableChange = (dataSource) => {
+        this.props.onChange(dataSource);
+    }
+
+    handleCellBlur = (record, dataIndex) => {
+        if (dataIndex === 'initialValue' && !record.hasOwnProperty('currentValue')) {
+            record.currentValue = record.initialValue;
+        }
+        return record;
+    }
+
     render() {
-     
+
+        const {value} = this.props;
         return (
             <EditableTable 
-                rowKey='index'
+                rowKey='id'
                 ref={ref => this.editableTableRef = ref}
-                columns={
-                [
+                columns={[
                     {
                         title: 'VARIABLE',
                         dataIndex: 'name',
@@ -80,7 +92,7 @@ class VariablesTable extends React.Component {
                                 <TooltipButton 
                                     type="text" 
                                     size="small"
-                                    icon={<InfoCircleFilled style={{fontSize: 5}} />} 
+                                    icon={CIRCLE_INFO_ICON} 
                                     title={INITIAL_VALUE_TIPS}
                                 />
                             </>
@@ -98,7 +110,7 @@ class VariablesTable extends React.Component {
                                 <TooltipButton 
                                     type="text" 
                                     size="small"
-                                    icon={<InfoCircleFilled style={{fontSize: 5}} />} 
+                                    icon={CIRCLE_INFO_ICON} 
                                     title={CURRENT_VALUE_TIPS}
                                 />
                             </>
@@ -108,148 +120,152 @@ class VariablesTable extends React.Component {
                         editable: true,
                         className: 'drag-visible',
                     }
-                ]
-            } 
-            operations = {
-                (dataSource) => [
-                    (
-                        <TooltipButton 
-                            type="purelink" 
-                            label="Persist All" 
-                            onClick={() => this.handlePersistAllBtnClick(dataSource)}
-                            title={PERSIST_ALL_TIPS}
-                        />
-                    ),
-                    (
-                        <TooltipButton 
-                            type="purelink" 
-                            label="Reset All" 
-                            onClick={() => this.handleResetAllBtnClick(dataSource)}
-                            title={RESET_ALL_TIPS}
-                        />
-                    )
-                ]
-            }
-            cellOperations = {
-                (record, dataSource) => (
-                    <Dropdown overlay={
-                        <Menu onClick={(e) => this.handleCellOperationSel(e, record, dataSource)}>
-                            <Menu.Item key="persist">
-                                Persist
-                            </Menu.Item>
-                            <Menu.Item key="reset">
-                                Reset
-                            </Menu.Item>
-                        </Menu>
-                      } 
-                      trigger="click">
-                        <TooltipButton 
-                            size="small" 
-                            type="text" 
-                            buttonProps={{style: {height: 10}}} 
-                            title="View more actions" 
-                            label={<EllipsisOutlined />} 
-                            onClick={this.stopClickPropagation} 
-                        />
-                      </Dropdown>
-                )
-            }
-            dataSource={
-                [
-                    {
-                      name: 'one',
-                      initialValue: '32',
-                      currentValue: 'London, Park Lane no. 0',
-                      index: 0,
-                    },
-                    {
-                      name: 'second',
-                      initialValue: '32',
-                      currentValue: 'London, Park Lane no. 1',
-                      index: 1
-                    },
-                    {
-                      name: 'third',
-                      initialValue: '32',
-                      currentValue: 'London, Park Lane no. 1',
-                      index: 2
-                    },
-                    {
-                      name: 'second',
-                      initialValue: '32',
-                      currentValue: 'London, Park Lane no. 1',
-                      index: 3
-                    },
-                    {
-                      name: 'third',
-                      initialValue: '32',
-                      currentValue: 'London, Park Lane no. 1',
-                      index: 4
-                    },
-                    {
-                      name: 'second',
-                      initialValue: '32',
-                      currentValue: 'London, Park Lane no. 1',
-                      index: 5
-                    },
-                    {
-                      name: 'third',
-                      initialValue: '32',
-                      currentValue: 'London, Park Lane no. 1',
-                      index: 6
-                    },
-                    {
-                      name: 'second',
-                      initialValue: '32',
-                      currentValue: 'London, Park Lane no. 1',
-                      index: 7
-                    },
-                    {
-                      name: 'third',
-                      initialValue: '32',
-                      currentValue: 'London, Park Lane no. 1',
-                      index: 8
-                    },
-                    {
-                      name: 'second',
-                      initialValue: '32',
-                      currentValue: 'London, Park Lane no. 1',
-                      index: 9
-                    },
-                    {
-                      name: 'third',
-                      initialValue: '32',
-                      currentValue: 'London, Park Lane no. 1',
-                      index: 10
-                    },
-                    {
-                      name: 'second',
-                      initialValue: '32',
-                      currentValue: 'London, Park Lane no. 1',
-                      index: 11
-                    },
-                    {
-                      name: 'third',
-                      initialValue: '32',
-                      currentValue: 'London, Park Lane no. 1',
-                      index: 12
-                    },
-                  ]
-            }
-            tableProps = {{
-                scroll: {y: 250},
-                style: {
-                    maxWidth: 750
+                ]} 
+                operations = {
+                    (dataSource) => [
+                        (
+                            <TooltipButton 
+                                type="purelink" 
+                                label="Persist All" 
+                                onClick={() => this.handlePersistAllBtnClick(dataSource)}
+                                title={PERSIST_ALL_TIPS}
+                            />
+                        ),
+                        (
+                            <TooltipButton 
+                                type="purelink" 
+                                label="Reset All" 
+                                onClick={() => this.handleResetAllBtnClick(dataSource)}
+                                title={RESET_ALL_TIPS}
+                            />
+                        )
+                    ]
                 }
-            }}
+                cellOperations = {
+                    (record, dataSource) => (
+                        <Dropdown overlay={
+                            <Menu onClick={(e) => this.handleCellOperationSel(e, record, dataSource)}>
+                                <Menu.Item key="persist">
+                                    Persist
+                                </Menu.Item>
+                                <Menu.Item key="reset">
+                                    Reset
+                                </Menu.Item>
+                            </Menu>
+                        } 
+                        overlayStyle={{paddingTop: 10, width: 150}}
+                        placement="bottomRight"
+                        trigger="click">
+                            <TooltipButton 
+                                size="small" 
+                                type="text" 
+                                buttonProps={{style: {height: 10}}} 
+                                title="View more actions" 
+                                label={<EllipsisOutlined />} 
+                                onClick={this.stopClickPropagation} 
+                            />
+                        </Dropdown>
+                    )
+                }
+                dataSource={value}
+                tableProps = {{
+                    scroll: {y: 250},
+                    style: {
+                        maxWidth: 750
+                    }
+                }}
+                onChange={this.handleVariableChange}
+                onCellBlur={this.handleCellBlur}
             />
         )
     }
 }
 
 export default VariablesTable;
+VariablesTable.defaultProps = {
+    onChange: () => {},
+}
 
-
+// [
+                    //     {
+                    //     name: 'one',
+                    //     initialValue: '32',
+                    //     currentValue: 'London, Park Lane no. 0',
+                    //     index: 0,
+                    //     },
+                    //     {
+                    //     name: 'second',
+                    //     initialValue: '32',
+                    //     currentValue: 'London, Park Lane no. 1',
+                    //     index: 1
+                    //     },
+                    //     {
+                    //     name: 'third',
+                    //     initialValue: '32',
+                    //     currentValue: 'London, Park Lane no. 1',
+                    //     index: 2
+                    //     },
+                    //     {
+                    //     name: 'second',
+                    //     initialValue: '32',
+                    //     currentValue: 'London, Park Lane no. 1',
+                    //     index: 3
+                    //     },
+                    //     {
+                    //     name: 'third',
+                    //     initialValue: '32',
+                    //     currentValue: 'London, Park Lane no. 1',
+                    //     index: 4
+                    //     },
+                    //     {
+                    //     name: 'second',
+                    //     initialValue: '32',
+                    //     currentValue: 'London, Park Lane no. 1',
+                    //     index: 5
+                    //     },
+                    //     {
+                    //     name: 'third',
+                    //     initialValue: '32',
+                    //     currentValue: 'London, Park Lane no. 1',
+                    //     index: 6
+                    //     },
+                    //     {
+                    //     name: 'second',
+                    //     initialValue: '32',
+                    //     currentValue: 'London, Park Lane no. 1',
+                    //     index: 7
+                    //     },
+                    //     {
+                    //     name: 'third',
+                    //     initialValue: '32',
+                    //     currentValue: 'London, Park Lane no. 1',
+                    //     index: 8
+                    //     },
+                    //     {
+                    //     name: 'second',
+                    //     initialValue: '32',
+                    //     currentValue: 'London, Park Lane no. 1',
+                    //     index: 9
+                    //     },
+                    //     {
+                    //     name: 'third',
+                    //     initialValue: '32',
+                    //     currentValue: 'London, Park Lane no. 1',
+                    //     index: 10
+                    //     },
+                    //     {
+                    //     name: 'second',
+                    //     initialValue: '32',
+                    //     currentValue: 'London, Park Lane no. 1',
+                    //     index: 11
+                    //     },
+                    //     {
+                    //     name: 'third',
+                    //     initialValue: '32',
+                    //     currentValue: 'London, Park Lane no. 1',
+                    //     index: 12
+                    //     },
+                    // ]
 
 
 

@@ -30,6 +30,7 @@ class DescriptionEditor extends React.Component {
         super(props);
         this.state = {
             mdEditorShow: props.mdEditorShow,
+            value: props.value
         }
     }
 
@@ -50,13 +51,13 @@ class DescriptionEditor extends React.Component {
     }
 
     handleEditorChange = ({text}) => {
-        console.log('text: %s', text);
+        this.setState({value: text});
         this.props.onChange(text);
     }
 
     render() {
-        const {mdEditorShow} = this.state;
-        const {mdEditorProps, scene = "single", value} = this.props;
+        const {mdEditorShow, value} = this.state;
+        const {mdEditorProps, scene = "single"} = this.props;
         return mdEditorShow ? (
             <>
                 <MdEditor

@@ -12,7 +12,9 @@ import { CaretRightOutlined,  EllipsisOutlined,} from '@ant-design/icons';
 import TooltipButton from 'ui/components/tooltip_button'
 import RequiredInput from './required_input'
 import PostmanButton from './postman_button'
+import CollectionModal from 'ui/components/collection_modal'
 import {stopClickPropagation} from '@/utils/global_utils';
+import {publishCollectionModalOpen} from '@/utils/event_utils'
 import {
     SHARE_COLLECTION_ICON, MANAGE_ROLES_ICON, RENAME_ICON, EDIT_ICON, CREATE_FORK_ICON, 
     MERGE_CHANGES_ICON, ADD_REQUEST_ICON, ADD_FOLDER_ICON, DUPLICATE_ICON,
@@ -20,6 +22,7 @@ import {
     REMOVE_FROM_WORKSPACE_ICON, DELETE_ICON, COLLECTION_FOLDER_ICON, 
 } from '@/ui/constants/icons'
 import 'ui/style/tree.css'
+
 const { TabPane } = Tabs;
 const { Paragraph, Text } = Typography;
 class CollectionItem extends React.Component {
@@ -77,12 +80,16 @@ class CollectionItem extends React.Component {
         // TODO: 保存至数据库
     }
 
+    handleCollectionModalVisibleChange = (visible = true) => {
+        this.setState({collectionModalVisible: visible})
+    }
+
     // 菜单配置
     menuItems = [
         { name: 'share_collection', label: 'Share Collection', icon: SHARE_COLLECTION_ICON,  },
         { name: 'manage_roles', label: 'Manage Roles', icon: MANAGE_ROLES_ICON, },
         { name: 'rename', label: 'Rename', icon: RENAME_ICON, event: this.showCollectionNameInput},
-        { name: 'edit', label: 'Edit', icon: EDIT_ICON, },
+        { name: 'edit', label: 'Edit', icon: EDIT_ICON, event: publishCollectionModalOpen},
         { name: 'create_fork', label: 'Create a fork', icon: CREATE_FORK_ICON, },
         { name: 'merge_changes', label: 'Merge changes', icon: MERGE_CHANGES_ICON, },
         { name: 'add_request', label: 'Add Request', icon: ADD_REQUEST_ICON, },
@@ -125,7 +132,7 @@ class CollectionItem extends React.Component {
                 }
             </Menu>
         );
-        const {showCollectionNameInput, item, collectionDrawerVisible} = this.state;
+        const {showCollectionNameInput, item, collectionDrawerVisible, collectionModalVisible} = this.state;
       
         const viewMoreActionButton = (
             <Dropdown overlay={menu} placement="bottomRight" trigger="click">
@@ -134,6 +141,7 @@ class CollectionItem extends React.Component {
                 </Tooltip>
             </Dropdown>
         )
+        
         return (
             <>
                 <Dropdown 
@@ -189,6 +197,8 @@ class CollectionItem extends React.Component {
                         </Col>
                     </Row>
                 </Dropdown>
+
+                {/* <CollectionModal visible={collectionModalVisible} onVisibleChange={(visible) => this.handleCollectionModalVisibleChange(visible)} /> */}
             </>
             
         )
