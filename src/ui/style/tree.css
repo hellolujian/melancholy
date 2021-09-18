@@ -42,3 +42,12 @@
 .ant-rate-star-first, .ant-rate-star-second {
   color: lightgrey;
 }
+
+.collection-tree-item-title-empty {
+  /* border: 1px solid blue; */
+  padding: 8px 0px;
+}
+
+.ant-tree-treenode-empty .ant-tree-switcher-noop {
+  display: none !important;
+}

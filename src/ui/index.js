@@ -16,6 +16,7 @@ import CollectionTree from 'ui/components/collection_tree'
 import ResponseTab from 'ui/components/response_tab'
 import { Resizable } from 'react-resizable';
 import {ADD_ICON} from 'ui/constants/icons'
+import {publishCollectionModalOpen} from '@/utils/event_utils'
 import 'ui/style/resizable.css'
 import 'ui/style/common.css'
 import 'ui/style/layout.css'
@@ -53,7 +54,8 @@ class Home extends React.Component {
     }
 
     handleCollectionModalVisibleChange = (visible) => {
-      this.setState({collectionModalVisible: visible})
+      // this.setState({collectionModalVisible: visible})
+      publishCollectionModalOpen();
     }
 
     handleCollectionNewBtnClick = () => {}

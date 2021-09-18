@@ -18,10 +18,10 @@ import DescriptionEditor from './description_editor'
 import AuthorizationSetting from './authorization_setting'
 import DAPTVSettingTabs from './DAPTV_setting_tabs'
 
-import {addCollection, queryCollection} from '@/database/database'
+import {addCollection, queryCollection, updateCollection} from '@/database/database'
 
 import {UUID} from '@/utils/global_utils'
-import {subscribeCollectionModalOpen} from '@/utils/event_utils'
+import {subscribeCollectionModalOpen, publishCollectionSave} from '@/utils/event_utils'
 const { TabPane } = Tabs;
 const { Text, Link } = Typography;
 
@@ -39,11 +39,13 @@ class CollectionModal extends React.Component {
     }
 
     getCollectionInfo = async (key, data) => {
+        if (data) {
+            let result = await queryCollection(data);
+            this.setState({visible: true, collectionSettings: result || {}});
+        } else {
+            this.setState({visible: true});
+        }
         
-        let result = await queryCollection('76063f0c-a73f-40b4-b359-47b306eb0ded');
-        console.log('====result===')
-        console.log(result);
-        this.setState({visible: true, collectionSettings: result});
     }
 
     componentDidMount() {
@@ -51,28 +53,33 @@ class CollectionModal extends React.Component {
     }
 
     handleModalCancel = () => {
-        this.setState({visible: true})
-        this.props.onVisibleChange(false);
+        this.setState({visible: false})
+        // this.props.onVisibleChange(false);
     }
 
     handleModalOk = () => {
         this.formRef.current.submit()   
     }
 
-    handleFormFinish = (values) => {
+    handleFormFinish = async (values) => {
         
-        const {description, auth, test, prerequest, variable} = this.state.collectionSettings;
-
-        addCollection({
-            id: UUID(),
+        const {id, description, auth, test, prerequest, variable} = this.state.collectionSettings;
+        let data = {
+            id: id,
             name: values.name,
             description: description,
             auth: auth,
             test: test,
             prerequest: prerequest,
-            createdTime: new Date(),
             variable: variable,
-        })
+        }
+        if (id) {
+            await updateCollection(id, data)
+        } else {
+            data.id = UUID();
+            await addCollection(data)
+        }
+        publishCollectionSave(data)
         this.handleModalCancel()
     }
 

@@ -5,6 +5,11 @@ import CollectionSelectCard from './collection_select_card'
 import DescriptionEditor from './description_editor'
 import EditableTable from './editable_table';
 
+import {addCollection, queryCollection, updateCollection} from '@/database/database'
+
+import {UUID} from '@/utils/global_utils'
+import {subscribeCollectionModalOpen, publishCollectionSave} from '@/utils/event_utils'
+
 import {
     VARIABLE_TIPS,
     VARIABLE_VALUE_TIPS,

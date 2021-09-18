@@ -17,9 +17,17 @@ const initDatabase = (dbName) => {
 
 export const addCollection = (doc) => {
     const collectionDB = initDatabase('collection');
-    collectionDB.insert(doc, function (err, newDoc) {   // Callback is optional
-        console.log(err)
-    });
+    return new Promise((resolve, reject) => {
+        collectionDB.insert(doc, function (err, newDoc) {   // Callback is optional
+            if (err) {
+                console.error(err);
+                reject(err);
+            } else {
+                resolve(newDoc)
+            }
+        });
+    }) 
+    
 }
 
 export const queryCollection = (id) => {
@@ -35,7 +43,89 @@ export const queryCollection = (id) => {
             }
         });
       
-    })
+    }) 
+}
 
-    
+export const loadCollection = () => {
+    const collectionDB = initDatabase('collection');
+
+    return new Promise((resolve, reject) => {
+        collectionDB.find({ $not: { deleted: true } }, (err, doc) => {
+            if (err) {
+                console.error(err);
+                reject(err);
+            } else {
+                resolve(doc)
+            }
+        });
+      
+    }) 
+}
+
+export const updateCollection = (id, data) => {
+    const collectionDB = initDatabase('collection');
+
+    return new Promise((resolve, reject) => {
+        collectionDB.update({ id: id }, data, {}, (err, numAffected, affectedDocuments, upsert) => {
+            if (err) {
+                console.error(err);
+                reject(err);
+            } else {
+                resolve(affectedDocuments)
+            }
+        });
+      
+    }) 
+}
+
+export const deleteCollection = (id) => {
+    const collectionDB = initDatabase('collection');
+
+    return new Promise((resolve, reject) => {
+        // 设定一个已存字段的值
+        collectionDB.update({ id: id }, { $set: { deleted: true } }, {}, (err, numAffected, affectedDocuments, upsert) => {
+            if (err) {
+                console.error(err);
+                reject(err);
+            } else {
+                resolve(affectedDocuments)
+            }
+        });
+      
+    }) 
+}
+
+export const starCollection = (id, starred) => {
+    console.log('id: %s, starred: %s', id, starred);
+    const collectionDB = initDatabase('collection');
+
+    return new Promise((resolve, reject) => {
+        // 设定一个已存字段的值
+        collectionDB.update({ id: id }, { $set: { starred: starred } }, {}, (err, numAffected, affectedDocuments, upsert) => {
+            if (err) {
+                console.error(err);
+                reject(err);
+            } else {
+                resolve(affectedDocuments)
+            }
+        });
+      
+    }) 
+}
+
+export const renameCollection = (id, name) => {
+    const collectionDB = initDatabase('collection');
+
+    return new Promise((resolve, reject) => {
+        // 设定一个已存字段的值
+        collectionDB.update({ id: id }, { $set: { name: name } }, {}, (err, numAffected, affectedDocuments, upsert) => {
+            if (err) {
+                console.error(err);
+                reject(err);
+            } else {
+                resolve(affectedDocuments)
+            }
+        });
+      
+    }) 
 }

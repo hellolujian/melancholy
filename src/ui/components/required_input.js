@@ -37,7 +37,11 @@ class RequiredInput extends React.Component {
     }
 
     saveCollectionName = () => {
-        this.setState({editing: false});
+        const {inputValue} = this.state;
+        if (inputValue && inputValue.trim()) {
+            this.setState({editing: false});
+        }
+        
     }
 
     handleInputClick = (e) => {

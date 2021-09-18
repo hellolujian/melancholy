@@ -9,7 +9,7 @@ class AuthorizationSetting extends React.Component {
         super(props);
         this.state = {
             collectionName: 'api-new',
-            auth: props.auth || {}
+            auth: props.value || {}
         }
     }
 

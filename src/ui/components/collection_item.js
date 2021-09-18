@@ -14,13 +14,14 @@ import RequiredInput from './required_input'
 import PostmanButton from './postman_button'
 import CollectionModal from 'ui/components/collection_modal'
 import {stopClickPropagation} from '@/utils/global_utils';
-import {publishCollectionModalOpen} from '@/utils/event_utils'
+import {publishCollectionModalOpen, subscribeCollectionSave} from '@/utils/event_utils'
 import {
     SHARE_COLLECTION_ICON, MANAGE_ROLES_ICON, RENAME_ICON, EDIT_ICON, CREATE_FORK_ICON, 
     MERGE_CHANGES_ICON, ADD_REQUEST_ICON, ADD_FOLDER_ICON, DUPLICATE_ICON,
     EXPORT_ICON, MOCK_COLLECTION, MONITOR_COLLECTION_ICON, PUBLISH_DOCS_ICON, 
     REMOVE_FROM_WORKSPACE_ICON, DELETE_ICON, COLLECTION_FOLDER_ICON, 
 } from '@/ui/constants/icons'
+// import {starCollection} from '@/database/database'
 import 'ui/style/tree.css'
 
 const { TabPane } = Tabs;
@@ -41,6 +42,7 @@ class CollectionItem extends React.Component {
     }
 
     componentDidMount() {
+        subscribeCollectionSave(this.handleCollectionSave)
     }
 
     // 处理详情抽屉的显示
@@ -58,30 +60,28 @@ class CollectionItem extends React.Component {
     // 保存collection名称
     saveCollectionName = (e) => {
         let value = e.target.value;
-        let object = {
-            showCollectionNameInput: false
-        }
         if (value && value.trim()) {
-            const {item} = this.state;
-            item.name = value;
-            object.item = item;
-
-            // TODO: 保存至数据库
+            this.setState({showCollectionNameInput: false});
+            this.props.onRename(value)
         }
-        this.setState(object)
+        
     }
 
     // 收藏处理
     handleRateChange = (value) => {
-        const {item} = this.state;
-        item.starred = value;
-        this.setState({item})
-
-        // TODO: 保存至数据库
+        this.props.onStar(value);
     }
 
     handleCollectionModalVisibleChange = (visible = true) => {
         this.setState({collectionModalVisible: visible})
+    }
+
+    deleteCollection = () => {
+        this.props.onDelete()
+    }
+
+    duplicateCollection = () => {
+        this.props.onDuplicate();
     }
 
     // 菜单配置
@@ -89,24 +89,25 @@ class CollectionItem extends React.Component {
         { name: 'share_collection', label: 'Share Collection', icon: SHARE_COLLECTION_ICON,  },
         { name: 'manage_roles', label: 'Manage Roles', icon: MANAGE_ROLES_ICON, },
         { name: 'rename', label: 'Rename', icon: RENAME_ICON, event: this.showCollectionNameInput},
-        { name: 'edit', label: 'Edit', icon: EDIT_ICON, event: publishCollectionModalOpen},
+        { name: 'edit', label: 'Edit', icon: EDIT_ICON, event: () => publishCollectionModalOpen(this.state.item.id)},
         { name: 'create_fork', label: 'Create a fork', icon: CREATE_FORK_ICON, },
         { name: 'merge_changes', label: 'Merge changes', icon: MERGE_CHANGES_ICON, },
         { name: 'add_request', label: 'Add Request', icon: ADD_REQUEST_ICON, },
         { name: 'add_folder', label: 'Add Folder', icon: ADD_FOLDER_ICON, },
-        { name: 'duplicate', label: 'Duplicate', icon: DUPLICATE_ICON, },
+        { name: 'duplicate', label: 'Duplicate', icon: DUPLICATE_ICON, event: this.duplicateCollection },
         { name: 'export', label: 'Export', icon: EXPORT_ICON, },
         { name: 'monitor_collection', label: 'Monitor Collection', icon: MONITOR_COLLECTION_ICON, },
         { name: 'mock_collection', label: 'Mock Collection', icon: MOCK_COLLECTION, },
         { name: 'publish_docs', label: 'Publish Docs', icon: PUBLISH_DOCS_ICON, },
-        { name: 'remove_from_workspace', label: 'Remove from workspace', icon: REMOVE_FROM_WORKSPACE_ICON, },
-        { name: 'delete', label: 'Delete', icon: DELETE_ICON, },
+        { name: 'remove_from_workspace', label: 'Remove from workspace', icon: REMOVE_FROM_WORKSPACE_ICON, event: this.props.onRemove },
+        { name: 'delete', label: 'Delete', icon: DELETE_ICON, event: this.deleteCollection },
     ]
 
     // 处理菜单点击
     handleMenuClick = ({domEvent , key}) => {
         let target = this.menuItems.find(menu => menu.name === key);
         if (target && target.event) {
+           
             target.event();
         }
         stopClickPropagation(domEvent )
@@ -162,6 +163,7 @@ class CollectionItem extends React.Component {
                                                 editIcon={null}
                                                 defaultValue={item.name}
                                                 onClick={stopClickPropagation} 
+                                                // onChange={this.handleCollectionNameChange}
                                             />
                                             
                                         ) : (
@@ -207,7 +209,12 @@ class CollectionItem extends React.Component {
 
 export default CollectionItem;
 CollectionItem.defaultProps = {
-    onDrawerVisibleChange: () => {}
+    onDrawerVisibleChange: () => {},
+    onDelete: () => {},
+    onRemove: () => {},
+    onDuplicate: () => {},
+    onStar: () => {},
+    onRename: () => {},
 }
 
 
