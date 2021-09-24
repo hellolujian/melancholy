@@ -4,8 +4,8 @@ import {
     Menu, 
     Space,Row, Col ,
     Divider , Input,Tree,
-    Button, Rate,Drawer,
-    Tabs, Modal
+    Button, Rate,Tooltip,
+    Tabs, Modal, Dropdown
 } from 'antd';
 import Icon from '@ant-design/icons';
 import { 
@@ -13,21 +13,29 @@ import {
     FolderAddOutlined ,CloseOutlined, LockFilled , EditFilled, EllipsisOutlined,
     DownloadOutlined ,FolderFilled , FontColorsOutlined ,DeleteFilled ,
     InsertRowLeftOutlined, MonitorOutlined ,CopyOutlined ,PicCenterOutlined    } from '@ant-design/icons';
-import { GET_REQUEST_ICON, POST_REQUEST_ICON } from '@/ui/constants/icons'
+import { SHARE_COLLECTION_ICON, MANAGE_ROLES_ICON, RENAME_ICON, EDIT_ICON, CREATE_FORK_ICON, 
+    MERGE_CHANGES_ICON, ADD_REQUEST_ICON, ADD_FOLDER_ICON, DUPLICATE_ICON,ELLIPSIS_ICON,
+    EXPORT_ICON, MOCK_COLLECTION, MONITOR_COLLECTION_ICON, PUBLISH_DOCS_ICON, 
+    REMOVE_FROM_WORKSPACE_ICON, DELETE_ICON, COLLECTION_FOLDER_ICON, GET_REQUEST_ICON, POST_REQUEST_ICON } from '@/ui/constants/icons'
 import TooltipButton from 'ui/components/tooltip_button'
 import CollectionItem from './collection_item'
+import FolderItem from './folder_item'
+import RequestItem from './request_item'
 import PostmanButton from './postman_button'
 import RequiredInput from './required_input'
 import {stopClickPropagation} from '@/utils/global_utils';
+import {publishRequestModalOpen, subscribeRequestSave, subscribeCollectionSave} from '@/utils/event_utils'
 import {
-    loadCollection, 
-    queryCollection, 
-    addCollection, 
+    queryCollectionMetaById, 
+} from '@/database/collection_meta'
+import {loadCollection} from '@/database/collection'
+import {
+    newCollection, 
     deleteCollection,
     starCollection,
     renameCollection,
-} from '@/database/database'
-import {subscribeCollectionSave} from '@/utils/event_utils'
+    deleteRequest
+} from '@/utils/database_utils'
 import {UUID} from '@/utils/global_utils'
 import 'ui/style/resizable.css'
 import 'ui/style/tree.css'
@@ -40,45 +48,9 @@ class CollectionTree extends React.Component {
         super(props);
         this.state = {
            showCollectionNameInput: false,
-           collectionData: [
-            //    {
-            //        id: '76063f0c-a73f-40b4-b359-47b306eb0ded',
-            //        name: 'api-new',
-            //        count: 11,
-            //        starred: 1,
-            //        items: [
-            //            {
-            //                id: '0-0',
-            //                name: '第一个文件夹',
-            //                items: [
-            //                    {
-            //                        id: '0-0-1',
-            //                        name: '请求1',
-            //                        method: 'GET',
-            //                    }
-            //                ]
-            //            },
-            //            {
-            //                id: '0-1',
-            //                name: '请求2',
-            //                method: 'POST',
-            //            }
-            //        ]
-            //    },
-            //    {
-            //        id: '4f4573dd-ce46-41fa-9e36-8e9191bf3d9e',
-            //        name: 'soa-group',
-            //     //    items: [
-            //     //        {
-            //     //            id: '1-0',
-            //     //            name: 'request 3',
-            //     //            method: 'GET',
-            //     //        },
-                     
-            //     //    ]
-            //    }
-           ],
-           collectionDrawerVisibleItem: null
+           collectionData: [],
+           collectionDrawerVisibleItem: null,
+           expandedKeys: []
         }
     }
 
@@ -108,14 +80,29 @@ class CollectionTree extends React.Component {
         })
     }
 
-    componentDidMount = async () => {
-      let collectionData = await loadCollection();
-      this.setState({collectionData: this.sortCollectionData(collectionData)});
-      subscribeCollectionSave(this.handleCollectionSave)
+    refreshData = async () => {
+        let collectionData = await loadCollection();
+        this.setState({collectionData: this.sortCollectionData(collectionData)});
     }
 
-    handleSelectTreeNode = (selectedKeys, e) => {
-        this.setState({expandedKeys: selectedKeys});
+    componentDidMount = async () => {
+      subscribeCollectionSave(this.refreshData)
+      subscribeRequestSave(this.refreshData)
+      this.refreshData();
+    }
+
+    handleExpandKeys = (key, selected) => {
+        const {expandedKeys} = this.state;
+        let newExpandedKeys = expandedKeys.includes(key) ? expandedKeys.filter(item => item !== key) : [...expandedKeys, key];
+        this.setState({expandedKeys: newExpandedKeys});
+    }
+
+    handleSelectTreeNode = (selectedKeys, {selected, selectedNodes, node}) => {
+        this.handleExpandKeys(node.key, selected)
+    }
+
+    handleExpandTreeNode = (selectedKeys, {expanded, node}) => {
+        this.handleExpandKeys(node.key, expanded)
     }
 
     updateTreeData = (list, key, children) => {
@@ -157,6 +144,37 @@ class CollectionTree extends React.Component {
             }, 1000);
           });
     }
+  
+    handleOpenRequestModal = () => {
+        publishRequestModalOpen();
+    }
+
+    getEmptyNode = (id, isFolder) => {
+        let text1 = isFolder ? 'folder' : 'collection';
+        let text2 = isFolder ? 'subfolders' : 'folders';
+        return {
+            key: id + "_0",
+            isLeaf: true,
+            className: 'ant-tree-treenode-empty',
+            title: (
+                <div className="collection-tree-item-title-empty">
+                    <Text type="secondary">
+                        This {text1} is empty. <Link onClick={this.handleOpenRequestModal}>Add requests</Link> to this {text1} and create {text2} to organize them
+                    </Text>
+                </div>
+            )
+        }
+    }
+
+    handleFolderRename = async (id, name) => {
+        await renameCollection(id, name);
+        this.refreshData()
+    }
+
+    handleRequestRename = async (id, name) => {
+        await renameCollection(id, name);
+        this.refreshData()
+    }
 
     // 递归遍历collection下的folder
     traverseCollectionItems = (list) => {
@@ -166,24 +184,40 @@ class CollectionTree extends React.Component {
 
             }
             if (node.items) {
-                treeItem.children = this.traverseCollectionItems(node.items);
+                
                 treeItem.title = (
-                    <Space style={{padding: '4px 0px'}}>
-                        <FolderFilled />
-                        {node.name}
-                    </Space>
+                    <FolderItem 
+                        item={node} 
+                        onDelete={() => this.handleFolderDelete(node)}
+                        onDuplicate={() => this.handleCollectionDuplicate(node.id)}
+                        onRename={(value) => this.handleFolderRename(node.id, value)}
+                    />
                 );
+
+                
+                if (node.items.length > 0) {
+                    treeItem.children = this.traverseCollectionItems(node.items);
+                } else {
+                    treeItem.children = [this.getEmptyNode(node.id, true)]
+                }
+                
             } else {
                 treeItem.isLeaf = true;
                 treeItem.title = (
-                    <Space align="center" style={{padding: '4px 0px', display: 'flex',alignItems: 'center'}}>
-                        <div style={{width: 28, textAlign: 'center', lineHeight: 0}}>
-                            {
-                                node.method === 'POST' ? POST_REQUEST_ICON : GET_REQUEST_ICON
-                            }
-                        </div>
-                        <span>{node.name}</span>
-                    </Space>
+                    // <Space align="center" style={{padding: '4px 0px', display: 'flex',alignItems: 'center'}}>
+                    //     <div style={{width: 28, textAlign: 'center', lineHeight: 0}}>
+                    //         {
+                    //             node.method === 'POST' ? POST_REQUEST_ICON : GET_REQUEST_ICON
+                    //         }
+                    //     </div>
+                    //     <span>{node.name}</span>
+                    // </Space>
+                    <RequestItem 
+                        item={node} 
+                        onDelete={() => this.handleRequestDelete(node)}
+                        onDuplicate={() => this.handleRequestDuplicate(node.id)}
+                        onRename={(value) => this.handleRequestRename(node.id, value)}
+                    />
                 )
             }
             return treeItem;
@@ -216,11 +250,9 @@ class CollectionTree extends React.Component {
             ),
             okText: 'Delete',
             cancelText: 'Cancel',
-            onOk: () => {
-                deleteCollection(id);
-                const {collectionData} = this.state;
-                const newCollectionData = collectionData.filter(item => item.id !== id);
-                this.setState({collectionData: newCollectionData});
+            onOk: async () => {
+                await deleteCollection(id);
+                this.refreshData()
             }
         });
         
@@ -245,18 +277,58 @@ class CollectionTree extends React.Component {
             ),
             okText: 'Delete',
             cancelText: 'Cancel',
-            onOk: () => {
-                deleteCollection(id);
-                const {collectionData} = this.state;
-                const newCollectionData = collectionData.filter(item => item.id !== id);
-                this.setState({collectionData: newCollectionData});
+            onOk: async () => {
+                await deleteCollection(id);
+                this.refreshData()
             }
         });
         
     }
 
+    handleFolderDelete = (node) => {
+        const {id, name} = node;
+        Modal.confirm({
+            title: 'DELETE FOLDER',
+            icon: null,
+            closable: true,
+            width: 530,
+            content: (
+                <p>
+                    Are you sure you want to delete {name}?
+                </p>
+            ),
+            okText: 'Delete',
+            cancelText: 'Cancel',
+            onOk: async () => {
+                await deleteCollection(id);
+                this.refreshData()
+            }
+        });
+    }
+
+    handleRequestDelete = (node) => {
+        const {id, name} = node;
+        Modal.confirm({
+            title: 'DELETE REQUEST',
+            icon: null,
+            closable: true,
+            width: 530,
+            content: (
+                <p>
+                    Are you sure you want to delete {name}?
+                </p>
+            ),
+            okText: 'Delete',
+            cancelText: 'Cancel',
+            onOk: async () => {
+                await deleteRequest(id);
+                this.refreshData();
+            }
+        });
+    }
+
     handleCollectionDuplicate = async (id) => {
-        let collectionInfo = await queryCollection(id)
+        let collectionInfo = await queryCollectionMetaById(id)
         if (collectionInfo) {
             let {name, auth, description, prerequest, test, variable} = collectionInfo;
             let copyData = {
@@ -268,7 +340,29 @@ class CollectionTree extends React.Component {
                 test: test,
                 variable: variable
             };
-            addCollection(copyData);
+            newCollection(copyData);
+            const {collectionData} = this.state;
+            collectionData.push(copyData);
+            this.setState({
+                collectionData: this.sortCollectionData(collectionData),
+            })
+        }
+    }
+
+    handleRequestDuplicate = async (id) => {
+        let collectionInfo = await queryCollectionMetaById(id)
+        if (collectionInfo) {
+            let {name, auth, description, prerequest, test, variable} = collectionInfo;
+            let copyData = {
+                id: UUID(),
+                name: name + " Copy",
+                auth: auth,
+                description: description,
+                prerequest: prerequest,
+                test: test,
+                variable: variable
+            };
+            newCollection(copyData);
             const {collectionData} = this.state;
             collectionData.push(copyData);
             this.setState({
@@ -287,7 +381,7 @@ class CollectionTree extends React.Component {
         } 
     }
 
-    handleCollectionRename = (id, name) => {
+    handleCollectionRename = async (id, name) => {
         let {collectionData} = this.state;
         const updatedItem = collectionData.find(item => item.id === id);
         if (updatedItem) {
@@ -299,7 +393,7 @@ class CollectionTree extends React.Component {
 
     render() {
 
-        const {collectionData, collectionDrawerVisibleItem} = this.state;
+        const {collectionData, collectionDrawerVisibleItem, expandedKeys, selectedKeys} = this.state;
         let treeData = collectionData.map(item => {
             return {
                 key: item.id,
@@ -316,37 +410,27 @@ class CollectionTree extends React.Component {
                     />
                 ),
                 children: !item.items ? [
-                    {
-                        key: item.id + "_0",
-                        // icon: (<></>),
-                        isLeaf: true,
-                        className: 'ant-tree-treenode-empty',
-                        title: (
-                            <div className="collection-tree-item-title-empty">
-                                <Text type="secondary">
-                                    This collection is empty. <Link>Add requests</Link> to this collection and create folders to organize them
-                                </Text>
-                            </div>
-                        )
-                    }
+                    this.getEmptyNode(item.id)
                 ] : this.traverseCollectionItems(item.items)
             }
         })
         
         return (
             <>
-                <Tree autoExpandParent={true} 
+                <Tree 
+                    // autoExpandParent={true} 
                     // titleRender={}
-                    expandedKeys={this.state.expandedKeys}
+                    expandedKeys={expandedKeys}
+                    // selectedKeys={selectedKeys}
                     treeData={treeData}
                     onSelect={this.handleSelectTreeNode}
                     draggable
                     blockNode
-                    onExpand={this.handleSelectTreeNode}
+                    onExpand={this.handleExpandTreeNode}
                     // defaultExpandAll	
                     onDragEnter={this.onDragEnter}
                     onDrop={this.onDrop}
-                    loadData={this.handleLoadData}
+                    // loadData={this.handleLoadData}
                 />
                 
             </>

@@ -7,7 +7,7 @@ const NeDB = window.require('@electron/remote').getGlobal('nedb');
 const initDatabase = (dbName) => {
     if (!db[dbName]) {
         db[dbName] = new NeDB({
-            filename: path.join(window.__dirname, `databases/collection.db`), 
+            filename: path.join(window.__dirname, `databases/${dbName}.db`), 
             autoload: true,
             timestampData: true,
         });
@@ -15,8 +15,40 @@ const initDatabase = (dbName) => {
     return db[dbName]
 }
 
-export const addCollection = (doc) => {
-    const collectionDB = initDatabase('collection');
+export const query = (dbName, query) => {
+    const collectionDB = initDatabase(dbName);
+
+    return new Promise((resolve, reject) => {
+        collectionDB.find(query, (err, doc) => {
+            if (err) {
+                console.error(err);
+                reject(err);
+            } else {
+                resolve(doc)
+            }
+        });
+      
+    }) 
+}
+
+export const findOne = (dbName, query) => {
+    const collectionDB = initDatabase(dbName);
+
+    return new Promise((resolve, reject) => {
+        collectionDB.findOne(query, (err, doc) => {
+            if (err) {
+                console.error(err);
+                reject(err);
+            } else {
+                resolve(doc)
+            }
+        });
+      
+    }) 
+}
+
+export const insert = (dbName, doc) => {
+    const collectionDB = initDatabase(dbName);
     return new Promise((resolve, reject) => {
         collectionDB.insert(doc, function (err, newDoc) {   // Callback is optional
             if (err) {
@@ -27,98 +59,17 @@ export const addCollection = (doc) => {
             }
         });
     }) 
-    
 }
 
-export const queryCollection = (id) => {
-    const collectionDB = initDatabase('collection');
+export const update = (dbName, query, doc, options = {}) => {
+    console.log('=======udpate======');
+    console.log('dbname: %s, ', dbName);
+    console.log(query)
+    console.log(doc)
+    const collectionDB = initDatabase(dbName);
 
     return new Promise((resolve, reject) => {
-        collectionDB.findOne({ id: id }, (err, doc) => {
-            if (err) {
-                console.error(err);
-                reject(err);
-            } else {
-                resolve(doc)
-            }
-        });
-      
-    }) 
-}
-
-export const loadCollection = () => {
-    const collectionDB = initDatabase('collection');
-
-    return new Promise((resolve, reject) => {
-        collectionDB.find({ $not: { deleted: true } }, (err, doc) => {
-            if (err) {
-                console.error(err);
-                reject(err);
-            } else {
-                resolve(doc)
-            }
-        });
-      
-    }) 
-}
-
-export const updateCollection = (id, data) => {
-    const collectionDB = initDatabase('collection');
-
-    return new Promise((resolve, reject) => {
-        collectionDB.update({ id: id }, data, {}, (err, numAffected, affectedDocuments, upsert) => {
-            if (err) {
-                console.error(err);
-                reject(err);
-            } else {
-                resolve(affectedDocuments)
-            }
-        });
-      
-    }) 
-}
-
-export const deleteCollection = (id) => {
-    const collectionDB = initDatabase('collection');
-
-    return new Promise((resolve, reject) => {
-        // 设定一个已存字段的值
-        collectionDB.update({ id: id }, { $set: { deleted: true } }, {}, (err, numAffected, affectedDocuments, upsert) => {
-            if (err) {
-                console.error(err);
-                reject(err);
-            } else {
-                resolve(affectedDocuments)
-            }
-        });
-      
-    }) 
-}
-
-export const starCollection = (id, starred) => {
-    console.log('id: %s, starred: %s', id, starred);
-    const collectionDB = initDatabase('collection');
-
-    return new Promise((resolve, reject) => {
-        // 设定一个已存字段的值
-        collectionDB.update({ id: id }, { $set: { starred: starred } }, {}, (err, numAffected, affectedDocuments, upsert) => {
-            if (err) {
-                console.error(err);
-                reject(err);
-            } else {
-                resolve(affectedDocuments)
-            }
-        });
-      
-    }) 
-}
-
-export const renameCollection = (id, name) => {
-    const collectionDB = initDatabase('collection');
-
-    return new Promise((resolve, reject) => {
-        // 设定一个已存字段的值
-        collectionDB.update({ id: id }, { $set: { name: name } }, {}, (err, numAffected, affectedDocuments, upsert) => {
+        collectionDB.update(query, doc, options, (err, numAffected, affectedDocuments, upsert) => {
             if (err) {
                 console.error(err);
                 reject(err);

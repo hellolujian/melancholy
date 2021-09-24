@@ -3,22 +3,14 @@ import {Input, Tabs, Button, Form, Modal, Space, Typography} from 'antd';
 import CollectionSelectCard from './collection_select_card'
 
 import DescriptionEditor from './description_editor'
-import EditableTable from './editable_table';
 
-import {addCollection, queryCollection, updateCollection} from '@/database/database'
+import {queryRequestMetaById} from '@/database/request_meta'
 
 import {UUID} from '@/utils/global_utils'
-import {subscribeCollectionModalOpen, publishCollectionSave} from '@/utils/event_utils'
+import {subscribeRequestModalOpen, publishRequestSave} from '@/utils/event_utils'
+import {newRequest, saveRequest} from '@/utils/database_utils'
 
 import {
-    VARIABLE_TIPS,
-    VARIABLE_VALUE_TIPS,
-    COLLECTION_DESCRIPTION_TIPS,
-    DESCRIPTION_TIPS,
-    DESCRIPTION_MARKDOWN_TIPS,
-    AUTHORIZATION_TIPS,
-    PRE_REQUEST_SCRIPTS_TIPS,
-    TESTS_TIPS,
     SAVE_REQUEST_TIPS
 } from 'ui/constants/tips'
 
@@ -37,32 +29,59 @@ class RequestModal extends React.Component {
         }
     }
 
+    getRequestInfo = async (key, data = {}) => {
+        const {requestId, parentId} = data;
+        let updateObj = {visible: true};
+        if (requestId) {
+            updateObj.requestInfo = await queryRequestMetaById(requestId);
+        } else if (parentId) {
+            updateObj.parentId = parentId
+        } 
+        this.setState(updateObj);
+    }
+
     componentDidMount() {
-        
+        subscribeRequestModalOpen(this.getRequestInfo) 
     }
 
     handleModalCancel = () => {
-        this.props.onVisibleChange(false);
+        
+        this.setState({visible: false, requestInfo: null, parentId: null})
+        // this.props.onVisibleChange(false);
     }
 
     handleModalOk = () => {
         this.formRef.current.submit()   
     }
 
-    handleFormFinish = (values) => {
+    handleFormFinish = async (values) => {
+        const {requestInfo, parentId} = this.state;
+        let data = {
+            name: values.name,
+            description: values.description,
+        }
+        if (requestInfo) {
+            data.id = requestInfo.id;
+            await saveRequest(data)
+        } else {
+            data.id = UUID();
+            data.parentId = parentId;
+            await newRequest(data)
+        }
+        publishRequestSave(data)
         this.handleModalCancel()
     }
 
     render() {
      
-        const {workspaceId, collectionId, folderId, visible, scene = 'add', initialValues = {name: 'name', description: 'description'}} = this.props;
+        const {requestInfo, visible} = this.state;
         return (
             <Modal 
-                title={(scene === 'edit' ? "SAVE" : "EDIT") + " REQUEST"} 
+                title={(requestInfo ? "SAVE" : "EDIT") + " REQUEST"} 
                 centered
                 // bodyStyle={{ height: 600}}
-                // footer={null}
-                okText="Save"
+                destroyOnClose
+                okText={requestInfo ? "update" : "Save"}
                 width={560}
                 visible={visible} 
                 onOk={this.handleModalOk} 
@@ -70,12 +89,13 @@ class RequestModal extends React.Component {
                 <Form
                     layout="vertical"
                     ref={this.formRef}
+                    preserve={false}
                     onFinish={this.handleFormFinish}
-                    initialValues={initialValues}
+                    initialValues={requestInfo}
                 >
 
                     {
-                        scene === 'add' && (
+                        !requestInfo && (
                             <Form.Item>
                                 {SAVE_REQUEST_TIPS}
                             </Form.Item>
@@ -83,14 +103,14 @@ class RequestModal extends React.Component {
                     }
 
                     <Form.Item
-                        label={scene === 'edit' ? 'Name' : 'Request name'}
+                        label={requestInfo ? 'Name' : 'Request name'}
                         name="name"
                         rules={[{ required: true, message: '' }]}
                     >
-                        <Input placeholder="Request Name" />
+                        <Input autoFocus placeholder="Request Name" />
                     </Form.Item>
 
-                    <Form.Item name="description" label={scene === 'edit' ? 'description' : "Request description (Optional)"}>
+                    <Form.Item name="description" label={requestInfo ? 'description' : "Request description (Optional)"}>
 
                         <DescriptionEditor 
                             scene="form" 
@@ -101,7 +121,7 @@ class RequestModal extends React.Component {
                     </Form.Item>
 
                     {
-                        scene === 'add' && (
+                        !requestInfo && (
                             <Form.Item label="Select a collection or folder to save to:">
                                 <CollectionSelectCard />
                             </Form.Item>

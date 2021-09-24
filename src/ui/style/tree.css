@@ -46,8 +46,35 @@
 .collection-tree-item-title-empty {
   /* border: 1px solid blue; */
   padding: 8px 0px;
+  margin-left: 12px;
 }
 
 .ant-tree-treenode-empty .ant-tree-switcher-noop {
   display: none !important;
+}
+
+.ant-tree-treenode-empty .ant-tree-node-content-wrapper {
+  cursor: text;
+}
+
+.ant-tree-indent-unit {
+  width: 12px
+}
+
+/* .ant-tree-treenode-empty .ant-tree-indent-unit {
+  width: 24px !important
+} */
+
+.collection-item-action-split {
+  /* border: 1px solid red; */
+  margin: 0px !important;
+}
+
+.folder-item-display {
+  visibility: hidden;
+  opacity: 0;
+}
+.ant-tree .ant-tree-treenode:hover .folder-item-display {
+  visibility: visible;
+  opacity: 1;
 }

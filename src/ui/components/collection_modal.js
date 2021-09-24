@@ -1,27 +1,13 @@
 import React from 'react';
 import {Input, Tabs, Button, Form, Modal, Space, Typography, Alert} from 'antd';
 
-import ScriptEditor from './script_editor'
-
-import {
-    VARIABLE_TIPS,
-    VARIABLE_VALUE_TIPS,
-    COLLECTION_DESCRIPTION_TIPS,
-    DESCRIPTION_TIPS,
-    DESCRIPTION_MARKDOWN_TIPS,
-    AUTHORIZATION_TIPS,
-    PRE_REQUEST_SCRIPTS_TIPS,
-    TESTS_TIPS
-} from 'ui/constants/tips'
-
-import DescriptionEditor from './description_editor'
-import AuthorizationSetting from './authorization_setting'
 import DAPTVSettingTabs from './DAPTV_setting_tabs'
 
-import {addCollection, queryCollection, updateCollection} from '@/database/database'
+import {queryCollectionMetaById} from '@/database/collection_meta'
 
 import {UUID} from '@/utils/global_utils'
 import {subscribeCollectionModalOpen, publishCollectionSave} from '@/utils/event_utils'
+import {newCollection, saveCollection} from '@/utils/database_utils'
 const { TabPane } = Tabs;
 const { Text, Link } = Typography;
 
@@ -38,14 +24,20 @@ class CollectionModal extends React.Component {
         }
     }
 
-    getCollectionInfo = async (key, data) => {
-        if (data) {
-            let result = await queryCollection(data);
-            this.setState({visible: true, collectionSettings: result || {}});
-        } else {
-            this.setState({visible: true});
-        }
-        
+    getCollectionInfo = async (key, data = {}) => {
+        const {collectionId, parentId} = data;
+        let updateObj = {visible: true};
+        if (collectionId) {
+            updateObj.collectionId = collectionId;
+            updateObj.collectionSettings = await queryCollectionMetaById(collectionId);
+        } else if (parentId) {
+            updateObj.parentId = parentId;
+            let parentInfo = await queryCollectionMetaById(parentId);
+            if (parentInfo) {
+                updateObj.parentName = parentInfo.name;
+            }
+        } 
+        this.setState(updateObj);
     }
 
     componentDidMount() {
@@ -53,7 +45,7 @@ class CollectionModal extends React.Component {
     }
 
     handleModalCancel = () => {
-        this.setState({visible: false})
+        this.setState({visible: false, collectionSettings: {}, collectionId: null, parentId: null})
         // this.props.onVisibleChange(false);
     }
 
@@ -63,7 +55,8 @@ class CollectionModal extends React.Component {
 
     handleFormFinish = async (values) => {
         
-        const {id, description, auth, test, prerequest, variable} = this.state.collectionSettings;
+        const {collectionSettings, collectionId, parentId} = this.state;
+        const {id = UUID(), description, auth, test, prerequest, variable} = collectionSettings;
         let data = {
             id: id,
             name: values.name,
@@ -73,12 +66,12 @@ class CollectionModal extends React.Component {
             prerequest: prerequest,
             variable: variable,
         }
-        if (id) {
-            await updateCollection(id, data)
+        if (collectionId) {
+            await saveCollection(id, data)
         } else {
-            data.id = UUID();
-            await addCollection(data)
+            await newCollection(data, parentId)
         }
+       
         publishCollectionSave(data)
         this.handleModalCancel()
     }
@@ -97,15 +90,14 @@ class CollectionModal extends React.Component {
 
     render() {
      
-        const {workspaceId, collectionId, folderId, scene = 'add'} = this.props;
-        const {collectionSettings, visible} = this.state;
+        const {collectionSettings, visible, collectionId, parentId, parentName} = this.state;
         return (
             <Modal 
-                title="CREATE A NEW COLLECTION" 
+                title={parentId ? (collectionId ? 'EDIT FOLDER' : `ADD FOLDER TO ${parentName}`) : (collectionId ? 'EDIT COLLECTION' : "CREATE A NEW COLLECTION")}
                 // centered
                 destroyOnClose
                 bodyStyle={{ height: 600}}
-                okText={collectionSettings.id ? "Update" : "Create"}
+                okText={collectionId ? "Update" : "Create"}
                 width={800}
                 visible={visible} 
                 onOk={this.handleModalOk} 
@@ -122,7 +114,7 @@ class CollectionModal extends React.Component {
                         name="name"
                         rules={[{ required: true, message: '' }]}
                     >
-                        <Input placeholder="Collection Name" />
+                        <Input autoFocus placeholder="Collection Name" />
                     </Form.Item>
                 </Form>
 
