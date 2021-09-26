@@ -27,4 +27,4 @@ yarn-error.log*
 /electron/build
 /electron/dist
 /electron/node_modules
-/electron/database
+/electron/databases
