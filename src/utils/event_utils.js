@@ -39,6 +39,7 @@ export const publishRequestModalOpen = (data) => {
 }
 
 export const subscribeRequestModalOpen = (handle) => {
+    
     subscribe(REQUEST_MODAL_EVENT_OPEN, handle);
 }
 

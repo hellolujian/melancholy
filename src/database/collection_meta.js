@@ -14,3 +14,7 @@ export const insertCollectionMeta = async (doc) => {
 export const updateCollectionMeta = (id, doc) => {
     return update(COLLECTION_META, {id: id}, doc)
 }
+
+export const queryCollectionMetaByParentId = (parentId) => {
+    return query(COLLECTION_META, {parentId: parentId});
+}

@@ -25,18 +25,17 @@ import PostmanButton from './postman_button'
 import RequiredInput from './required_input'
 import {stopClickPropagation} from '@/utils/global_utils';
 import {publishRequestModalOpen, subscribeRequestSave, subscribeCollectionSave} from '@/utils/event_utils'
+
 import {
-    queryCollectionMetaById, 
-} from '@/database/collection_meta'
-import {loadCollection} from '@/database/collection'
-import {
-    newCollection, 
+    duplicateRequest, 
+    deleteRequest,
+    saveRequest,
+    duplicateCollection,
     deleteCollection,
     starCollection,
-    renameCollection,
-    deleteRequest
+    saveCollection,
+    loadCollection
 } from '@/utils/database_utils'
-import {UUID} from '@/utils/global_utils'
 import 'ui/style/resizable.css'
 import 'ui/style/tree.css'
 
@@ -54,35 +53,9 @@ class CollectionTree extends React.Component {
         }
     }
 
-    handleCollectionSave = (key, data) => {
-        let {collectionData} = this.state;
-        const updatedItem = collectionData.find(item => item.id === data.id);
-        if (updatedItem) {
-            updatedItem.name = data.name;
-        } else {
-            collectionData.push(data);
-            collectionData = this.sortCollectionData(collectionData)
-        }
-
-        this.setState({collectionData: collectionData});
-    }
-
-    sortCollectionData = (collectionData) => {
-        return collectionData.sort((a, b) => {
-            if (a.starred) {
-                if (!b.starred) {
-                    return -1;
-                }
-            } else if(b.starred) {
-                return 1;
-            }
-            return a.name.localeCompare(b.name);
-        })
-    }
-
     refreshData = async () => {
         let collectionData = await loadCollection();
-        this.setState({collectionData: this.sortCollectionData(collectionData)});
+        this.setState({collectionData: collectionData});
     }
 
     componentDidMount = async () => {
@@ -166,13 +139,8 @@ class CollectionTree extends React.Component {
         }
     }
 
-    handleFolderRename = async (id, name) => {
-        await renameCollection(id, name);
-        this.refreshData()
-    }
-
     handleRequestRename = async (id, name) => {
-        await renameCollection(id, name);
+        await saveRequest({id: id, name: name});
         this.refreshData()
     }
 
@@ -190,7 +158,7 @@ class CollectionTree extends React.Component {
                         item={node} 
                         onDelete={() => this.handleFolderDelete(node)}
                         onDuplicate={() => this.handleCollectionDuplicate(node.id)}
-                        onRename={(value) => this.handleFolderRename(node.id, value)}
+                        onRename={(value) => this.handleCollectionRename(node.id, value)}
                     />
                 );
 
@@ -328,67 +296,23 @@ class CollectionTree extends React.Component {
     }
 
     handleCollectionDuplicate = async (id) => {
-        let collectionInfo = await queryCollectionMetaById(id)
-        if (collectionInfo) {
-            let {name, auth, description, prerequest, test, variable} = collectionInfo;
-            let copyData = {
-                id: UUID(),
-                name: name + " Copy",
-                auth: auth,
-                description: description,
-                prerequest: prerequest,
-                test: test,
-                variable: variable
-            };
-            newCollection(copyData);
-            const {collectionData} = this.state;
-            collectionData.push(copyData);
-            this.setState({
-                collectionData: this.sortCollectionData(collectionData),
-            })
-        }
+        await duplicateCollection(id);
+        this.refreshData();
     }
 
     handleRequestDuplicate = async (id) => {
-        let collectionInfo = await queryCollectionMetaById(id)
-        if (collectionInfo) {
-            let {name, auth, description, prerequest, test, variable} = collectionInfo;
-            let copyData = {
-                id: UUID(),
-                name: name + " Copy",
-                auth: auth,
-                description: description,
-                prerequest: prerequest,
-                test: test,
-                variable: variable
-            };
-            newCollection(copyData);
-            const {collectionData} = this.state;
-            collectionData.push(copyData);
-            this.setState({
-                collectionData: this.sortCollectionData(collectionData),
-            })
-        }
+        await duplicateRequest(id);
+        this.refreshData();
     }
 
-    handleCollectionStar = (id, starred) => {
-        let {collectionData} = this.state;
-        const updatedItem = collectionData.find(item => item.id === id);
-        if (updatedItem) {
-            updatedItem.starred = starred;
-            starCollection(id, starred);
-            this.setState({collectionData: this.sortCollectionData(collectionData)});
-        } 
+    handleCollectionStar = async (id, starred) => {
+        await starCollection(id, starred);
+        this.refreshData();
     }
 
     handleCollectionRename = async (id, name) => {
-        let {collectionData} = this.state;
-        const updatedItem = collectionData.find(item => item.id === id);
-        if (updatedItem) {
-            updatedItem.name = name;
-            renameCollection(id, name);
-            this.setState({collectionData: this.sortCollectionData(collectionData)});
-        } 
+        await saveCollection(id, {name: name});
+        this.refreshData()
     }
 
     render() {

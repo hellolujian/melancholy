@@ -7,8 +7,8 @@ export const queryCollectionById = async (id) => {
     return await findOne(COLLECTION, {id: id});
 }
 
-export const loadCollection = async () => {
-    let result = await query(COLLECTION, {$not: { deleted: true } });
+export const queryCollection = async (param = {}) => {
+    let result = await query(COLLECTION, param);
     return result;
 }
 

@@ -23,7 +23,6 @@ import DropdownTooltip from './dropdown_tooltip'
 import NewButtonModal from './new_button_modal'
 
 import SettingsModal from './settings_modal'
-import RequestModal from './request_modal'
 import WorkspaceCard from './workspace_card'
 import EnvironmentModal from './environment_modal'
 

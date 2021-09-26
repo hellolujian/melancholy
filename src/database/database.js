@@ -19,7 +19,7 @@ export const query = (dbName, query) => {
     const collectionDB = initDatabase(dbName);
 
     return new Promise((resolve, reject) => {
-        collectionDB.find(query, (err, doc) => {
+        collectionDB.find({...query, $not: { deleted: true }}, (err, doc) => {
             if (err) {
                 console.error(err);
                 reject(err);
@@ -75,6 +75,22 @@ export const update = (dbName, query, doc, options = {}) => {
                 reject(err);
             } else {
                 resolve(affectedDocuments)
+            }
+        });
+      
+    }) 
+}
+
+export const count = (dbName, query) => {
+    const collectionDB = initDatabase(dbName);
+
+    return new Promise((resolve, reject) => {
+        collectionDB.count({...query, $not: { deleted: true }}, (err, count) => {
+            if (err) {
+                console.error(err);
+                reject(err);
+            } else {
+                resolve(count)
             }
         });
       

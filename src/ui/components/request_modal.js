@@ -6,6 +6,8 @@ import DescriptionEditor from './description_editor'
 
 import {queryRequestMetaById} from '@/database/request_meta'
 
+import {queryCollectionMetaById} from '@/database/collection_meta'
+
 import {UUID} from '@/utils/global_utils'
 import {subscribeRequestModalOpen, publishRequestSave} from '@/utils/event_utils'
 import {newRequest, saveRequest} from '@/utils/database_utils'
@@ -35,7 +37,8 @@ class RequestModal extends React.Component {
         if (requestId) {
             updateObj.requestInfo = await queryRequestMetaById(requestId);
         } else if (parentId) {
-            updateObj.parentId = parentId
+            let collectionInfo = await queryCollectionMetaById(parentId);
+            updateObj.collectionInfo = collectionInfo
         } 
         this.setState(updateObj);
     }
@@ -46,7 +49,7 @@ class RequestModal extends React.Component {
 
     handleModalCancel = () => {
         
-        this.setState({visible: false, requestInfo: null, parentId: null})
+        this.setState({visible: false, requestInfo: null, collectionInfo: null})
         // this.props.onVisibleChange(false);
     }
 
@@ -55,7 +58,7 @@ class RequestModal extends React.Component {
     }
 
     handleFormFinish = async (values) => {
-        const {requestInfo, parentId} = this.state;
+        const {requestInfo, collectionInfo} = this.state;
         let data = {
             name: values.name,
             description: values.description,
@@ -65,23 +68,28 @@ class RequestModal extends React.Component {
             await saveRequest(data)
         } else {
             data.id = UUID();
-            data.parentId = parentId;
+            data.parentId = collectionInfo.id;
             await newRequest(data)
         }
         publishRequestSave(data)
         this.handleModalCancel()
     }
 
+    handleSelectedCollectionChange = (collectionInfo) => {
+        this.setState({collectionInfo: collectionInfo})
+    }
+
     render() {
      
-        const {requestInfo, visible} = this.state;
+        const {requestInfo, visible, collectionInfo} = this.state;
         return (
             <Modal 
                 title={(requestInfo ? "SAVE" : "EDIT") + " REQUEST"} 
                 centered
                 // bodyStyle={{ height: 600}}
                 destroyOnClose
-                okText={requestInfo ? "update" : "Save"}
+                okText={requestInfo ? "update" : `Save${collectionInfo ? (" to " + collectionInfo.name) : ""}`}
+                okButtonProps={{disabled: !collectionInfo}}
                 width={560}
                 visible={visible} 
                 onOk={this.handleModalOk} 
@@ -93,7 +101,6 @@ class RequestModal extends React.Component {
                     onFinish={this.handleFormFinish}
                     initialValues={requestInfo}
                 >
-
                     {
                         !requestInfo && (
                             <Form.Item>
@@ -123,7 +130,10 @@ class RequestModal extends React.Component {
                     {
                         !requestInfo && (
                             <Form.Item label="Select a collection or folder to save to:">
-                                <CollectionSelectCard />
+                                <CollectionSelectCard 
+                                    defaultValue={collectionInfo} 
+                                    onChange={this.handleSelectedCollectionChange} 
+                                />
                             </Form.Item>
                         )
                     }

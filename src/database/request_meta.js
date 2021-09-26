@@ -1,5 +1,5 @@
 
-import {update, insert, findOne} from '@/database/database'
+import {update, insert, findOne, query, count} from '@/database/database'
 
 const REQUEST_META = 'requestMeta';
 
@@ -13,4 +13,12 @@ export const insertRequestMeta = async (doc) => {
 
 export const updateRequestMeta = (id, doc) => {
     return update(REQUEST_META, {id: id}, doc)
+}
+
+export const queryRequestMetaByParentId = (parentId) => {
+    return query(REQUEST_META, {parentId: parentId})
+}
+
+export const queryRequestCount = (parentId) => {
+    return count(REQUEST_META, {parentId: parentId});
 }

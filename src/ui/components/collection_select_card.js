@@ -3,23 +3,39 @@ import { render } from 'react-dom';
 import {List, PageHeader, Button, Row, Col, Input, Typography, Space} from 'antd'
 import { CaretLeftOutlined, SearchOutlined, CaretRightOutlined, CheckOutlined} from '@ant-design/icons';
 import 'ui/style/collection_select_card.css'
-import {GOU_ICON, YES_ICON, COLLECTION_ICON_20, COLLECTION_ICON, ENVIRONMENT_ICON, ENVIRONMENT_ICON_48,
+import {POST_REQUEST_ICON, YES_ICON, COLLECTION_ICON_20, GET_REQUEST_ICON, ENVIRONMENT_ICON, ENVIRONMENT_ICON_48,
     MOCK_COLLECTION, MOCK_COLLECTION_48, MONITOR_COLLECTION_ICON, CIRCLE_DOT_ICON, DOCUMENTATION_ICON, DOCUMENTATION_ICON_48, CLOSE_SVG,CLOSE_ICON
 } from 'ui/constants/icons';
 
+import {loadCollection, getParentArr, newCollection} from '@/utils/database_utils'
+import {publishCollectionSave} from '@/utils/event_utils'
+
+import {UUID} from '@/utils/global_utils'
 class CollectionSelectCard extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
             creating: false,
             collectionName: '',
-            
+            chooseChain: []
         }
     }
-    editorDidMount(editor, monaco) {
-        console.log('editorDidMount', editor);
-        editor.focus();
+
+    refreshData = async (obj = {}) => {
+        let collectionData = await loadCollection();
+        this.setState({collectionData: collectionData, ...obj});
     }
+
+    componentDidMount = async () => {
+        const {defaultValue} = this.props;
+        let chooseChain = [];
+        if (defaultValue) {
+            chooseChain = await getParentArr(defaultValue.id)
+        }
+        this.setState({chooseChain: chooseChain});
+        this.refreshData({chooseChain: chooseChain});
+    }
+
     onChange(newValue, e) {
         console.log('onChange', newValue, e);
     }
@@ -32,52 +48,55 @@ class CollectionSelectCard extends React.Component {
         this.setState({creating: false});
     }
 
+    getChoosedCollectionId = () => {
+        const {chooseChain} = this.state;
+        return chooseChain.length > 0 ? chooseChain[chooseChain.length - 1].id : null;
+    }
+
+    handleYesBtnClick = async () => {
+        const {collectionName, chooseChain} = this.state;
+        let choosedCollection = {id: UUID(), name: collectionName}
+        await newCollection(choosedCollection, this.getChoosedCollectionId());
+        chooseChain.push(choosedCollection)
+        await this.refreshData({chooseChain: chooseChain, });
+        this.setState({creating: false})
+        publishCollectionSave()
+    }
+
     handleCollectionCreateInputChange = (e) => {
         this.setState({collectionName: e.target.value})
     }
 
     handleListItemClick = (item) => {
-        this.setState({selectedCollection: item})
+        if (!item.items) {
+            return;
+        }
+        const {chooseChain} = this.state;
+        chooseChain.push({id: item.id, name: item.name})
+        this.setState({chooseChain: chooseChain});
+        this.props.onChange(item);
     }
 
     handleBackIconClick = () => {
-        this.setState({selectedCollection: null})
+        const {chooseChain} = this.state;
+        chooseChain.pop();
+        this.setState({chooseChain: chooseChain});
+        this.props.onChange(chooseChain.length > 0 ? chooseChain[chooseChain.length - 1] : null);
+    }
+
+    getListData = () => {
+        const {collectionData, chooseChain} = this.state;
+        let listData = collectionData;
+        for (let i = 0; i < chooseChain.length; i++) {
+            let chooseOne = chooseChain[i];
+            listData = listData.find(o => o.id === chooseOne.id).items;
+        }
+        return listData;
     }
 
     render() {
-
-        let data = [
-
-        {
-            id: '1',
-            name: 'api-new'
-        },
-        {
-            id: '2',
-            name: 'api-seller-manager'
-        },
-        {
-            id: '3',
-            name: 'api-open'
-        },
-        {
-            id: '4',
-            name: 'api-open'
-        },
-        {
-            id: '12',
-            name: 'api-seller-manager'
-        },
-        {
-            id: '13',
-            name: 'api-open'
-        },
-        {
-            id: '14',
-            name: 'api-open'
-        },
-        ];
-        const {creating, collectionName, selectedCollection} =this.state;
+        const {creating, collectionName, chooseChain} = this.state;
+        const selectedCollection = chooseChain.length > 0 ? chooseChain[chooseChain.length - 1] : null;
         return (
             <PageHeader 
                 className="collection-select-card"
@@ -103,7 +122,6 @@ class CollectionSelectCard extends React.Component {
                     </Button>
                 ]}
             >
-
                 {
                     creating && (
                         <div className="collection-select-card-create-collection-input">
@@ -115,7 +133,7 @@ class CollectionSelectCard extends React.Component {
                                 suffix={collectionName && (
                                     CLOSE_ICON(this.handleCloseBtnClick)
                                 )}
-                                addonAfter={collectionName && (YES_ICON)}
+                                addonAfter={collectionName && (YES_ICON(this.handleYesBtnClick))}
                                 // onBlur={this.handleCreateBtnBlur}
                             />
                         </div>
@@ -125,19 +143,23 @@ class CollectionSelectCard extends React.Component {
                 <List
                     size="small"
                     // bordered
-                    dataSource={data}
+                    dataSource={this.getListData()}
                     renderItem={item => (
                         <List.Item 
                             key={item.id}
-                            className="collection-select-card-item"
+                            className={`collection-select-card-item ${item.items ? 'collection-select-card-collection-item' : 'collection-select-card-request-item'}`}
                             actions={[
                                 <CaretRightOutlined className="collection-select-card-item-right" />
                             ]}
                             onClick={() => this.handleListItemClick(item)}>
         
                             <div className="vertical-center">
-                            {COLLECTION_ICON_20}
-                            <Typography.Text style={{marginLeft: 8}}>{item.name}</Typography.Text>
+                                {
+                                    item.items ? COLLECTION_ICON_20 : (
+                                        item.method === 'POST' ? POST_REQUEST_ICON : GET_REQUEST_ICON
+                                    )
+                                }
+                                <Typography.Text style={{marginLeft: 8}}>{item.name}</Typography.Text>
                             </div>
 
                         </List.Item>
@@ -150,6 +172,10 @@ class CollectionSelectCard extends React.Component {
     }
 }
 export default CollectionSelectCard;
+
+CollectionSelectCard.defaultProps = {
+    onChange: () => {},
+}
 
 
 

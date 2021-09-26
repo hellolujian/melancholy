@@ -17,20 +17,25 @@
   border-bottom: none;
 }
 
+.collection-select-card .collection-select-card-request-item {
+  opacity: 0.5;
+  user-select: none;
+}
+
 .collection-select-card .ant-page-header-heading-left {
   padding-left: 8px;
 }
 
-.collection-select-card .collection-select-card-item .collection-select-card-item-right {
+.collection-select-card .collection-select-card-item-right {
   display: none;
 }
 
-.collection-select-card .collection-select-card-item:hover {
+.collection-select-card .collection-select-card-collection-item:hover {
   background-color: lightgray;  
   cursor: pointer;
 }
 
-.collection-select-card .collection-select-card-item:hover .collection-select-card-item-right {
+.collection-select-card .collection-select-card-collection-item:hover .collection-select-card-item-right {
   display: block;
 }
 

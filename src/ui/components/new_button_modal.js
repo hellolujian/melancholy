@@ -38,7 +38,7 @@ import DocumentationModal from './documentation_modal'
 
 import {IMPORT_TITLE, SYNC_DATA_TITLE, CREATE_NEW, ACCOUNT_TITLE, NOTIFICATIONS_TITLE, SETTINGS_TITLE, RUNNER_TITLE} from '@/ui/constants/titles'
 import Pubsub from 'pubsub-js'
-import {publishCollectionModalOpen} from '@/utils/event_utils'
+import {publishCollectionModalOpen, publishRequestModalOpen} from '@/utils/event_utils'
 import 'ui/style/new_button_modal.css'
 const { Header,} = Layout;
 const { TabPane } = Tabs;
@@ -71,10 +71,9 @@ class NewButtonModal extends React.Component {
     handleRCEModalVisibleChange = (key, visible, parentModalVisible) => {
         switch (key) {
             case 'request':
-                this.setState({requestModalVisible: visible, newModalVisible: false});
+                publishRequestModalOpen()
                 break;
             case 'collection':
-                // this.setState({collectionModalVisible: visible, newModalVisible: false});
                 publishCollectionModalOpen();
                 break;
             case 'environment':
@@ -274,8 +273,8 @@ class NewButtonModal extends React.Component {
                     }}
                 />
 
-                <RequestModal visible={requestModalVisible} onVisibleChange={(visible) => this.handleRCEModalVisibleChange('request', visible)} />
-                {/* <CollectionModal visible={collectionModalVisible} onVisibleChange={(visible) => this.handleRCEModalVisibleChange('collection', visible)} /> */}
+                <RequestModal />
+                <CollectionModal />
                 <EnvironmentModal visible={environmentModalVisible} onVisibleChange={(visible) => this.handleRCEModalVisibleChange('environment', visible)} />
                 {
                     documentationModalVisible && (

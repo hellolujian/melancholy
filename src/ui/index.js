@@ -53,16 +53,11 @@ class Home extends React.Component {
       this.setState({expandedKeys: selectedKeys});
     }
 
-    handleCollectionModalVisibleChange = (visible) => {
-      // this.setState({collectionModalVisible: visible})
+    handleNewCollectionClick = () => {
       publishCollectionModalOpen();
     }
 
-    handleCollectionNewBtnClick = () => {}
-
     render() {
-
-      const {collectionModalVisible} = this.state;
      
         return (
             <Layout>
@@ -95,7 +90,7 @@ class Home extends React.Component {
                         <Space className="justify-content-space-between" style={{margin: '8px 0px'}}>
                           <TooltipButton 
                             label="New Collection"
-                            onClick={() => this.handleCollectionModalVisibleChange(true)}
+                            onClick={this.handleNewCollectionClick}
                             tooltipProps={{title: 'Create new Collection'}}
                             buttonProps={{icon: ADD_ICON, type: 'link'}}
                            />
@@ -104,8 +99,6 @@ class Home extends React.Component {
                             tooltipProps={{title: "Recover your deleted collections"}}
                             buttonProps={{type: 'text'}}
                           />
-
-                        <CollectionModal visible={collectionModalVisible} onVisibleChange={(visible) => this.handleCollectionModalVisibleChange(visible)} />
 
                         </Space>
                         
