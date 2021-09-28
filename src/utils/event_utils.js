@@ -64,4 +64,16 @@ export const subscribeRequestSave = (handle) => {
  export const subscribeRequestSelected = (handle) => {
      subscribe(REQUEST_SELECTED_EVENT, handle);
  }
+
+/**
+ * =====================================开启新tab===========================================
+ */
+ const OPEN_NEW_TAB_EVENT = 'open_new_tab_event';
  
+ export const publishNewTabOpen = (data) => {
+    publish(OPEN_NEW_TAB_EVENT, data)
+}
+
+export const subscribeNewTabOpen = (handle) => {
+    subscribe(OPEN_NEW_TAB_EVENT, handle);
+}

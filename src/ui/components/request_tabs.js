@@ -10,12 +10,15 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 import EnvironmentSetting from './environment_setting';
 import RequestTabConfirm from './request_tab_confirm';
 import { UNSAVED_DOT_ICON, POST_REQUEST_ICON, GET_REQUEST_ICON, CLOSE_SVG, UNSAVED_DOT_SVG } from 'ui/constants/icons'
-import Pubsub from 'pubsub-js'
-import {OPEN_NEW_TAB_EVENT} from '@/ui/constants/events'
-import {
-  subscribeRequestSelected
-} from '@/utils/event_utils'
 
+import {insertTabMeta, multiRemove, removeTabMetaById, queryTabMeta} from '@/database/tab_meta'
+import {queryRequestMetaById, insertRequestMeta} from '@/database/request_meta'
+import {
+  subscribeRequestSelected,
+  subscribeNewTabOpen
+} from '@/utils/event_utils'
+import {TabIconType, TabType, getIconByCode} from '@/enums'
+import {UUID} from '@/utils/global_utils'
 import 'ui/style/request_tabs.css'
 
 const { TabPane } = Tabs;
@@ -95,12 +98,12 @@ class DraggableTabs extends React.Component {
       activeTabKey: '111'
     };
   }
-  
+
   // 移动tab
   moveTabNode = (dragKey, hoverKey) => {
     const {tabData} = this.state;
-    const dragIndex = tabData.findIndex(item => item.key === dragKey);
-    const hoverIndex = tabData.findIndex(item => item.key === hoverKey);
+    const dragIndex = tabData.findIndex(item => item.id === dragKey);
+    const hoverIndex = tabData.findIndex(item => item.id === hoverKey);
     const dragNode = tabData[dragIndex];
     tabData[dragIndex] = tabData[hoverIndex];
     tabData[hoverIndex] = dragNode;
@@ -109,30 +112,89 @@ class DraggableTabs extends React.Component {
     });
   };
 
+  refreshData = async (obj = {}) => {
+    let tabData = await queryTabMeta();
+    this.setState({tabData: tabData, ...obj});
+    return tabData;
+  }
+
   // 新增tab
-  handleAddTabClick = () => {
-    let newTab = {
-      key: new Date().getTime() + '',
-      name: '新增tab' + (this.state.tabData.length + 1),
-      method: "GET"
+  handleAddTabClick = async () => {
+    let newRequest = {
+      id: UUID(),
+      name: 'Untitled Request',
+      method: 'get',
     }
+    await insertRequestMeta(newRequest)
+    let newTab = {
+      id: UUID(),
+      name: newRequest.name,
+      icon: TabIconType.GET.code,
+      type: TabType.request.name(),
+      refId: newRequest.id
+    }
+    await insertTabMeta(newTab);
+    this.refreshData({activeTabKey: newTab.id})
+  }
+
+  handleRequestSelected = async (msg, data) => {
+    console.log('jiantingdao===');
+    console.log(data);
+    let requestMetaInfo = await queryRequestMetaById(data);
+    if (!requestMetaInfo) {
+      return;
+    }
+    const {id: requestId, name, method = 'get'} = requestMetaInfo;
     const {tabData} = this.state;
-    tabData.push(newTab);
-    this.setState({tabData: tabData, activeTabKey: newTab.key});
+    let selectedTab = tabData.find(item => item.refId === requestId);
+    if (selectedTab) {
+      this.setState({activeTabKey: selectedTab.id})
+    } else {
+      let newTab = {
+        id: UUID(),
+        type: TabType.request.name(),
+        name: name,
+        icon: method,
+        refId: requestId, 
+      };
+      await insertTabMeta(newTab);
+      this.refreshData({activeTabKey: newTab.id})
+    }
+    
+
+
+  }
+
+  componentDidMount = async () => {
+
+    let tabData = await queryTabMeta();
+    this.setState({tabData: tabData});
+    
+    subscribeNewTabOpen(this.handleAddTabClick)
+    subscribeRequestSelected(this.handleRequestSelected)
+  }
+
+  doCloseTab = async (id) => {
+    await removeTabMetaById(id);
+    let tabData = await this.refreshData();
+    const {activeTabKey} = this.state;
+    if (activeTabKey === id) {
+      this.setState({activeTabKey: tabData.length === 0 ? null : tabData[0].id});
+    }
   }
 
   // 关闭tab
-  handleCloseTabClick = (closeTabKey, isForced = false) => {
+  handleCloseTabClick = async (closeTabKey, isForced = false) => {
     const {tabData} = this.state;
     if (isForced) {
-      this.setState({tabData: tabData.filter(item => item.key !== closeTabKey)});
-      return;
-    }
-    const targetTab = tabData.find(tab => tab.key === closeTabKey);
-    if (targetTab.unSaved) {
-      this.reqeustTabConfirmRef.show(targetTab);
+      await this.doCloseTab(closeTabKey)
     } else {
-      this.setState({tabData: tabData.filter(item => item.key !== closeTabKey)});
+      const targetTab = tabData.find(tab => tab.id === closeTabKey);
+      if (targetTab.unSaved) {
+        this.reqeustTabConfirmRef.show(targetTab);
+      } else {
+        await this.doCloseTab(closeTabKey)
+      }
     }
   }
 
@@ -161,7 +223,7 @@ class DraggableTabs extends React.Component {
   // 重复tab
   handleDuplicateTab = (key) => {
     const {tabData} = this.state;
-    const sourceTab = tabData.find(tab => tab.key === key);
+    const sourceTab = tabData.find(tab => tab.id === key);
     let newKey = sourceTab.key + new Date().getTime();
     tabData.push(
       {
@@ -174,7 +236,7 @@ class DraggableTabs extends React.Component {
 
   handleCloseOtherTabs = (key) => {
     const {tabData} = this.state;
-    this.setState({tabData: tabData.filter(tab => tab.key === key), activeTabKey: key})
+    this.setState({tabData: tabData.filter(tab => tab.id === key), activeTabKey: key})
   }
 
   handleCloseAllTabs = (key) => {
@@ -213,19 +275,6 @@ class DraggableTabs extends React.Component {
       event: this.handleCloseAllTabs
     }
   ]
-
-  handleRequestSelected = (msg, data) => {
-    console.log('jiantingdao===');
-    console.log(data);
-
-  }
-  componentDidMount = () => {
-    Pubsub.subscribe(OPEN_NEW_TAB_EVENT, (msg, data) => {
-      this.handleAddTabClick()
-    });
-
-    subscribeRequestSelected(this.handleRequestSelected)
-  }
 
   handleRequestTabItemMenuClick = (menuKey, tabKey) => {
     const menuItem = this.requestItemMenuArr.find(item => item.key === menuKey);
@@ -317,12 +366,12 @@ class DraggableTabs extends React.Component {
                       <Icon 
                         className={item.unSaved ? "close-tab-icon-none" : "close-tab-icon-hide"} 
                         component={() => CLOSE_SVG} 
-                        onClick={() => this.handleCloseTabClick(item.key)} 
+                        onClick={() => this.handleCloseTabClick(item.id)} 
                       />
                     </span>
                   </Space>
                 )} 
-                key={item.key}>
+                key={item.id}>
                 
               </TabPane>
             ))

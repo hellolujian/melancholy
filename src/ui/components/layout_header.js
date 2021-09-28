@@ -16,7 +16,10 @@ import {
 import {SQUARE_PLUS_ICON, ADD_REQUEST_ICON, COLLECTION_ICON, ENVIRONMENT_ICON,
     MOCK_COLLECTION, MONITOR_COLLECTION_ICON, DOCUMENTATION_ICON, OPEN_NEW_ICON
 } from 'ui/constants/icons';
-import {OPEN_NEW_TAB_EVENT} from '@/ui/constants/events'
+import {
+    publishNewTabOpen
+} from '@/utils/event_utils'
+  
 import ImportModal from './import_modal'
 import TooltipButton from './tooltip_button'
 import DropdownTooltip from './dropdown_tooltip'
@@ -27,7 +30,6 @@ import WorkspaceCard from './workspace_card'
 import EnvironmentModal from './environment_modal'
 
 import {IMPORT_TITLE, SYNC_DATA_TITLE, CREATE_NEW, ACCOUNT_TITLE, NOTIFICATIONS_TITLE, SETTINGS_TITLE, RUNNER_TITLE} from '@/ui/constants/titles'
-import Pubsub from 'pubsub-js'
 const { Header,} = Layout;
 
 class LayoutHeader extends React.Component {
@@ -53,7 +55,7 @@ class LayoutHeader extends React.Component {
 
     handleOpenNewBtnClick = ({key}) => {
         if (key === 'tab') {
-            Pubsub.publish(OPEN_NEW_TAB_EVENT)
+            publishNewTabOpen()
         }
     }
 

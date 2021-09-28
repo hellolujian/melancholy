@@ -24,7 +24,6 @@ import {SQUARE_PLUS_ICON, ADD_REQUEST_ICON, ADD_REQUEST_ICON_48, COLLECTION_ICON
     MOCK_COLLECTION, MOCK_COLLECTION_48, MONITOR_COLLECTION_ICON, MONITOR_COLLECTION_ICON_48, DOCUMENTATION_ICON, DOCUMENTATION_ICON_48, CLOSE_SVG,CLOSE_ICON
 } from 'ui/constants/icons';
 import {POSTMAN_DOCS_TIPS} from 'ui/constants/tips'
-import {OPEN_NEW_TAB_EVENT} from '@/ui/constants/events'
 import ImportModal from './import_modal'
 import TooltipButton from './tooltip_button'
 import DropdownTooltip from './dropdown_tooltip'
@@ -37,7 +36,6 @@ import EnvironmentModal from './environment_modal'
 import DocumentationModal from './documentation_modal'
 
 import {IMPORT_TITLE, SYNC_DATA_TITLE, CREATE_NEW, ACCOUNT_TITLE, NOTIFICATIONS_TITLE, SETTINGS_TITLE, RUNNER_TITLE} from '@/ui/constants/titles'
-import Pubsub from 'pubsub-js'
 import {publishCollectionModalOpen, publishRequestModalOpen} from '@/utils/event_utils'
 import 'ui/style/new_button_modal.css'
 const { Header,} = Layout;
@@ -58,13 +56,6 @@ class NewButtonModal extends React.Component {
 
     componentDidMount() {
       
-    }
-
-    // 处理新增tab事件
-    handleOpenNewBtnClick = ({key}) => {
-        if (key === 'tab') {
-            Pubsub.publish(OPEN_NEW_TAB_EVENT)
-        }
     }
 
     // 处理rce弹框显示或隐藏

@@ -77,9 +77,10 @@ class CollectionTree extends React.Component {
     }
 
     handleSelectTreeNode = (selectedKeys, {selected, selectedNodes, node}) => {
+        console.log('handleseletreddnode');
         this.handleExpandKeys(node.key, selected)
         if (node.isLeaf) {
-            publishRequestSelected(node)
+            publishRequestSelected(node.key)
         }
     }
 

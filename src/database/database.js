@@ -15,11 +15,11 @@ const initDatabase = (dbName) => {
     return db[dbName]
 }
 
-export const query = (dbName, query) => {
+export const query = (dbName, param) => {
     const collectionDB = initDatabase(dbName);
 
     return new Promise((resolve, reject) => {
-        collectionDB.find({...query, $not: { deleted: true }}, (err, doc) => {
+        collectionDB.find({...param, $not: { deleted: true }}, (err, doc) => {
             if (err) {
                 console.error(err);
                 reject(err);
@@ -95,4 +95,20 @@ export const count = (dbName, query) => {
         });
       
     }) 
+}
+
+export const remove = (dbName, query, multi = false) => {
+    const collectionDB = initDatabase(dbName);
+
+    return new Promise((resolve, reject) => {
+        collectionDB.remove(query, { multi: multi }, (err, ret) => {
+            if (err) {
+                console.error(err);
+                reject(err);
+            } else {
+                resolve(ret)
+            }
+        });
+      
+    })
 }
