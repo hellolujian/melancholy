@@ -24,7 +24,12 @@ import RequestItem from './request_item'
 import PostmanButton from './postman_button'
 import RequiredInput from './required_input'
 import {stopClickPropagation} from '@/utils/global_utils';
-import {publishRequestModalOpen, subscribeRequestSave, subscribeCollectionSave} from '@/utils/event_utils'
+import {
+    publishRequestModalOpen, 
+    subscribeRequestSave, 
+    subscribeCollectionSave,
+    publishRequestSelected,
+} from '@/utils/event_utils'
 
 import {
     duplicateRequest, 
@@ -34,7 +39,8 @@ import {
     deleteCollection,
     starCollection,
     saveCollection,
-    loadCollection
+    loadCollection,
+    dropNode
 } from '@/utils/database_utils'
 import 'ui/style/resizable.css'
 import 'ui/style/tree.css'
@@ -72,6 +78,9 @@ class CollectionTree extends React.Component {
 
     handleSelectTreeNode = (selectedKeys, {selected, selectedNodes, node}) => {
         this.handleExpandKeys(node.key, selected)
+        if (node.isLeaf) {
+            publishRequestSelected(node)
+        }
     }
 
     handleExpandTreeNode = (selectedKeys, {expanded, node}) => {
@@ -122,12 +131,15 @@ class CollectionTree extends React.Component {
         publishRequestModalOpen();
     }
 
-    getEmptyNode = (id, isFolder) => {
+    getEmptyNode = (item, isFolder) => {
+        const {id, name} = item;
         let text1 = isFolder ? 'folder' : 'collection';
         let text2 = isFolder ? 'subfolders' : 'folders';
         return {
             key: id + "_0",
+            name: `${name}下的空节点`,
             isLeaf: true,
+            isEmptyNode: true,
             className: 'ant-tree-treenode-empty',
             title: (
                 <div className="collection-tree-item-title-empty">
@@ -149,7 +161,7 @@ class CollectionTree extends React.Component {
         return list.map(node => {
             let treeItem = {
                 key: node.id,
-
+                name: node.name,
             }
             if (node.items) {
                 
@@ -166,7 +178,7 @@ class CollectionTree extends React.Component {
                 if (node.items.length > 0) {
                     treeItem.children = this.traverseCollectionItems(node.items);
                 } else {
-                    treeItem.children = [this.getEmptyNode(node.id, true)]
+                    treeItem.children = [this.getEmptyNode(node, true)]
                 }
                 
             } else {
@@ -315,12 +327,46 @@ class CollectionTree extends React.Component {
         this.refreshData()
     }
 
+    handleDragStart = ({event, node}) => {
+        
+    }
+
+    checkDraggable = (node) => {
+        const {collectionData} = this.state;
+        return node.isEmptyNode || collectionData.find(collection => collection.id === node.key) ? false : true;
+    }
+
+    handleDrop = async (info) => {
+        const {dropPosition, node, dragNode, dragNodesKeys, dropToGap} = info;
+
+        console.log('node:');
+        console.log(node);
+        console.log('dragnode:');
+        console.log(dragNode);
+        console.log('dragNodesKeys:');
+        console.log(dragNodesKeys);
+        console.log('info============================');
+        console.log(info);
+        await dropNode(dragNode.key, dragNode.isLeaf, node.key, node.isLeaf, dropPosition, dropToGap) 
+
+        
+        this.refreshData()
+    }
+
+    checkAllowDrop = (dropInfo) =>  {
+        const { dropNode, dropPosition } = dropInfo;
+        console.log('======================dropinfo==================================');
+        console.log(dropInfo);
+        return !dropInfo.isLeaf;
+    }
+
     render() {
 
         const {collectionData, collectionDrawerVisibleItem, expandedKeys, selectedKeys} = this.state;
         let treeData = collectionData.map(item => {
             return {
                 key: item.id,
+                name: item.name,
                 title: (
                     <CollectionItem 
                         item={item} 
@@ -333,8 +379,8 @@ class CollectionTree extends React.Component {
                         onRename={(value) => this.handleCollectionRename(item.id, value)}
                     />
                 ),
-                children: !item.items ? [
-                    this.getEmptyNode(item.id)
+                children: !item.items || item.items.length === 0 ? [
+                    this.getEmptyNode(item)
                 ] : this.traverseCollectionItems(item.items)
             }
         })
@@ -342,21 +388,18 @@ class CollectionTree extends React.Component {
         return (
             <>
                 <Tree 
-                    // autoExpandParent={true} 
-                    // titleRender={}
                     expandedKeys={expandedKeys}
                     // selectedKeys={selectedKeys}
                     treeData={treeData}
                     onSelect={this.handleSelectTreeNode}
-                    draggable
+                    draggable={this.checkDraggable}
                     blockNode
                     onExpand={this.handleExpandTreeNode}
-                    // defaultExpandAll	
                     onDragEnter={this.onDragEnter}
-                    onDrop={this.onDrop}
-                    // loadData={this.handleLoadData}
+                    onDrop={this.handleDrop}
+                    onDragStart={this.handleDragStart}
+                    allowDrop={this.checkAllowDrop}
                 />
-                
             </>
             
         )

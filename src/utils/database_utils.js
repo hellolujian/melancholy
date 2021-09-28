@@ -354,3 +354,105 @@ export const duplicateCollection = async (id) => {
         return await insertCollection(duplicateCollection)
     }
 }
+
+const setTargetDropNode = (rootCollectionInfo, targetParentIdArr, dropNode, isLeaf, targetIsLeaf, position, isGap) => {
+    let targetTarget = getTargetItem(rootCollectionInfo, targetParentIdArr);
+    if (!targetTarget.items) targetTarget.items = []; 
+    let splitIndex = targetTarget.items.findIndex(item => !item.items);
+    let collectionArr = splitIndex < 0 ? targetTarget.items : targetTarget.items.slice(0, splitIndex);
+    let requestArr = splitIndex < 0 ? [] : targetTarget.items.slice(splitIndex);
+    if (!isGap) {
+
+    }
+    if (isLeaf) {
+        let positionAtRequest = isGap ? (position < collectionArr.length ? 0 : position - collectionArr.length) : requestArr.length
+        requestArr = [...requestArr.slice(0, positionAtRequest), dropNode, ...requestArr.slice(positionAtRequest)]
+        // if (splitIndex < 0) {
+        //     targetTarget.items = [...targetTarget.items, dropNode];
+        // } else {
+        //     if (position < splitIndex) {
+        //         targetTarget.items = [...targetTarget.items.slice(0, splitIndex), dropNode, ...targetTarget.items.slice(splitIndex)];
+        //     } else if (position >= targetTarget.items.length) {
+        //         targetTarget.items = [...targetTarget.items, dropNode];  
+        //     } else {
+        //         targetTarget.items = [...targetTarget.items.slice(0, position), dropNode, ...targetTarget.items.slice(position)];
+        //     }
+        // }
+    } else {
+        let positionAtCollection = isGap ? (position > collectionArr ? collectionArr.length : position) : collectionArr.length;
+        collectionArr = [...collectionArr.slice(0, positionAtCollection), dropNode, ...collectionArr.slice(positionAtCollection)]
+        // if (splitIndex === 0) {
+        //     targetTarget.items = [dropNode, ...targetTarget.items];
+        // } else {
+        //     if (position >= splitIndex) {
+        //         targetTarget.items = [...targetTarget.items, dropNode];  
+        //     } else {
+        //         targetTarget.items = [...targetTarget.items.slice(0, position), dropNode, ...targetTarget.items.slice(position)];
+        //     }
+        // }
+    } 
+    targetTarget.items = [...collectionArr, ...requestArr];
+    return targetTarget;
+}
+
+export const dropNode = async (sourceId, sourceIsLeaf, targetId, targetIsLeaf, position, isGap) => {
+ 
+    let targetParentIdArr;
+    if (isGap) {
+        let targetCollection;
+        if (targetIsLeaf) {
+            let targetRequest = await queryRequestMetaById(targetId);
+            if (!targetRequest) return;
+            targetCollection = await queryCollectionMetaById(targetRequest.parentId);
+            if (!targetCollection) return;
+            targetParentIdArr = await getParentIdArr(targetCollection.id);
+        } else {
+            targetCollection = await queryCollectionMetaById(targetId);
+            if (!targetCollection) return;
+            targetParentIdArr = await getParentIdArr(targetCollection.parentId);
+        }
+        
+    } else {
+        if (targetIsLeaf) return;
+        targetParentIdArr = await getParentIdArr(targetId);
+    }
+
+    let sourceParentIdArr;
+    if (sourceIsLeaf) {
+        let requestMetaInfo = await queryRequestMetaById(sourceId);
+        if (!requestMetaInfo) return;
+        sourceParentIdArr = await getParentIdArr(requestMetaInfo.parentId);
+        await updateRequestMeta(sourceId, {$set: {parentId: targetParentIdArr[targetParentIdArr.length - 1]}})
+    } else {
+        let sourceCollection = await queryCollectionMetaById(sourceId);
+        if (!sourceCollection) return;
+        sourceParentIdArr = await getParentIdArr(sourceCollection.parentId);
+        await updateCollectionMeta(sourceId, {$set: {parentId: targetParentIdArr[targetParentIdArr.length - 1]}})
+    }
+
+    let sourceRootCollectionInfo = await queryCollectionById(sourceParentIdArr[0]);
+    let sourceTarget = getTargetItem(sourceRootCollectionInfo, sourceParentIdArr);
+    
+    let dropNode = sourceTarget.items.find(item => item.id === sourceId);
+    sourceTarget.items = sourceTarget.items.filter(item => item.id !== sourceId);
+
+    console.log('=====sourceParentIdArr===================');
+    console.log(sourceParentIdArr);
+    console.log('=================targetaprentaddrr=========');
+    console.log(targetParentIdArr);
+    if (sourceParentIdArr[0] === targetParentIdArr[0]) {
+        setTargetDropNode(sourceRootCollectionInfo, targetParentIdArr, dropNode, sourceIsLeaf, targetIsLeaf, position, isGap)
+        await updateCollection(sourceRootCollectionInfo.id, {$set: {items: sourceRootCollectionInfo.items}})
+        console.log('sourceRootCollectionInfo============')
+        console.log(sourceRootCollectionInfo)
+    } else {
+        let sourceRequestCount = sourceIsLeaf ? 1 : (await getRequestCount(sourceId));
+        let targetRootCollectionInfo = await queryCollectionById(targetParentIdArr[0]);
+        setTargetDropNode(targetRootCollectionInfo, targetParentIdArr, dropNode, sourceIsLeaf, targetIsLeaf, position, isGap);
+        await updateCollection(sourceRootCollectionInfo.id , {$set: {items: sourceRootCollectionInfo.items, requestCount: sourceRootCollectionInfo.requestCount - sourceRequestCount}})
+        await updateCollection(targetRootCollectionInfo.id , {$set: {items: targetRootCollectionInfo.items, requestCount: targetRootCollectionInfo.requestCount + sourceRequestCount}})
+        console.log('targetRootCollectionInfo====================');
+        console.log(targetRootCollectionInfo);
+    }
+
+}

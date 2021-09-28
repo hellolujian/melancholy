@@ -17,7 +17,8 @@ class CollectionSelectCard extends React.Component {
         this.state = {
             creating: false,
             collectionName: '',
-            chooseChain: []
+            chooseChain: [],
+            collectionData: []
         }
     }
 
@@ -32,8 +33,7 @@ class CollectionSelectCard extends React.Component {
         if (defaultValue) {
             chooseChain = await getParentArr(defaultValue.id)
         }
-        this.setState({chooseChain: chooseChain});
-        this.refreshData({chooseChain: chooseChain});
+        await this.refreshData({chooseChain: chooseChain});
     }
 
     onChange(newValue, e) {
@@ -68,10 +68,10 @@ class CollectionSelectCard extends React.Component {
     }
 
     handleListItemClick = (item) => {
-        if (!item.items) {
+        const {chooseChain} = this.state;
+        if (!item.items && chooseChain.length > 0) {
             return;
         }
-        const {chooseChain} = this.state;
         chooseChain.push({id: item.id, name: item.name})
         this.setState({chooseChain: chooseChain});
         this.props.onChange(item);
@@ -87,6 +87,8 @@ class CollectionSelectCard extends React.Component {
     getListData = () => {
         const {collectionData, chooseChain} = this.state;
         let listData = collectionData;
+        console.log('listdata');
+        console.log(listData);
         for (let i = 0; i < chooseChain.length; i++) {
             let chooseOne = chooseChain[i];
             listData = listData.find(o => o.id === chooseOne.id).items;
@@ -118,7 +120,7 @@ class CollectionSelectCard extends React.Component {
                     <Button 
                         type="link" 
                         onClick={this.handleCreateBtnClick}>
-                        + Create Folder
+                        + Create {chooseChain.length > 0 ? 'Folder' : 'Collection'}
                     </Button>
                 ]}
             >
@@ -147,7 +149,7 @@ class CollectionSelectCard extends React.Component {
                     renderItem={item => (
                         <List.Item 
                             key={item.id}
-                            className={`collection-select-card-item ${item.items ? 'collection-select-card-collection-item' : 'collection-select-card-request-item'}`}
+                            className={`collection-select-card-item ${chooseChain.length > 0 && !item.items ? 'collection-select-card-request-item' : 'collection-select-card-collection-item'}`}
                             actions={[
                                 <CaretRightOutlined className="collection-select-card-item-right" />
                             ]}
@@ -155,7 +157,7 @@ class CollectionSelectCard extends React.Component {
         
                             <div className="vertical-center">
                                 {
-                                    item.items ? COLLECTION_ICON_20 : (
+                                    chooseChain.length === 0 || item.items ? COLLECTION_ICON_20 : (
                                         item.method === 'POST' ? POST_REQUEST_ICON : GET_REQUEST_ICON
                                     )
                                 }

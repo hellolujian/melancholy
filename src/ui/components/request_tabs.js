@@ -12,6 +12,10 @@ import RequestTabConfirm from './request_tab_confirm';
 import { UNSAVED_DOT_ICON, POST_REQUEST_ICON, GET_REQUEST_ICON, CLOSE_SVG, UNSAVED_DOT_SVG } from 'ui/constants/icons'
 import Pubsub from 'pubsub-js'
 import {OPEN_NEW_TAB_EVENT} from '@/ui/constants/events'
+import {
+  subscribeRequestSelected
+} from '@/utils/event_utils'
+
 import 'ui/style/request_tabs.css'
 
 const { TabPane } = Tabs;
@@ -62,31 +66,31 @@ class DraggableTabs extends React.Component {
     super(props);
     this.state = {
       tabData: [
-        {
-          id: '111',
-          name: '增加接口',
-          method: 'POST',
-          key: '111',
-        },
-        {
-          id: '112',
-          name: '删除接口',
-          method: 'POST',
-          unSaved: true,
-          key: '112',
-        },
-        {
-          id: '113',
-          name: '修改接口',
-          method: 'POST',
-          key: '113',
-        },
-        {
-          id: '114',
-          name: '查询接口',
-          method: 'GET',
-          key: '114'
-        },
+        // {
+        //   id: '111',
+        //   name: '增加接口',
+        //   method: 'POST',
+        //   key: '111',
+        // },
+        // {
+        //   id: '112',
+        //   name: '删除接口',
+        //   method: 'POST',
+        //   unSaved: true,
+        //   key: '112',
+        // },
+        // {
+        //   id: '113',
+        //   name: '修改接口',
+        //   method: 'POST',
+        //   key: '113',
+        // },
+        // {
+        //   id: '114',
+        //   name: '查询接口',
+        //   method: 'GET',
+        //   key: '114'
+        // },
       ],
       activeTabKey: '111'
     };
@@ -210,10 +214,17 @@ class DraggableTabs extends React.Component {
     }
   ]
 
+  handleRequestSelected = (msg, data) => {
+    console.log('jiantingdao===');
+    console.log(data);
+
+  }
   componentDidMount = () => {
     Pubsub.subscribe(OPEN_NEW_TAB_EVENT, (msg, data) => {
       this.handleAddTabClick()
-    })
+    });
+
+    subscribeRequestSelected(this.handleRequestSelected)
   }
 
   handleRequestTabItemMenuClick = (menuKey, tabKey) => {

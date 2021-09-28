@@ -28,11 +28,12 @@ export const subscribeCollectionSave = (handle) => {
     subscribe(COLLECTION_MODAL_EVENT_SAVE, handle);
 }
 
-
+/**
+ * ======================================保存请求==========================================
+ */
 const REQUEST_MODAL_EVENT = 'request_modal_event';
 const REQUEST_MODAL_EVENT_OPEN = `${REQUEST_MODAL_EVENT}.open`
 const REQUEST_MODAL_EVENT_SAVE = `${REQUEST_MODAL_EVENT}.save`
-
 
 export const publishRequestModalOpen = (data) => {
     publish(REQUEST_MODAL_EVENT_OPEN, data)
@@ -50,3 +51,17 @@ export const publishRequestSave = (data) => {
 export const subscribeRequestSave = (handle) => {
     subscribe(REQUEST_MODAL_EVENT_SAVE, handle);
 }
+
+/**
+ * ======================================选中请求==========================================
+ */
+ const REQUEST_SELECTED_EVENT = 'request_selected_event';
+ 
+ export const publishRequestSelected = (data) => {
+     publish(REQUEST_SELECTED_EVENT, data)
+ }
+ 
+ export const subscribeRequestSelected = (handle) => {
+     subscribe(REQUEST_SELECTED_EVENT, handle);
+ }
+ 
