@@ -30,19 +30,27 @@ class RequestIntro extends React.Component {
       
     }
 
+    handleNameChange = (e) => {
+      this.props.onChange({name: e.target.value})
+    }
+
     render() {
      
-      const {showEditInput} = this.state;
+      const {} = this.state;
+      const {value} = this.props;
+      let {name, description} = value;
+      console.log('name: %s, description: %s', name, description);
       let header = (
       
         <RequiredInput 
-        // onBlur={this.saveCollectionName}
-        // onPressEnter={this.saveCollectionName}
-        size="small"
-        editIcon={{className: "request-intro-edit-icon"}}
-        defaultValue="hello"
-        // onClick={stopClickPropagation} 
-    />
+            // onBlur={this.saveCollectionName}
+            value={name}
+            onPressEnter={this.saveCollectionName}
+            size="small"
+            editIcon={{className: "request-intro-edit-icon"}}
+            // onClick={stopClickPropagation} 
+            onValueChange={this.handleNameChange}
+        />
                                         
        
         
@@ -69,6 +77,10 @@ class RequestIntro extends React.Component {
 }
 
 export default RequestIntro;
+
+RequestIntro.defaultProps = {
+  onChange: () => {},
+}
 
 
 

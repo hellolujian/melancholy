@@ -9,7 +9,7 @@ class RequiredInput extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            inputValue: props.defaultValue,
+            value: props.defaultValue,
             editing: props.editing,
         }
     }
@@ -27,8 +27,8 @@ class RequiredInput extends React.Component {
     }
 
     handleInputChange = (e) => {
-        this.setState({inputValue: e.target.value, showRed: true});
-        this.props.onChange(e);
+        this.setState({value: e.target.value, showRed: true});
+        this.props.onValueChange(e);
     }
 
     handleEditIconClick = (e) => {
@@ -36,10 +36,11 @@ class RequiredInput extends React.Component {
         stopClickPropagation(e)
     }
 
-    saveCollectionName = () => {
-        const {inputValue} = this.state;
-        if (inputValue && inputValue.trim()) {
+    handleSave = () => {
+        const {value} = this.state;
+        if (value && value.trim()) {
             this.setState({editing: false});
+            this.props.onSave(value)
         }
         
     }
@@ -47,34 +48,30 @@ class RequiredInput extends React.Component {
     handleInputClick = (e) => {
         stopClickPropagation(e);
     }
+
     render() {
      
-        const {title, color = 'gray', label, type, editable = {}, editIcon = {}, editWhenHover} = this.props;
+        const {editIcon = {}, editWhenHover, defaultValue} = this.props;
         
-        let inputProps = {...this.props};
-        delete inputProps.divProps;
-        delete inputProps.onChange;
-        delete inputProps.editIcon;
-        const {inputValue, editing, showRed} = this.state;
+        const {value, editing, showRed} = this.state;
+        let inputValue = this.props.hasOwnProperty('value') ? this.props.value : value;
         let borderColor = !(inputValue && inputValue.trim()) && showRed ? 'red' : 'gray';
         return (
             <>
-            
                 {            
                     editing ? (
                         <div style={{border: '1px solid ' + borderColor, display: 'inline-block'}}>
                             <Input
-                            
                                 size="small"
                                 bordered={false}
                                 onChange={this.handleInputChange}
                                 autoFocus
+                                defaultValue={defaultValue}
                                 value={inputValue}
                                 style={{padding: 0}}
-                                onBlur={this.saveCollectionName}
-                                onPressEnter={this.saveCollectionName}
+                                onBlur={this.handleSave}
+                                onPressEnter={this.handleSave}
                                 onClick={this.handleInputClick}
-                                {...inputProps}
                             />
                             
                         </div>
@@ -95,7 +92,8 @@ class RequiredInput extends React.Component {
 
 export default RequiredInput;
 RequiredInput.defaultProps = {
-    onChange: () => {},
+    onValueChange: () => {},
+    onSave: () => {},
 }
 
 

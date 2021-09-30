@@ -6,7 +6,7 @@ import { ExclamationCircleOutlined , CaretRightOutlined, PlusOutlined, CaretDown
 import Icon from '@ant-design/icons';
 import { DndProvider, DragSource, DropTarget } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-
+import RequestTabContent from './request_tab_content'
 import EnvironmentSetting from './environment_setting';
 import RequestTabConfirm from './request_tab_confirm';
 import { UNSAVED_DOT_ICON, POST_REQUEST_ICON, GET_REQUEST_ICON, CLOSE_SVG, UNSAVED_DOT_SVG } from 'ui/constants/icons'
@@ -87,6 +87,23 @@ class DraggableTabs extends React.Component {
     }
     this.reqeustTabConfirmRef = ref;
   }
+  
+  handleActiveTab = async (activeTab, refInfo) => {
+    if (!activeTab) {
+      this.setState({activeTab: null, requestInfo: null})
+      return;
+    }
+    const {refId, type, id, draft = {}} = activeTab;
+    let updateObj = {activeTabKey: id};
+    switch (type) {
+      case TabType.REQUEST.name(): 
+        let requestMetaInfo = refInfo ? refInfo : await queryRequestMetaById(refId)
+        updateObj.requestInfo = {...requestMetaInfo, ...draft};
+        break;
+      default: break;
+    }
+    this.setState(updateObj);
+  }
 
   // 刷新数据
   refreshData = async (obj = {}) => {
@@ -114,7 +131,8 @@ class DraggableTabs extends React.Component {
       id: UUID(),
     }
     await insertTabMeta(newTab);
-    this.refreshData({activeTabKey: newTab.id})
+    await this.refreshData({activeTabKey: newTab.id})
+    await this.handleActiveTab(newTab);
   }
 
   // 添加默认tab(request tab)
@@ -124,24 +142,19 @@ class DraggableTabs extends React.Component {
       name: 'Untitled Request',
       method: 'get',
     }
-    await insertRequestMeta(newRequest)
+    await insertRequestMeta(newRequest);
     await this.addTabMeta({name: newRequest.name, refId: newRequest.id})
   }
 
-  // 新增tab
-  handleAddTabClick = async () => {
-    await this.addRequestTab();
-  }
-  
   // 点击tab变更
-  handleRequestTabChange = (activeTabKey) => {
-    this.setState({activeTabKey: activeTabKey})
+  handleTabChange = async (activeTabKey) => {
+    const {tabData} = this.state;
+    let targetTab = tabData.find(item => item.id === activeTabKey);
+    await this.handleActiveTab(targetTab);
   }
 
   // 选中request事件
   handleRequestSelected = async (msg, requestId) => {
-    console.log('jiantingdao===');
-    console.log(requestId);
     let requestMetaInfo = await queryRequestMetaById(requestId);
     if (!requestMetaInfo) {
       return;
@@ -149,7 +162,7 @@ class DraggableTabs extends React.Component {
     const {tabData} = this.state;
     let selectedTab = tabData.find(item => item.refId === requestId);
     if (selectedTab) {
-      this.handleRequestTabChange(selectedTab.id)
+      await this.handleActiveTab(selectedTab, requestMetaInfo)
     } else {
       const {name, method = 'get'} = requestMetaInfo;
       await this.addTabMeta({name: name, icon: method, refId: requestId});
@@ -159,12 +172,19 @@ class DraggableTabs extends React.Component {
   handleRequestSave = async (msg, data) => {
     const {id, name} = data;
     await multiUpdateTabMeta({refId: id, type: TabType.REQUEST.name()}, {$set: {name: name}})
-    this.refreshData()
+    this.refreshData();
+    const {requestInfo} = this.state;
+    if (requestInfo && requestInfo.id === id) {
+      this.setState({requestInfo: {...requestInfo, ...data}})
+    }
   }
 
   componentDidMount = async () => {
-    this.refreshData();
-    subscribeNewTabOpen(this.handleAddTabClick)
+    let tabData = await this.refreshData();
+    if (tabData.length > 0) {
+      await this.handleActiveTab(tabData[0])
+    }
+    subscribeNewTabOpen(this.addRequestTab)
     subscribeRequestSelected(this.handleRequestSelected)
     subscribeRequestSave(this.handleRequestSave)
   }
@@ -179,7 +199,7 @@ class DraggableTabs extends React.Component {
     const {activeTabKey} = this.state;
     let tabData = await this.refreshData();
     if (activeTabKey === id) {
-      this.setState({activeTabKey: tabData.length === 0 ? null : tabData[0].id});
+      await this.handleActiveTab(tabData.length === 0 ? null : tabData[0])
     }
   }
 
@@ -221,9 +241,9 @@ class DraggableTabs extends React.Component {
       if (currentAllClosedTabs.length >= 10) {
         await multiRemove({id: {$in: currentAllClosedTabs.slice(10).map(item => item.id)}})
       }
-      this.setState({tabData: [], activeTabKey: null});
+      this.setState({tabData: []});
+      await this.handleActiveTab(null);
     } else {
-      console.log('=====');
       this.reqeustTabConfirmRef.show(tabData);
     }
   }
@@ -360,92 +380,106 @@ class DraggableTabs extends React.Component {
     }
   }
 
+  handleRequestTabContentChange = (value) => {
+    const {requestInfo} = this.state;
+    this.setState({requestInfo: {...requestInfo, ...value}});
+  }
+
   render() {
-    const { tabData, activeTabKey, recentClosedTabs = [] } = this.state;
+    const { tabData, activeTabKey, recentClosedTabs = [], requestInfo } = this.state;
     return (
       <>
-      <RequestTabConfirm 
-        ref={this.reqeustTabConfirmRef} 
-        onSave={this.handleSave}
-        onNotSave={this.handleNotSave}
-        onCancel={this.handleCancel}
-      />
-     
-      <DndProvider backend={HTML5Backend}>
-        <Tabs 
-          activeKey={activeTabKey}
-          className="request-tabs-class"
-          type="editable-card" 
-          addIcon={(
-            <Dropdown.Button 
-              overlay={(
-                <Menu onClick={({key, keyPath}) => this.handleMenuClick(key, keyPath)}>
-                  <Menu.SubMenu key="recently_closed" title="Recently Closed">
+        <RequestTabConfirm 
+          ref={this.reqeustTabConfirmRef} 
+          onSave={this.handleSave}
+          onNotSave={this.handleNotSave}
+          onCancel={this.handleCancel}
+        />
+      
+        <DndProvider backend={HTML5Backend}>
+          <Tabs 
+            activeKey={activeTabKey}
+            className="request-tabs-class"
+            type="editable-card" 
+            addIcon={(
+              <Dropdown.Button 
+                overlay={(
+                  <Menu onClick={({key, keyPath}) => this.handleMenuClick(key, keyPath)}>
+                    <Menu.SubMenu key="recently_closed" title="Recently Closed">
+                      {
+                        recentClosedTabs.map(item => (
+                          <Menu.Item key={item.id}>
+                            <Space>
+                              <span className="vertical-center">
+                                {getIconByCode(item.icon)}
+                              </span>
+                              <span>
+                                {item.name}
+                              </span>
+                            </Space>
+                          </Menu.Item>
+                        ))
+                      }
+                    </Menu.SubMenu>
                     {
-                      recentClosedTabs.map(item => (
-                        <Menu.Item key={item.id}>
-                          <Space>
-                            <span className="vertical-center">
-                              {getIconByCode(item.icon)}
-                            </span>
-                            <span>
-                              {item.name}
-                            </span>
-                          </Space>
-                        </Menu.Item>
+                      this.moreActionMenu.map(item => (
+                        <Menu.Item disabled={tabData.length === 0} key={item.key}>{item.label}</Menu.Item>
                       ))
                     }
-                  </Menu.SubMenu>
-                  {
-                    this.moreActionMenu.map(item => (
-                      <Menu.Item disabled={tabData.length === 0} key={item.key}>{item.label}</Menu.Item>
-                    ))
-                  }
-                </Menu>
-              )} 
-              onClick={this.handleAddTabClick}
-              className="request-tabs-add">
-              <PlusOutlined />
-            </Dropdown.Button>
-          )}
-          onChange={this.handleRequestTabChange}
-          renderTabBar={this.renderTabBar} 
-          tabBarExtraContent={{
-            right: <EnvironmentSetting />,
-          }} 
-          >
-          {
-            tabData.map((item, index) => (
-              <TabPane
-                closeIcon={<></>} 
-                tab={(
-                  <Space>
-                    <span className="vertical-center">
-                      {getIconByCode(item.icon)}
-                    </span>
-                    <span>{item.name}</span>
-                    <span className="vertical-center request-tab-right-icon">
-                      {
-                        item.unSaved && (
-                          <Icon className="unsaved-dot-icon" component={() => UNSAVED_DOT_SVG} />
-                        )
-                      }
-                      <Icon 
-                        className={item.unSaved ? "close-tab-icon-none" : "close-tab-icon-hide"} 
-                        component={() => CLOSE_SVG} 
-                        onClick={() => this.handleCloseTabClick(item.id)} 
-                      />
-                    </span>
-                  </Space>
+                  </Menu>
                 )} 
-                key={item.id}>
-                
-              </TabPane>
-            ))
+                onClick={this.addRequestTab}
+                className="request-tabs-add">
+                <PlusOutlined />
+              </Dropdown.Button>
+            )}
+            onChange={this.handleTabChange}
+            renderTabBar={this.renderTabBar} 
+            tabBarExtraContent={{
+              right: <EnvironmentSetting />,
+            }} 
+            >
+            {
+              tabData.map((item, index) => (
+                <TabPane
+                  closeIcon={<></>} 
+                  tab={(
+                    <Space>
+                      <span className="vertical-center">
+                        {getIconByCode(item.icon)}
+                      </span>
+                      <span>{item.name}</span>
+                      <span className="vertical-center request-tab-right-icon">
+                        {
+                          item.unSaved && (
+                            <Icon className="unsaved-dot-icon" component={() => UNSAVED_DOT_SVG} />
+                          )
+                        }
+                        <Icon 
+                          className={item.unSaved ? "close-tab-icon-none" : "close-tab-icon-hide"} 
+                          component={() => CLOSE_SVG} 
+                          onClick={() => this.handleCloseTabClick(item.id)} 
+                        />
+                      </span>
+                    </Space>
+                  )} 
+                  key={item.id}>
+                  
+                </TabPane>
+              ))
+          
+            }
+          </Tabs>
+        </DndProvider>
+        {
+          requestInfo && (
+            <RequestTabContent 
+              value={requestInfo} 
+              onChange={() => this.handleRequestTabContentChange}
+            />
+          )
+        }
         
-          }
-        </Tabs>
-      </DndProvider>
       </>
     );
   }

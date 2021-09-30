@@ -7,10 +7,7 @@ import {
 import { PlusOutlined, SearchOutlined,} from '@ant-design/icons';
 import CollectionModal from 'ui/components/collection_modal'
 import TooltipButton from 'ui/components/tooltip_button';
-import RequestIntroCollapse from 'ui/components/request_intro_collapse'
-import RequestSendBar from 'ui/components/request_send_bar'
 import RequestTabs from 'ui/components/request_tabs'
-import RequestSendSetting from 'ui/components/request_send_setting'
 import LayoutHeader from 'ui/components/layout_header'
 import CollectionTree from 'ui/components/collection_tree'
 import ResponseTab from 'ui/components/response_tab'
@@ -58,7 +55,6 @@ class Home extends React.Component {
     }
 
     render() {
-     
         return (
             <Layout>
               <LayoutHeader />
@@ -112,9 +108,6 @@ class Home extends React.Component {
                 </Resizable>
 
                 <Layout className="site-drawer-render-in-current-wrapper">
-
-                
-                 
                   <Content
                     className="site-layout-background"
                     style={{
@@ -123,13 +116,7 @@ class Home extends React.Component {
                     }}
                   >
                     <RequestTabs />
-                     
-                   
-
-                    <RequestIntroCollapse />
-
-                    <RequestSendBar />
-                    <RequestSendSetting />
+                    
                     <ResponseTab />
                   </Content>
                 </Layout>
