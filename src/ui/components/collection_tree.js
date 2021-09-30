@@ -29,6 +29,7 @@ import {
     subscribeRequestSave, 
     subscribeCollectionSave,
     publishRequestSelected,
+    publishRequestSave,
 } from '@/utils/event_utils'
 
 import {
@@ -77,7 +78,6 @@ class CollectionTree extends React.Component {
     }
 
     handleSelectTreeNode = (selectedKeys, {selected, selectedNodes, node}) => {
-        console.log('handleseletreddnode');
         this.handleExpandKeys(node.key, selected)
         if (node.isLeaf) {
             publishRequestSelected(node.key)
@@ -102,30 +102,6 @@ class CollectionTree extends React.Component {
       
           return node;
         });
-    }
-
-    handleLoadData = ({key, children}) => {
-       
-        return new Promise((resolve) => {
-            if (children) {
-              resolve();
-              return;
-            }
-      
-            setTimeout(() => {
-              this.updateTreeData(origin, key, [
-                {
-                  title: 'Child Node',
-                  key: `${key}-0`,
-                },
-                {
-                  title: 'Child Node',
-                  key: `${key}-1`,
-                },
-              ]);
-              resolve();
-            }, 1000);
-          });
     }
   
     handleOpenRequestModal = () => {
@@ -153,8 +129,9 @@ class CollectionTree extends React.Component {
     }
 
     handleRequestRename = async (id, name) => {
-        await saveRequest({id: id, name: name});
-        this.refreshData()
+        let saveObj = {id: id, name: name};
+        await saveRequest(saveObj);
+        publishRequestSave(saveObj);
     }
 
     // 递归遍历collection下的folder

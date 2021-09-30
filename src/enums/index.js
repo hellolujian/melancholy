@@ -2,7 +2,7 @@ import { DEL_REQUEST_ICON, BOOTCAMP_ICON, EXAMPLE_ICON, POST_REQUEST_ICON, GET_R
 
 const Enum = require('node-enumjs');
 
-export const TabType= Enum.define("TabType", ["request", "example", "bootcamp"])
+export const TabType= Enum.define("TabType", ["REQUEST", "EXAMPLE", "BOOTCAMP"])
 
 export const TabIconType = Enum.define("TabIconType", {
     constants: {

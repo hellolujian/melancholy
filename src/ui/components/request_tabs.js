@@ -11,11 +11,20 @@ import EnvironmentSetting from './environment_setting';
 import RequestTabConfirm from './request_tab_confirm';
 import { UNSAVED_DOT_ICON, POST_REQUEST_ICON, GET_REQUEST_ICON, CLOSE_SVG, UNSAVED_DOT_SVG } from 'ui/constants/icons'
 
-import {insertTabMeta, multiRemove, removeTabMetaById, queryTabMeta} from '@/database/tab_meta'
+import {
+  insertTabMeta, 
+  multiRemove, 
+  removeTabMetaById, 
+  queryTabMeta, 
+  queryTabMetaById,
+  updateTabMeta, 
+  querySortedTab, 
+  multiUpdateTabMeta} from '@/database/tab_meta'
 import {queryRequestMetaById, insertRequestMeta} from '@/database/request_meta'
 import {
   subscribeRequestSelected,
-  subscribeNewTabOpen
+  subscribeNewTabOpen,
+  subscribeRequestSave
 } from '@/utils/event_utils'
 import {TabIconType, TabType, getIconByCode} from '@/enums'
 import {UUID} from '@/utils/global_utils'
@@ -68,116 +77,107 @@ class DraggableTabs extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      tabData: [
-        // {
-        //   id: '111',
-        //   name: '增加接口',
-        //   method: 'POST',
-        //   key: '111',
-        // },
-        // {
-        //   id: '112',
-        //   name: '删除接口',
-        //   method: 'POST',
-        //   unSaved: true,
-        //   key: '112',
-        // },
-        // {
-        //   id: '113',
-        //   name: '修改接口',
-        //   method: 'POST',
-        //   key: '113',
-        // },
-        // {
-        //   id: '114',
-        //   name: '查询接口',
-        //   method: 'GET',
-        //   key: '114'
-        // },
-      ],
-      activeTabKey: '111'
+      tabData: [],
     };
   }
 
-  // 移动tab
-  moveTabNode = (dragKey, hoverKey) => {
-    const {tabData} = this.state;
-    const dragIndex = tabData.findIndex(item => item.id === dragKey);
-    const hoverIndex = tabData.findIndex(item => item.id === hoverKey);
-    const dragNode = tabData[dragIndex];
-    tabData[dragIndex] = tabData[hoverIndex];
-    tabData[hoverIndex] = dragNode;
-    this.setState({
-      tabData: tabData,
-    });
-  };
-
-  refreshData = async (obj = {}) => {
-    let tabData = await queryTabMeta();
-    this.setState({tabData: tabData, ...obj});
-    return tabData;
+  reqeustTabConfirmRef = (ref) => {
+    if (!ref) {
+      return
+    }
+    this.reqeustTabConfirmRef = ref;
   }
 
-  // 新增tab
-  handleAddTabClick = async () => {
+  // 刷新数据
+  refreshData = async (obj = {}) => {
+    let allTabData = await queryTabMeta();
+    let showTabData = allTabData.filter(item => item.closedAt === 0).sort((a, b) => {
+      if (a.sequence === b.sequence) {
+        return a.createdAt <= b.createdAt ? -1 : 1;
+      }
+      return a.sequence - b.sequence;
+    });
+    let closedTabs = allTabData.filter(item => item.closedAt > 0).sort((a, b) => a.closedAt > b.closedAt ? -1 : 1);
+    this.setState({tabData: showTabData, recentClosedTabs: closedTabs, ...obj});
+    return showTabData;
+  }
+
+  // 添加tab元数据记录
+  addTabMeta = async (obj = {}) => {
+    let newTab = {
+      icon: TabIconType.GET.code,
+      type: TabType.REQUEST.name(),
+      unSaved: true,
+      closedAt: 0,
+      sequence: new Date().getTime(),
+      ...obj,
+      id: UUID(),
+    }
+    await insertTabMeta(newTab);
+    this.refreshData({activeTabKey: newTab.id})
+  }
+
+  // 添加默认tab(request tab)
+  addRequestTab = async () => {
     let newRequest = {
       id: UUID(),
       name: 'Untitled Request',
       method: 'get',
     }
     await insertRequestMeta(newRequest)
-    let newTab = {
-      id: UUID(),
-      name: newRequest.name,
-      icon: TabIconType.GET.code,
-      type: TabType.request.name(),
-      refId: newRequest.id
-    }
-    await insertTabMeta(newTab);
-    this.refreshData({activeTabKey: newTab.id})
+    await this.addTabMeta({name: newRequest.name, refId: newRequest.id})
   }
 
-  handleRequestSelected = async (msg, data) => {
+  // 新增tab
+  handleAddTabClick = async () => {
+    await this.addRequestTab();
+  }
+  
+  // 点击tab变更
+  handleRequestTabChange = (activeTabKey) => {
+    this.setState({activeTabKey: activeTabKey})
+  }
+
+  // 选中request事件
+  handleRequestSelected = async (msg, requestId) => {
     console.log('jiantingdao===');
-    console.log(data);
-    let requestMetaInfo = await queryRequestMetaById(data);
+    console.log(requestId);
+    let requestMetaInfo = await queryRequestMetaById(requestId);
     if (!requestMetaInfo) {
       return;
     }
-    const {id: requestId, name, method = 'get'} = requestMetaInfo;
     const {tabData} = this.state;
     let selectedTab = tabData.find(item => item.refId === requestId);
     if (selectedTab) {
-      this.setState({activeTabKey: selectedTab.id})
+      this.handleRequestTabChange(selectedTab.id)
     } else {
-      let newTab = {
-        id: UUID(),
-        type: TabType.request.name(),
-        name: name,
-        icon: method,
-        refId: requestId, 
-      };
-      await insertTabMeta(newTab);
-      this.refreshData({activeTabKey: newTab.id})
+      const {name, method = 'get'} = requestMetaInfo;
+      await this.addTabMeta({name: name, icon: method, refId: requestId});
     }
-    
+  }
 
-
+  handleRequestSave = async (msg, data) => {
+    const {id, name} = data;
+    await multiUpdateTabMeta({refId: id, type: TabType.REQUEST.name()}, {$set: {name: name}})
+    this.refreshData()
   }
 
   componentDidMount = async () => {
-
-    let tabData = await queryTabMeta();
-    this.setState({tabData: tabData});
-    
+    this.refreshData();
     subscribeNewTabOpen(this.handleAddTabClick)
     subscribeRequestSelected(this.handleRequestSelected)
+    subscribeRequestSave(this.handleRequestSave)
   }
 
+  // 执行关闭
   doCloseTab = async (id) => {
-    await removeTabMetaById(id);
-    let tabData = await this.refreshData();
+    let closedTabs = await querySortedTab({closedAt: {$gt: 0}}, {closedAt: -1});
+    if (closedTabs.length >= 10) {
+      await removeTabMetaById(closedTabs[9].id);
+    }
+    await updateTabMeta(id, {$set: {closedAt: new Date().getTime()}})
     const {activeTabKey} = this.state;
+    let tabData = await this.refreshData();
     if (activeTabKey === id) {
       this.setState({activeTabKey: tabData.length === 0 ? null : tabData[0].id});
     }
@@ -191,56 +191,49 @@ class DraggableTabs extends React.Component {
     } else {
       const targetTab = tabData.find(tab => tab.id === closeTabKey);
       if (targetTab.unSaved) {
-        this.reqeustTabConfirmRef.show(targetTab);
+        this.reqeustTabConfirmRef.show([targetTab]);
       } else {
         await this.doCloseTab(closeTabKey)
       }
     }
   }
 
-  // 点击tab变更
-  handleRequestTabChange = (activeTabKey) => {
-    this.setState({activeTabKey: activeTabKey})
-  }
-
-  menu = (
-    <Menu onClick={this.handleMenuClick}>
-      <Menu.SubMenu key="sub1" title="Recently Closed">
-      <Menu.Item key="1">Option 1</Menu.Item>
-          <Menu.Item key="2">Option 2</Menu.Item>
-          <Menu.Item key="3">Option 3</Menu.Item>
-          <Menu.Item key="4">Option 4</Menu.Item>
-      </Menu.SubMenu>
-      <Menu.Item key="11">Duplicate Current Tab</Menu.Item>
-      <Menu.Item key="12">Close Current Tab</Menu.Item>
-      <Menu.Item key="13">Force Close Current Tab</Menu.Item>
-      <Menu.Item key="111">Close All but Current Tab</Menu.Item>
-      <Menu.Item key="112">Close All Tabs</Menu.Item>
-      <Menu.Item key="113">Force Close All Tabs</Menu.Item>
-    </Menu>
-  )
-
   // 重复tab
   handleDuplicateTab = (key) => {
     const {tabData} = this.state;
     const sourceTab = tabData.find(tab => tab.id === key);
-    let newKey = sourceTab.key + new Date().getTime();
-    tabData.push(
-      {
-        ...sourceTab,
-        key: newKey,
-      }
-    )
-    this.setState({tabData: tabData, activeTabKey: newKey})
+    const {icon, type, name} = sourceTab;
+    this.addTabMeta({icon: icon, type: type, name: name})
   }
 
+  // 关闭其他
   handleCloseOtherTabs = (key) => {
     const {tabData} = this.state;
-    this.setState({tabData: tabData.filter(tab => tab.id === key), activeTabKey: key})
+    this.reqeustTabConfirmRef.show(tabData.filter(tab => tab.id !== key));
   }
 
-  handleCloseAllTabs = (key) => {
-    this.setState({tabData: [], activeTabKey: null})
+  // 关闭所有
+  handleCloseAllTabs = async (isForced = false) => {
+    const {tabData} = this.state;
+    if (isForced) {
+      await multiUpdateTabMeta({closedAt: 0}, {$set: {closedAt: new Date().getTime()}});
+      let currentAllClosedTabs = await querySortedTab({}, {closedAt: -1});
+      if (currentAllClosedTabs.length >= 10) {
+        await multiRemove({id: {$in: currentAllClosedTabs.slice(10).map(item => item.id)}})
+      }
+      this.setState({tabData: [], activeTabKey: null});
+    } else {
+      console.log('=====');
+      this.reqeustTabConfirmRef.show(tabData);
+    }
+  }
+
+  handleSave = async (tabInfo) => {
+    await this.doCloseTab(tabInfo.id)
+  }
+
+  handleNotSave = async (tabInfo) => {
+    await this.doCloseTab(tabInfo.id)
   }
 
   requestItemMenuArr = [
@@ -267,12 +260,12 @@ class DraggableTabs extends React.Component {
     {
       key: 'close_all_tabs',
       label: 'Close All Tabs',
-      event: this.handleCloseAllTabs
+      event: () => this.handleCloseAllTabs(false)
     },
     {
       key: 'force_close_all_tabs',
       label: 'Force Close All Tabs',
-      event: this.handleCloseAllTabs
+      event: () => this.handleCloseAllTabs(true)
     }
   ]
 
@@ -280,9 +273,18 @@ class DraggableTabs extends React.Component {
     const menuItem = this.requestItemMenuArr.find(item => item.key === menuKey);
     menuItem.event(tabKey)
   }
-
+  
+  // 移动tab
+  moveTabNode = async (dragKey, hoverKey) => {
+    const {tabData} = this.state;
+    const hoverNode = tabData.find(item => item.id === hoverKey);
+    // 这里简单处理成被拖拽的那个tab的sequence-1小于原来的就行了
+    await updateTabMeta(dragKey, {$set: {sequence: hoverNode.sequence - 1}})
+    this.refreshData()
+  };
+  
   renderTabBar = (props, DefaultTabBar) => (
-      <DefaultTabBar {...props} >
+    <DefaultTabBar {...props} >
       {
         node => {
             return (
@@ -311,20 +313,63 @@ class DraggableTabs extends React.Component {
     </DefaultTabBar>
   )
 
-  reqeustTabConfirmRef = (ref) => {
-    if (!ref) {
-      return
+  moreActionMenu = [
+    {
+      key: 'duplicate_tab',
+      label: 'Duplicate Current Tab',
+      event: this.handleDuplicateTab
+    },
+    {
+      key: 'close',
+      label: 'Close Current Tab',
+      event: this.handleCloseTabClick
+    },
+    {
+      key: 'force_close',
+      label: 'Force Close Current Tab',
+      event: (tabKey) => this.handleCloseTabClick(tabKey, true)
+    },
+    {
+      key: 'close_other_tabs',
+      label: 'Close All but Current Tab',
+      event: this.handleCloseOtherTabs
+    },
+    {
+      key: 'close_all_tabs',
+      label: 'Close All Tabs',
+      event: () => this.handleCloseAllTabs()
+    },
+    {
+      key: 'force_close_all_tabs',
+      label: 'Force Close All Tabs',
+      event: () => this.handleCloseAllTabs(true)
     }
-    this.reqeustTabConfirmRef = ref;
+  ]
+  
+  handleMenuClick = async (key, keyPath) => {
+    let firstKey = keyPath[0];
+    if (firstKey === 'recently_closed') {
+      let closedTabKey = keyPath[1];
+      await updateTabMeta(closedTabKey, {$set: {closedAt: 0}});
+      this.refreshData();
+    } else {
+      const menuItem = this.moreActionMenu.find(item => item.key === key);
+      if (menuItem.event) {
+        menuItem.event(this.state.activeTabKey)
+      } 
+    }
   }
 
   render() {
-    const { tabData, activeTabKey } = this.state;
-
-    
+    const { tabData, activeTabKey, recentClosedTabs = [] } = this.state;
     return (
       <>
-      <RequestTabConfirm ref={this.reqeustTabConfirmRef} />
+      <RequestTabConfirm 
+        ref={this.reqeustTabConfirmRef} 
+        onSave={this.handleSave}
+        onNotSave={this.handleNotSave}
+        onCancel={this.handleCancel}
+      />
      
       <DndProvider backend={HTML5Backend}>
         <Tabs 
@@ -333,7 +378,31 @@ class DraggableTabs extends React.Component {
           type="editable-card" 
           addIcon={(
             <Dropdown.Button 
-              overlay={this.menu} 
+              overlay={(
+                <Menu onClick={({key, keyPath}) => this.handleMenuClick(key, keyPath)}>
+                  <Menu.SubMenu key="recently_closed" title="Recently Closed">
+                    {
+                      recentClosedTabs.map(item => (
+                        <Menu.Item key={item.id}>
+                          <Space>
+                            <span className="vertical-center">
+                              {getIconByCode(item.icon)}
+                            </span>
+                            <span>
+                              {item.name}
+                            </span>
+                          </Space>
+                        </Menu.Item>
+                      ))
+                    }
+                  </Menu.SubMenu>
+                  {
+                    this.moreActionMenu.map(item => (
+                      <Menu.Item disabled={tabData.length === 0} key={item.key}>{item.label}</Menu.Item>
+                    ))
+                  }
+                </Menu>
+              )} 
               onClick={this.handleAddTabClick}
               className="request-tabs-add">
               <PlusOutlined />
@@ -352,9 +421,7 @@ class DraggableTabs extends React.Component {
                 tab={(
                   <Space>
                     <span className="vertical-center">
-                      {
-                        item.method === 'GET' ? GET_REQUEST_ICON : POST_REQUEST_ICON
-                      }
+                      {getIconByCode(item.icon)}
                     </span>
                     <span>{item.name}</span>
                     <span className="vertical-center request-tab-right-icon">

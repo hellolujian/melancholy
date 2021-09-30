@@ -1,5 +1,5 @@
 
-import {query, update, insert, findOne, remove} from '@/database/database'
+import {query, update, insert, findOne, remove, sort} from '@/database/database'
 
 const TAB_META = 'tabMeta';
 
@@ -15,6 +15,10 @@ export const updateTabMeta = (id, doc) => {
     return update(TAB_META, {id: id}, doc)
 }
 
+export const multiUpdateTabMeta = async (param, doc) => {
+    return await update(TAB_META, param, doc, {multi: true})
+}
+
 export const queryTabMeta = (param = {}) => {
     return query(TAB_META, param);
 }
@@ -25,4 +29,8 @@ export const removeTabMetaById = (id) => {
 
 export const multiRemove = (query) => {
     return remove(TAB_META, query, true)
+}
+
+export const querySortedTab = (param, order) => {
+    return sort(TAB_META, param, order)
 }

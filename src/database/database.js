@@ -112,3 +112,19 @@ export const remove = (dbName, query, multi = false) => {
       
     })
 }
+
+export const sort = (dbName, query = {}, order = {}) => {
+    const collectionDB = initDatabase(dbName);
+
+    return new Promise((resolve, reject) => {
+        collectionDB.find(query).sort(order).exec(function (err, docs) {
+            if (err) {
+                console.error(err);
+                reject(err);
+            } else {
+                resolve(docs)
+            }
+        });
+      
+    })
+}
