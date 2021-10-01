@@ -20,12 +20,16 @@ import {
   updateTabMeta, 
   querySortedTab, 
   multiUpdateTabMeta} from '@/database/tab_meta'
-import {queryRequestMetaById, insertRequestMeta} from '@/database/request_meta'
+import {queryRequestMetaById, insertRequestMeta, updateRequestMeta} from '@/database/request_meta'
 import {
   subscribeRequestSelected,
   subscribeNewTabOpen,
-  subscribeRequestSave
+  subscribeRequestSave,
+  publishRequestSave
 } from '@/utils/event_utils'
+import {
+  saveRequest,
+} from '@/utils/database_utils'
 import {TabIconType, TabType, getIconByCode} from '@/enums'
 import {UUID} from '@/utils/global_utils'
 import 'ui/style/request_tabs.css'
@@ -172,11 +176,8 @@ class DraggableTabs extends React.Component {
   handleRequestSave = async (msg, data) => {
     const {id, name} = data;
     await multiUpdateTabMeta({refId: id, type: TabType.REQUEST.name()}, {$set: {name: name}})
-    this.refreshData();
     const {requestInfo} = this.state;
-    if (requestInfo && requestInfo.id === id) {
-      this.setState({requestInfo: {...requestInfo, ...data}})
-    }
+    this.refreshData(requestInfo && requestInfo.id === id ? {requestInfo: {...requestInfo, ...data}} : {});
   }
 
   componentDidMount = async () => {
@@ -382,7 +383,17 @@ class DraggableTabs extends React.Component {
 
   handleRequestTabContentChange = (value) => {
     const {requestInfo} = this.state;
-    this.setState({requestInfo: {...requestInfo, ...value}});
+    this.setState({requestInfo: {...requestInfo, ...value}})
+  }
+
+  handleRequestTabContentSave = async (value) => {
+    const {activeTabKey, requestInfo} = this.state;
+    if (value.hasOwnProperty('name')) {
+      await saveRequest({id: requestInfo.id, ...value});
+      publishRequestSave({id: requestInfo.id, name: value.name})
+    }
+    // await updateTabMeta(activeTabKey, {$set: value});
+    // await this.refreshData({requestInfo: {...requestInfo, ...value}})
   }
 
   render() {
@@ -475,7 +486,8 @@ class DraggableTabs extends React.Component {
           requestInfo && (
             <RequestTabContent 
               value={requestInfo} 
-              onChange={() => this.handleRequestTabContentChange}
+              onSave={this.handleRequestTabContentSave}
+              onChange={this.handleRequestTabContentChange}
             />
           )
         }

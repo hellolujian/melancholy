@@ -34,6 +34,10 @@ class RequestIntro extends React.Component {
       this.props.onChange({name: e.target.value})
     }
 
+    handleSave = (value) => {
+      this.props.onSave({name: value})
+    }
+
     render() {
      
       const {} = this.state;
@@ -49,6 +53,7 @@ class RequestIntro extends React.Component {
             size="small"
             editIcon={{className: "request-intro-edit-icon"}}
             // onClick={stopClickPropagation} 
+            onSave={this.handleSave}
             onValueChange={this.handleNameChange}
         />
                                         
@@ -80,6 +85,7 @@ export default RequestIntro;
 
 RequestIntro.defaultProps = {
   onChange: () => {},
+  onSave: () => {},
 }
 
 

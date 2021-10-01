@@ -89,7 +89,7 @@ class RequestModal extends React.Component {
                 // bodyStyle={{ height: 600}}
                 destroyOnClose
                 okText={requestInfo ? "update" : `Save${collectionInfo ? (" to " + collectionInfo.name) : ""}`}
-                okButtonProps={{disabled: !collectionInfo}}
+                okButtonProps={{disabled: !(collectionInfo || requestInfo)}}
                 width={560}
                 visible={visible} 
                 onOk={this.handleModalOk} 

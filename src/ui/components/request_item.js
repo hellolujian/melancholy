@@ -45,13 +45,9 @@ class RequestItem extends React.Component {
     }
 
     // 保存collection名称
-    saveRequestName = (e) => {
-        let value = e.target.value;
-        if (value && value.trim()) {
-            this.setState({showCollectionNameInput: false});
-            this.props.onRename(value)
-        }
-        
+    saveRequestName = async (value) => {
+        await this.props.onRename(value)
+        this.setState({showCollectionNameInput: false});
     }
 
     deleteRequest = () => {
@@ -140,8 +136,7 @@ class RequestItem extends React.Component {
                                         {
                                             showCollectionNameInput ? (
                                                 <RequiredInput 
-                                                    onBlur={this.saveRequestName}
-                                                    onPressEnter={this.saveRequestName}
+                                                    onSave={this.saveRequestName}
                                                     size="small"
                                                     editing={true}
                                                     editIcon={null}

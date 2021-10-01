@@ -23,6 +23,10 @@ class RequestTabContent extends React.Component {
         this.props.onChange(value);
     }
 
+    handleIntroSave = (value) => {
+        this.props.onSave(value);
+    }
+
     render() {
 
         const {value} = this.props;
@@ -30,6 +34,7 @@ class RequestTabContent extends React.Component {
             <>
                 <RequestIntroCollapse 
                     value={value}
+                    onSave={this.handleIntroSave}
                     onChange={this.handleIntroChange}
                 />
                 <RequestSendBar />
@@ -43,6 +48,7 @@ export default RequestTabContent;
 
 RequestTabContent.defaultProps = {
     onChange: () => {},
+    onSave: () => {},
 }
 
 

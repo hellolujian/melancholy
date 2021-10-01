@@ -36,13 +36,13 @@ class RequiredInput extends React.Component {
         stopClickPropagation(e)
     }
 
-    handleSave = () => {
-        const {value} = this.state;
+    handleSave = (e) => {
+        let value = e.target.value;
+        console.log('handleSave: %s', value)
         if (value && value.trim()) {
             this.setState({editing: false});
             this.props.onSave(value)
         }
-        
     }
 
     handleInputClick = (e) => {

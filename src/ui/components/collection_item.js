@@ -57,13 +57,9 @@ class CollectionItem extends React.Component {
     }
 
     // 保存collection名称
-    saveCollectionName = (e) => {
-        let value = e.target.value;
-        if (value && value.trim()) {
-            this.setState({showCollectionNameInput: false});
-            this.props.onRename(value)
-        }
-        
+    saveCollectionName = async (value) => {
+        await this.props.onRename(value)
+        this.setState({showCollectionNameInput: false});
     }
 
     // 收藏处理
@@ -155,8 +151,7 @@ class CollectionItem extends React.Component {
                                     {
                                         showCollectionNameInput ? (
                                             <RequiredInput 
-                                                onBlur={this.saveCollectionName}
-                                                onPressEnter={this.saveCollectionName}
+                                                onSave={this.saveCollectionName}
                                                 size="small"
                                                 editing={true}
                                                 editIcon={null}

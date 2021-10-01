@@ -302,7 +302,7 @@ class CollectionTree extends React.Component {
 
     handleCollectionRename = async (id, name) => {
         await saveCollection(id, {name: name});
-        this.refreshData()
+        await this.refreshData()
     }
 
     handleDragStart = ({event, node}) => {
