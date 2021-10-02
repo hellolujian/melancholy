@@ -140,14 +140,21 @@ class DraggableTabs extends React.Component {
   }
 
   // 添加默认tab(request tab)
-  addRequestTab = async () => {
-    let newRequest = {
-      id: UUID(),
-      name: 'Untitled Request',
-      method: 'get',
+  addRequestTab = async (msg, requestInfo) => {
+    
+    if (requestInfo) {
+      const {id, method, name} = requestInfo;
+      await this.addTabMeta({name: name, refId: id, icon: method});
+    } else {
+      let newRequest = {
+        id: UUID(),
+        name: 'Untitled Request',
+        method: 'get',
+      };
+      await insertRequestMeta(newRequest);
+      await this.addTabMeta({name: newRequest.name, refId: newRequest.id})
     }
-    await insertRequestMeta(newRequest);
-    await this.addTabMeta({name: newRequest.name, refId: newRequest.id})
+    
   }
 
   // 点击tab变更

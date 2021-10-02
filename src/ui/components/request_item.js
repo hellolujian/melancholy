@@ -13,7 +13,7 @@ import TooltipButton from 'ui/components/tooltip_button'
 import RequiredInput from './required_input'
 import PostmanButton from './postman_button'
 import {stopClickPropagation} from '@/utils/global_utils';
-import {publishCollectionModalOpen, publishRequestModalOpen, publishRequestSelected} from '@/utils/event_utils'
+import {publishNewTabOpen, publishRequestModalOpen, publishRequestSelected} from '@/utils/event_utils'
 import {
     OPEN_NEW_ICON, ELLIPSIS_ICON, RENAME_ICON, EDIT_ICON, CREATE_FORK_ICON, 
     MERGE_CHANGES_ICON, ADD_REQUEST_ICON, ADD_FOLDER_ICON, DUPLICATE_ICON,
@@ -58,9 +58,13 @@ class RequestItem extends React.Component {
         this.props.onDuplicate();
     }
 
+    handleOpenNewTab = () => {
+        publishNewTabOpen()
+    }
+
     // 菜单配置
     menuItems = [
-        { name: 'open', label: 'Open in New Tab', icon: OPEN_NEW_ICON, event: () => publishCollectionModalOpen({parentId: this.state.item.id})},
+        { name: 'open', label: 'Open in New Tab', icon: OPEN_NEW_ICON, event: () => publishNewTabOpen(this.props.item)},
         { name: 'rename', label: 'Rename', icon: RENAME_ICON, event: this.showCollectionNameInput},
         { name: 'edit', label: 'Edit', icon: EDIT_ICON, event: () => publishRequestModalOpen({requestId: this.state.item.id})},
         { name: 'duplicate', label: 'Duplicate', icon: DUPLICATE_ICON, event: this.duplicateRequest },
@@ -75,11 +79,6 @@ class RequestItem extends React.Component {
             target.event();
         }
         stopClickPropagation(domEvent )
-    }
-
-    handleRequestItemClick = () => {
-        console.log('handleRequestItemclick=================');
-        // publishRequestSelected(this.props.item.id)
     }
 
     render() {
@@ -125,7 +124,7 @@ class RequestItem extends React.Component {
                 <Dropdown 
                     overlay={menu} 
                     trigger={['contextMenu']}>
-                            <Space className="full-width justify-content-space-between" onClick={this.handleRequestItemClick}>
+                            <Space className="full-width justify-content-space-between">
                                 <Space align="center" style={{padding: '4px 0px', display: 'flex', alignItems: 'center'}}>
                                     <div style={{width: 28, textAlign: 'center', lineHeight: 0}}>
                                         {
