@@ -16,21 +16,35 @@ class RequestSendBar extends React.Component {
       
     }
 
+    handleChange = (e) => {
+        this.props.onChange({url: e.target.value})
+    }
+
+    handleSave = (e) => {
+        this.props.onSave({url: e.target.value})
+    }
+    
     render() {
+        const {value = {}} = this.props;
+        const {url, method} = value;
         return (
             <Row gutter={[16, 16]} style={{marginTop: 5, marginBottom: 5}}>
                 
                 <Col flex='auto'>
                     <Input 
+                        value={url}
                         size="large" 
                         addonBefore={<RequestMethodSelect />} 
-                        defaultValue="Xihu District, Hangzhou" 
+                        onChange={this.handleChange} 
+                        onBlur={this.handleSave}
+                        onPressEnter={this.handleSave}
                     />
                 </Col>
 
                 <Col flex='none'>
                     <Space>
-                        <Dropdown.Button overlay={(
+                        <Dropdown.Button 
+                            overlay={(
                                 <Menu onClick={this.handleMenuClick}>
                                     <Menu.Item key="1">
                                         Send and Download

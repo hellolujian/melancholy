@@ -128,7 +128,6 @@ class DraggableTabs extends React.Component {
     let newTab = {
       icon: TabIconType.GET.code,
       type: TabType.REQUEST.name(),
-      unSaved: true,
       closedAt: 0,
       sequence: new Date().getTime(),
       ...obj,
@@ -218,7 +217,7 @@ class DraggableTabs extends React.Component {
       await this.doCloseTab(closeTabKey)
     } else {
       const targetTab = tabData.find(tab => tab.id === closeTabKey);
-      if (targetTab.unSaved) {
+      if (targetTab.draft) {
         this.reqeustTabConfirmRef.show([targetTab]);
       } else {
         await this.doCloseTab(closeTabKey)
@@ -389,18 +388,41 @@ class DraggableTabs extends React.Component {
   }
 
   handleRequestTabContentChange = (value) => {
-    const {requestInfo} = this.state;
-    this.setState({requestInfo: {...requestInfo, ...value}})
+    const {requestInfo, activeTabKey, tabData} = this.state;
+    this.setState({requestInfo: {...requestInfo, ...value}});
+    if (!(value.hasOwnProperty('name') || value.hasOwnProperty('description'))) {
+      let targetTab = tabData.find(item => item.id === activeTabKey);
+      const {draft} = targetTab;
+      if (!draft) {
+        targetTab.draft = value;
+        this.setState({tabData: tabData});
+      } else {
+        let targetDraftKeys = Object.keys(value);
+        if (targetDraftKeys.length === 1 && targetDraftKeys[0] === value[targetDraftKeys[0]]) {
+          let targetDraftKey = targetDraftKeys[0];
+          let preDraftValue = draft[targetDraftKey];
+          if (preDraftValue === value[targetDraftKey]) {
+            updateTabMeta(activeTabKey, {$unset: {draft: true}});
+          }
+        }
+        
+
+      }
+    }
   }
 
   handleRequestTabContentSave = async (value) => {
-    const {requestInfo} = this.state;
+    const {requestInfo, activeTabKey, tabData} = this.state;
     if (value.hasOwnProperty('name')) {
       await saveRequest({id: requestInfo.id, ...value});
       publishRequestSave({id: requestInfo.id, name: value.name})
-    } else {
+    } else if (value.hasOwnProperty('description')) {
       await updateRequestMeta(requestInfo.id, {$set: value})
       this.setState({requestInfo: {...requestInfo, ...value}})
+    } else {
+      const activeTab = tabData.find(item => item.id === activeTabKey);
+      let updateDraft = activeTab.draft || {};
+      await updateTabMeta(activeTabKey, {$set: {draft: {...updateDraft, ...value}}})
     }
     
   }
@@ -471,12 +493,12 @@ class DraggableTabs extends React.Component {
                       <span>{item.name}</span>
                       <span className="vertical-center request-tab-right-icon">
                         {
-                          item.unSaved && (
+                          item.draft && (
                             <Icon className="unsaved-dot-icon" component={() => UNSAVED_DOT_SVG} />
                           )
                         }
                         <Icon 
-                          className={item.unSaved ? "close-tab-icon-none" : "close-tab-icon-hide"} 
+                          className={item.draft ? "close-tab-icon-none" : "close-tab-icon-hide"} 
                           component={() => CLOSE_SVG} 
                           onClick={() => this.handleCloseTabClick(item.id)} 
                         />

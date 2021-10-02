@@ -19,11 +19,11 @@ class RequestTabContent extends React.Component {
       
     }
 
-    handleIntroChange = (value) => {
+    handleChange = (value) => {
         this.props.onChange(value);
     }
 
-    handleIntroSave = (value) => {
+    handleSave = (value) => {
         this.props.onSave(value);
     }
 
@@ -34,10 +34,14 @@ class RequestTabContent extends React.Component {
             <>
                 <RequestIntroCollapse 
                     value={value}
-                    onSave={this.handleIntroSave}
-                    onChange={this.handleIntroChange}
+                    onSave={this.handleSave}
+                    onChange={this.handleChange}
                 />
-                <RequestSendBar />
+                <RequestSendBar 
+                    value={value}
+                    onChange={this.handleChange}
+                    onSave={this.handleSave}
+                />
                 <RequestSendSetting />
             </>
         )
