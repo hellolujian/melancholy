@@ -1,5 +1,5 @@
 import React from 'react';
-import {Tooltip, Button, Space, Row, Col } from 'antd';
+import {Typography, Button, Space, Row, Col } from 'antd';
 
 import {
     VARIABLE_TIPS,
@@ -12,17 +12,16 @@ import {
     TESTS_TIPS
 } from 'ui/constants/tips'
 
+import { EDIT_ICON } from '@/ui/constants/icons'
 import MarkdownIt from 'markdown-it'
 import MdEditor from 'react-markdown-editor-lite'
 // 导入编辑器的样式
 import 'react-markdown-editor-lite/lib/index.css';
 import 'ui/style/markdown_editor.css'
 
-// 注册插件（如果有的话）
-// MdEditor.use(YOUR_PLUGINS_HERE);
-
 // 初始化Markdown解析器
 const mdParser = new MarkdownIt(/* Markdown-it options */);
+const {Link} = Typography;
 
 class DescriptionEditor extends React.Component {
 
@@ -30,7 +29,7 @@ class DescriptionEditor extends React.Component {
         super(props);
         this.state = {
             mdEditorShow: props.mdEditorShow,
-            value: props.value
+
         }
     }
 
@@ -39,15 +38,15 @@ class DescriptionEditor extends React.Component {
     }
 
     handleSaveClick = () => {
-
-    }
-
-    handleAddDescriptionClick = () => {
-        this.setState({mdEditorShow: true});
+        const {value} = this.state;
+        this.props.onSave(value);
+        this.setState({mdEditorShow: false});
     }
 
     handleCancelClick = () => {
-        this.setState({mdEditorShow: false});
+        const {preValue} = this.state;
+        this.setState({mdEditorShow: false, value: preValue});
+        this.props.onChange(preValue)
     }
 
     handleEditorChange = ({text}) => {
@@ -55,9 +54,25 @@ class DescriptionEditor extends React.Component {
         this.props.onChange(text);
     }
 
+    handleEditClick = () => {
+        const {value} = this.state;
+        let preValue = this.props.hasOwnProperty('value') ? this.props.value : value;
+        this.setState({mdEditorShow: true, preValue: preValue}, () => {
+
+            // 自动聚焦到末尾
+            let mdDom = document.querySelector('.description-md-editor');
+            mdDom.focus();
+            mdDom.selectionStart = preValue ? preValue.length : 0;
+        });
+    }
+
     render() {
         const {mdEditorShow, value} = this.state;
         const {mdEditorProps, scene = "single"} = this.props;
+        let realValue = value;
+        if (this.props.hasOwnProperty('value')) {
+            realValue = this.props.value;
+        }
         return mdEditorShow ? (
             <>
                 <MdEditor
@@ -65,7 +80,7 @@ class DescriptionEditor extends React.Component {
                     config={{view: {menu: false, html: false}}}
                     placeholder={DESCRIPTION_TIPS}
                     renderHTML={(text) => mdParser.render(text)}
-                    value={value}
+                    value={realValue}
                     onChange={this.handleEditorChange}
                     {...mdEditorProps}
                 />
@@ -83,7 +98,20 @@ class DescriptionEditor extends React.Component {
                 
             </>
         ) : (
-            <Button size="small" type="link" onClick={this.handleAddDescriptionClick}>Add a description</Button>
+            realValue ? (
+                <Space>
+                    <span>{realValue}</span>
+                    <Link onClick={this.handleEditClick}>{EDIT_ICON}</Link>
+                </Space>
+            ) : (
+                <Button 
+                    size="small" 
+                    type="link" 
+                    onClick={this.handleEditClick}>
+                    Add a description
+                </Button>
+            )
+            
         )
     }
 }

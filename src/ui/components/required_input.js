@@ -38,7 +38,6 @@ class RequiredInput extends React.Component {
 
     handleSave = (e) => {
         let value = e.target.value;
-        console.log('handleSave: %s', value)
         if (value && value.trim()) {
             this.setState({editing: false});
             this.props.onSave(value)
@@ -55,6 +54,7 @@ class RequiredInput extends React.Component {
         
         const {value, editing, showRed} = this.state;
         let inputValue = this.props.hasOwnProperty('value') ? this.props.value : value;
+        console.log('j=============================inptVAlue: %s=========,', inputValue);
         let borderColor = !(inputValue && inputValue.trim()) && showRed ? 'red' : 'gray';
         return (
             <>

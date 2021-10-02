@@ -11,12 +11,6 @@ import 'ui/style/request_intro_collapse.css'
 const { Panel } = Collapse;
 const { Text,Title } = Typography;
 
-const text = `
-  A dog is a type of domesticated animal.
-  Known for its loyalty and faithfulness,
-  it can be found as a welcome guest in many households across the world.
-`;
-
 class RequestIntro extends React.Component {
 
     constructor(props) {
@@ -35,30 +29,35 @@ class RequestIntro extends React.Component {
     }
 
     handleSave = (value) => {
-      this.props.onSave({name: value})
+      this.props.onSave(value)
+    }
+
+    handleNameSave = (value) => {
+      this.handleSave({name: value})
+    }
+
+    handleDescSave = (value) => {
+      this.handleSave({description: value})
+    }
+
+    handleDescChange = (value) => {
+      this.props.onChange({description: value})
     }
 
     render() {
      
-      const {} = this.state;
       const {value} = this.props;
       let {name, description} = value;
-      console.log('name: %s, description: %s', name, description);
       let header = (
       
         <RequiredInput 
-            // onBlur={this.saveCollectionName}
             value={name}
-            onPressEnter={this.saveCollectionName}
             size="small"
             editIcon={{className: "request-intro-edit-icon"}}
-            // onClick={stopClickPropagation} 
-            onSave={this.handleSave}
+            onSave={this.handleNameSave}
             onValueChange={this.handleNameChange}
         />
                                         
-       
-        
       )
         return (
             <Collapse
@@ -73,7 +72,11 @@ class RequestIntro extends React.Component {
                 key="1" 
                 extra={<RequestExamples />}>
                
-                <DescriptionEditor />
+                <DescriptionEditor 
+                  value={description}
+                  onSave={this.handleDescSave}
+                  onChange={this.handleDescChange}
+                />
               </Panel>
             
             </Collapse>

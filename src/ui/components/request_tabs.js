@@ -387,13 +387,15 @@ class DraggableTabs extends React.Component {
   }
 
   handleRequestTabContentSave = async (value) => {
-    const {activeTabKey, requestInfo} = this.state;
+    const {requestInfo} = this.state;
     if (value.hasOwnProperty('name')) {
       await saveRequest({id: requestInfo.id, ...value});
       publishRequestSave({id: requestInfo.id, name: value.name})
+    } else {
+      await updateRequestMeta(requestInfo.id, {$set: value})
+      this.setState({requestInfo: {...requestInfo, ...value}})
     }
-    // await updateTabMeta(activeTabKey, {$set: value});
-    // await this.refreshData({requestInfo: {...requestInfo, ...value}})
+    
   }
 
   render() {
