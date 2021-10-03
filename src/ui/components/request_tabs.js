@@ -256,6 +256,9 @@ class DraggableTabs extends React.Component {
   }
 
   handleSave = async (tabInfo) => {
+    const {tabData} = this.state;
+    let targetTab = tabData.find(item => item.id === tabInfo.id);
+    await updateRequestMeta(targetTab.refId, {$set: targetTab.draft})
     await this.doCloseTab(tabInfo.id)
   }
 
@@ -393,21 +396,22 @@ class DraggableTabs extends React.Component {
     if (!(value.hasOwnProperty('name') || value.hasOwnProperty('description'))) {
       let targetTab = tabData.find(item => item.id === activeTabKey);
       const {draft} = targetTab;
-      if (!draft) {
-        targetTab.draft = value;
-        this.setState({tabData: tabData});
-      } else {
-        let targetDraftKeys = Object.keys(value);
-        if (targetDraftKeys.length === 1 && targetDraftKeys[0] === value[targetDraftKeys[0]]) {
-          let targetDraftKey = targetDraftKeys[0];
-          let preDraftValue = draft[targetDraftKey];
-          if (preDraftValue === value[targetDraftKey]) {
-            updateTabMeta(activeTabKey, {$unset: {draft: true}});
+      if (draft) {
+        let targetKey = Object.keys(value)[0];
+        if (Object.keys(draft).length === 1 && draft.hasOwnProperty(targetKey)) {
+          let targetValue = value[targetKey];
+          let preValue = draft[targetKey]
+          if (targetValue === preValue) {
+            console.log("sdfffffff===========================")
+            console.log(targetTab)
+            delete targetTab.draft;
           }
         }
-        
-
+      } else {
+        targetTab.draft = {...value};
       }
+      this.setState({tabData: tabData});
+      
     }
   }
 
@@ -421,8 +425,13 @@ class DraggableTabs extends React.Component {
       this.setState({requestInfo: {...requestInfo, ...value}})
     } else {
       const activeTab = tabData.find(item => item.id === activeTabKey);
-      let updateDraft = activeTab.draft || {};
-      await updateTabMeta(activeTabKey, {$set: {draft: {...updateDraft, ...value}}})
+      let updateDraft = activeTab.draft;
+      if (updateDraft) {
+        await updateTabMeta(activeTabKey, {$set: {draft: {...updateDraft, ...value}}})
+      } else {
+        await updateTabMeta(activeTabKey, {$unset: {draft: true}})
+      }
+      
     }
     
   }

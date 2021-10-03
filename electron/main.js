@@ -5,6 +5,7 @@ const {
     dialog, 
     ipcMain, 
     BrowserWindow,  
+    globalShortcut
 } = require('electron');
 const log = require('electron-log');
 // const contextMenu = require('electron-context-menu');
@@ -161,6 +162,14 @@ app.on('ready', () => {
   require('@electron/remote/main').initialize();
   createWindow();
   isDev && createDevTools();
+  globalShortcut.register('CommandOrControl+Alt+K', function () {
+    dialog.showMessageBox({
+      type: 'info',
+      message: '成功!',
+      detail: '你按下了一个全局注册的快捷键绑定.',
+      buttons: ['好的']
+    })
+  })
 })
 
 // 当全部窗口关闭时退出。
@@ -172,6 +181,10 @@ app.on('window-all-closed', () => {
     }
 })
 
+app.on('will-quit', function () {
+  globalShortcut.unregisterAll()
+})
+
 app.on('activate', () => {
     // 在macOS上，当单击dock图标并且没有其他窗口打开时，
     // 通常在应用程序中重新创建一个窗口。
@@ -179,4 +192,6 @@ app.on('activate', () => {
         createWindow()
         
     }
+
+    
 })

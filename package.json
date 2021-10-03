@@ -38,7 +38,8 @@
     "start": "concurrently \"cross-env BROWSER=none npm run ui\" \"wait-on http://localhost:8000 && nodemon --watch electron/main.js --exec npm run electron\"",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "install": "npm install && npm install --prefix electron"
   },
   "eslintConfig": {
     "extends": [
