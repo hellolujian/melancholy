@@ -86,7 +86,8 @@ global.__dirname = __dirname
 log.info('main:    ' +  __dirname);
 // global.fs = require('fs');
 // global.store = store;
-global.nedb = require('nedb')
+global.nedb = require('nedb');
+global.shortcut = globalShortcut;
 isDev && require('electron-debug')({ enabled: true, showDevTools: false });
 
 function createDevTools() {
@@ -162,14 +163,14 @@ app.on('ready', () => {
   require('@electron/remote/main').initialize();
   createWindow();
   isDev && createDevTools();
-  globalShortcut.register('CommandOrControl+Alt+K', function () {
-    dialog.showMessageBox({
-      type: 'info',
-      message: '成功!',
-      detail: '你按下了一个全局注册的快捷键绑定.',
-      buttons: ['好的']
-    })
-  })
+  // globalShortcut.register('CommandOrControl+Alt+K', function () {
+  //   dialog.showMessageBox({
+  //     type: 'info',
+  //     message: '成功!',
+  //     detail: '你按下了一个全局注册的快捷键绑定.',
+  //     buttons: ['好的']
+  //   })
+  // })
 })
 
 // 当全部窗口关闭时退出。

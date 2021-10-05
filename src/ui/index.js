@@ -35,7 +35,17 @@ class Home extends React.Component {
     }
 
     componentDidMount() {
-      
+      const globalShortcut = window.require('@electron/remote').globalShortcut;   
+      console.log('==============================');
+      console.log(globalShortcut);
+      globalShortcut.register('CommandOrControl+S', function () {
+        alert('sdf')
+      })
+    }
+
+    componentWillUnmount() {
+      const globalShortcut = window.require('@electron/remote').getGlobal('shortcut');
+      globalShortcut.unregisterAll();
     }
 
     onResize = (event, {element, size, handle}) => {
