@@ -25,7 +25,8 @@ import {
   subscribeRequestSelected,
   subscribeNewTabOpen,
   subscribeRequestSave,
-  publishRequestSave
+  publishRequestSave,
+  listenShortcut
 } from '@/utils/event_utils'
 import {
   saveRequest,
@@ -186,16 +187,6 @@ class DraggableTabs extends React.Component {
     this.refreshData(requestInfo && requestInfo.id === id ? {requestInfo: {...requestInfo, ...data}} : {});
   }
 
-  componentDidMount = async () => {
-    let tabData = await this.refreshData();
-    if (tabData.length > 0) {
-      await this.handleActiveTab(tabData[0])
-    }
-    subscribeNewTabOpen(this.addRequestTab)
-    subscribeRequestSelected(this.handleRequestSelected)
-    subscribeRequestSave(this.handleRequestSave)
-  }
-
   // 执行关闭
   doCloseTab = async (id) => {
     let closedTabs = await querySortedTab({closedAt: {$gt: 0}}, {closedAt: -1});
@@ -212,7 +203,8 @@ class DraggableTabs extends React.Component {
 
   // 关闭tab
   handleCloseTabClick = async (closeTabKey, isForced = false) => {
-    const {tabData} = this.state;
+    const {tabData, activeTabKey} = this.state;
+    closeTabKey = closeTabKey || activeTabKey;
     if (isForced) {
       await this.doCloseTab(closeTabKey)
     } else {
@@ -255,15 +247,40 @@ class DraggableTabs extends React.Component {
     }
   }
 
-  handleSave = async (tabInfo) => {
+  doSave = async (tabId) => {
     const {tabData} = this.state;
-    let targetTab = tabData.find(item => item.id === tabInfo.id);
+    let targetTab = tabData.find(item => item.id === tabId);
+    // TODO: 需要判断tab类型
     await updateRequestMeta(targetTab.refId, {$set: targetTab.draft})
-    await this.doCloseTab(tabInfo.id)
+  }
+
+  handleSave = async (tabId) => {
+    await this.doSave(tabId);
+    await this.doCloseTab(tabId);
   }
 
   handleNotSave = async (tabInfo) => {
     await this.doCloseTab(tabInfo.id)
+  }
+
+  handleSaveCurrent = async () => {
+    const {activeTabKey} = this.state;
+    if (!activeTabKey) return;
+    await this.doSave(activeTabKey);
+    await updateTabMeta(activeTabKey, {$unset: {draft: true}});
+    await this.refreshData();
+
+  }
+  
+  componentDidMount = async () => {
+    let tabData = await this.refreshData();
+    if (tabData.length > 0) {
+      await this.handleActiveTab(tabData[0])
+    }
+    subscribeNewTabOpen(this.addRequestTab)
+    subscribeRequestSelected(this.handleRequestSelected)
+    subscribeRequestSave(this.handleRequestSave)
+    listenShortcut('saverequest', this.handleSaveCurrent)
   }
 
   requestItemMenuArr = [
@@ -391,6 +408,7 @@ class DraggableTabs extends React.Component {
   }
 
   handleRequestTabContentChange = (value) => {
+    console.log('病根传过来的参数：%s', value.url);
     const {requestInfo, activeTabKey, tabData} = this.state;
     this.setState({requestInfo: {...requestInfo, ...value}});
     if (!(value.hasOwnProperty('name') || value.hasOwnProperty('description'))) {
@@ -405,11 +423,16 @@ class DraggableTabs extends React.Component {
             console.log("sdfffffff===========================")
             console.log(targetTab)
             delete targetTab.draft;
+          } else {
+            targetTab.draft = {...targetTab.draft, ...value}
           }
         }
       } else {
         targetTab.draft = {...value};
       }
+
+      console.log('===变更后的tabdata纸==');
+      console.log(tabData);
       this.setState({tabData: tabData});
       
     }

@@ -87,7 +87,60 @@ log.info('main:    ' +  __dirname);
 // global.fs = require('fs');
 // global.store = store;
 global.nedb = require('nedb');
-global.shortcut = globalShortcut;
+
+let localShortcutList = [
+  { key: 'opennewtab', accelerator: 'CmdOrCtrl+T' },
+  { key: 'closetab', accelerator: 'CmdOrCtrl+W' },
+  { key: 'forceclosetab', accelerator: 'CmdOrCtrl+Alt+W' },
+  { key: 'switchtonexttab', accelerator: 'CmdOrCtrl+Shift+]' },
+  { key: 'switchtoprevioustab', accelerator: 'CmdOrCtrl+Shift+[' },
+  { key: 'switchtotab1', accelerator: 'CmdOrCtrl+1' },
+  { key: 'switchtotab2', accelerator: 'CmdOrCtrl+2' },
+  { key: 'switchtotab3', accelerator: 'CmdOrCtrl+3' },
+  { key: 'switchtotab4', accelerator: 'CmdOrCtrl+4' },
+  { key: 'switchtotab5', accelerator: 'CmdOrCtrl+5' },
+  { key: 'switchtotab6', accelerator: 'CmdOrCtrl+6' },
+  { key: 'switchtotab7', accelerator: 'CmdOrCtrl+7' },
+  { key: 'switchtotab8', accelerator: 'CmdOrCtrl+8' },
+  { key: 'switchtolasttab', accelerator: 'CmdOrCtrl+9' },
+  { key: 'reopenlastclosedtab', accelerator: 'CmdOrCtrl+Shift+T' },
+  { key: 'requesturl', accelerator: 'CmdOrCtrl+L' },
+  { key: 'saverequest', accelerator: 'CmdOrCtrl+S' },
+  { key: 'saverequestas', accelerator: 'CmdOrCtrl+Shift+S' },
+  { key: 'sendanddownloadrequest', accelerator: 'CmdOrCtrl+Alt+Enter' },
+  { key: 'scrolltorequest', accelerator: 'CmdOrCtrl+Alt+PageUp' },
+  { key: 'scrolltoresponse', accelerator: 'CmdOrCtrl+Alt+PageDown' },
+  { key: 'searchsidebar', accelerator: 'CmdOrCtrl+F' },
+  { key: 'togglesidebar', accelerator: 'CmdOrCtrl+\\' },
+  { key: 'nextitem', accelerator: 'PageDown' },
+  { key: 'previousitem', accelerator: 'PageUp' },
+  { key: 'expanditem', accelerator: 'End' },
+  { key: 'collapseitem', accelerator: 'Home' },
+  { key: 'selectitem', accelerator: 'Enter' },
+  // { key: 'openrequestinanewtab', accelerator: 'CmdOrCtrl+Shift+Click' },
+  { key: 'renameitem', accelerator: 'CmdOrCtrl+E' },
+  { key: 'groupitems', accelerator: 'CmdOrCtrl+G' },
+  { key: 'cutitem', accelerator: 'CmdOrCtrl+X' },
+  { key: 'copyitem', accelerator: 'CmdOrCtrl+C' },
+  { key: 'pasteitem', accelerator: 'CmdOrCtrl+V' },
+  { key: 'duplicateitem', accelerator: 'CmdOrCtrl+D' },
+  { key: 'deleteitem', accelerator: 'Delete' },
+  // { key: 'zoomin', accelerator: 'CmdOrCtrl++' },
+  { key: 'zoomout', accelerator: 'CmdOrCtrl+-' },
+  { key: 'resetzoom', accelerator: 'CmdOrCtrl+0' },
+  { key: 'toggletwopaneview', accelerator: 'CmdOrCtrl+Alt+V' },
+  { key: 'switchworkspaceview', accelerator: 'CmdOrCtrl+.' },
+  { key: 'new', accelerator: 'CmdOrCtrl+N' },
+  { key: 'newpostmanwindow', accelerator: 'CmdOrCtrl+Shift+N' },
+  { key: 'newrunnerwindow', accelerator: 'CmdOrCtrl+Shift+R' },
+  { key: 'newconsolewindow', accelerator: 'CmdOrCtrl+Alt+C' },
+  { key: 'find', accelerator: 'CmdOrCtrl+Shift+F' },
+  { key: 'import', accelerator: 'CmdOrCtrl+O' },
+  { key: 'manageenvironments', accelerator: 'CmdOrCtrl+Alt+E' },
+  { key: 'settings', accelerator: 'CmdOrCtrl+,' },
+  { key: 'submitmodal', accelerator: 'CmdOrCtrl+Enter' },
+  { key: 'openshortcuthelp', accelerator: 'CmdOrCtrl+/' },
+];
 isDev && require('electron-debug')({ enabled: true, showDevTools: false });
 
 function createDevTools() {
@@ -155,7 +208,8 @@ function createWindow() {
 
     
 }
-
+const LOCAL_SHORTCUT_EVENT = 'local.shortcut.event';
+global.LOCAL_SHORTCUT_EVENT = LOCAL_SHORTCUT_EVENT
 // Electron 会在初始化后并准备
 // 创建浏览器窗口时，调用这个函数。
 // 部分 API 在 ready 事件触发后才能使用。
@@ -163,14 +217,12 @@ app.on('ready', () => {
   require('@electron/remote/main').initialize();
   createWindow();
   isDev && createDevTools();
-  // globalShortcut.register('CommandOrControl+Alt+K', function () {
-  //   dialog.showMessageBox({
-  //     type: 'info',
-  //     message: '成功!',
-  //     detail: '你按下了一个全局注册的快捷键绑定.',
-  //     buttons: ['好的']
-  //   })
-  // })
+  const electronLocalshortcut = require('electron-localshortcut');
+  localShortcutList.forEach(item => {
+    electronLocalshortcut.register(item.accelerator, () => {
+      webContents.send(LOCAL_SHORTCUT_EVENT, item)
+    });
+  })
 })
 
 // 当全部窗口关闭时退出。
@@ -183,7 +235,8 @@ app.on('window-all-closed', () => {
 })
 
 app.on('will-quit', function () {
-  globalShortcut.unregisterAll()
+  const electronLocalshortcut = require('electron-localshortcut');
+  electronLocalshortcut.unregisterAll();
 })
 
 app.on('activate', () => {

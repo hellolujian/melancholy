@@ -77,3 +77,13 @@ export const subscribeRequestSave = (handle) => {
 export const subscribeNewTabOpen = (handle) => {
     subscribe(OPEN_NEW_TAB_EVENT, handle);
 }
+
+const {ipcRenderer} = window.require('electron')
+const LOCAL_SHORTCUT_EVENT = window.require('@electron/remote').getGlobal('LOCAL_SHORTCUT_EVENT');
+export const listenShortcut = (key, handle) => {
+    ipcRenderer.on(LOCAL_SHORTCUT_EVENT, (event, msg) => {
+        if (msg.key === key) {
+            handle()
+        }
+    })
+}
