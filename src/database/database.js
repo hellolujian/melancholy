@@ -19,7 +19,7 @@ export const query = (dbName, param) => {
     const collectionDB = initDatabase(dbName);
 
     return new Promise((resolve, reject) => {
-        collectionDB.find({...param, $not: { deleted: true }}, (err, doc) => {
+        collectionDB.find(param.$not ? param : {...param, $not: { deleted: true,  }}, (err, doc) => {
             if (err) {
                 console.error(err);
                 reject(err);

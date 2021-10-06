@@ -1,5 +1,5 @@
 import React from 'react';
-import { Tabs, Button, Space, Menu, Dropdown, Modal  } from 'antd';
+import { Tabs, Typography, Space, Menu, Dropdown, Popover  } from 'antd';
 import { ExclamationCircleOutlined , CaretRightOutlined, PlusOutlined, CaretDownFilled, PlusSquareFilled,SyncOutlined,
   ReadOutlined, SearchOutlined,EllipsisOutlined,
                     SettingFilled,NotificationFilled , EnvironmentFilled ,FolderViewOutlined ,DatabaseOutlined  , PullRequestOutlined  } from '@ant-design/icons';
@@ -221,8 +221,8 @@ class DraggableTabs extends React.Component {
   handleDuplicateTab = (key) => {
     const {tabData} = this.state;
     const sourceTab = tabData.find(tab => tab.id === key);
-    const {icon, type, name} = sourceTab;
-    this.addTabMeta({icon: icon, type: type, name: name})
+    const {icon, type, name, draft, refId} = sourceTab;
+    this.addTabMeta({icon: icon, type: type, name: name, draft: draft, refId: refId});
   }
 
   // 关闭其他
@@ -251,12 +251,19 @@ class DraggableTabs extends React.Component {
     const {tabData} = this.state;
     let targetTab = tabData.find(item => item.id === tabId);
     // TODO: 需要判断tab类型
-    await updateRequestMeta(targetTab.refId, {$set: targetTab.draft})
+    await updateRequestMeta(targetTab.refId, {$set: targetTab.draft});
+    console.log('targetTap=======================');
+    console.log(targetTab)
+    let ooo = await queryTabMeta({ $not: { id: tabId }, $and: [{refId: targetTab.refId}, {type: targetTab.type}], draft: { $exists: true } })
+    console.log('冲突的记录');
+    console.log(ooo)
+    await multiUpdateTabMeta({ $not: { id: tabId }, $and: [{refId: targetTab.refId}, {type: targetTab.type}], draft: { $exists: true } }, {$set: {conflict: true}});
   }
 
-  handleSave = async (tabId) => {
-    await this.doSave(tabId);
-    await this.doCloseTab(tabId);
+  handleSave = async (tabInfo) => {
+    const {id} = tabInfo;
+    await this.doSave(id);
+    await this.doCloseTab(id);
   }
 
   handleNotSave = async (tabInfo) => {
@@ -329,6 +336,15 @@ class DraggableTabs extends React.Component {
     await updateTabMeta(dragKey, {$set: {sequence: hoverNode.sequence - 1}})
     this.refreshData()
   };
+
+  handleTabPopoverChange = async (id, visible) => {
+    let visibleId = null;
+    if (visible) {
+      let result = await queryTabMetaById(id);
+      visibleId = result.conflict ? id : null;
+    }
+    this.setState({popoverVisible: visibleId})
+  }
   
   renderTabBar = (props, DefaultTabBar) => (
     <DefaultTabBar {...props} >
@@ -348,7 +364,10 @@ class DraggableTabs extends React.Component {
                   </Menu>
                 )} 
                 trigger={['contextMenu']}>
+                  <Popover visible={this.state.popoverVisible === node.key} content={<div>sdfsdf</div>} title="Title" onVisibleChange={(visible) => this.handleTabPopoverChange(node.key, visible)}>
                   {node}
+                  </Popover>
+                  
                 </Dropdown>
                 </div>
                 
@@ -518,12 +537,17 @@ class DraggableTabs extends React.Component {
                 <TabPane
                   closeIcon={<></>} 
                   tab={(
-                    <Space>
-                      <span className="vertical-center">
+                    <Space className="vertical-center" align="center">
+                      {
+                        item.conflict && (
+                          <Typography.Text>[CONFLICT]</Typography.Text>
+                        )
+                      }
+                      <div className="vertical-end" style={{marginTop: 2}}>
                         {getIconByCode(item.icon)}
-                      </span>
-                      <span>{item.name}</span>
-                      <span className="vertical-center request-tab-right-icon">
+                      </div>
+                      <div className="vertical-start">{item.name}</div>
+                      <div className="vertical-end request-tab-right-icon" style={{marginTop: 2}}>
                         {
                           item.draft && (
                             <Icon className="unsaved-dot-icon" component={() => UNSAVED_DOT_SVG} />
@@ -534,7 +558,7 @@ class DraggableTabs extends React.Component {
                           component={() => CLOSE_SVG} 
                           onClick={() => this.handleCloseTabClick(item.id)} 
                         />
-                      </span>
+                      </div>
                     </Space>
                   )} 
                   key={item.id}>
