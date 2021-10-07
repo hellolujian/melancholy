@@ -87,8 +87,6 @@ class CollectionSelectCard extends React.Component {
     getListData = () => {
         const {collectionData, chooseChain} = this.state;
         let listData = collectionData;
-        console.log('listdata');
-        console.log(listData);
         for (let i = 0; i < chooseChain.length; i++) {
             let chooseOne = chooseChain[i];
             listData = listData.find(o => o.id === chooseOne.id).items;

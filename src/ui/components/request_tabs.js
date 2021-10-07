@@ -26,6 +26,7 @@ import {
   subscribeNewTabOpen,
   subscribeRequestSave,
   publishRequestSave,
+  publishRequestModalOpen,
   listenShortcut
 } from '@/utils/event_utils'
 import {
@@ -266,16 +267,41 @@ class DraggableTabs extends React.Component {
     await this.doCloseTab(id);
   }
 
+  handleSaveAs = async (tabInfo) => {
+    const {name, url, method, body, header, description, auth, prerequest, test} = tabInfo;
+    const newId = UUID();
+    let newRequest = {
+      id: newId,
+      name: name,
+      url: url,
+      method: method,
+      body: body,
+      header: header,
+      description: description,
+      auth: auth,
+      prerequest: prerequest,
+      test: test, 
+    };
+    await insertRequestMeta(newRequest);
+    publishRequestModalOpen({requestId: newId})
+  }
+
   handleNotSave = async (tabInfo) => {
     await this.doCloseTab(tabInfo.id)
   }
 
   handleSaveCurrent = async () => {
-    const {activeTabKey} = this.state;
+    const {activeTabKey, tabData} = this.state;
     if (!activeTabKey) return;
-    await this.doSave(activeTabKey);
-    await updateTabMeta(activeTabKey, {$unset: {draft: true}});
-    await this.refreshData();
+    let targetTab = tabData.find(item => item.id === activeTabKey);
+    if (targetTab.conflict) {
+      this.reqeustTabConfirmRef.show([targetTab], true);
+    } else {
+      await this.doSave(activeTabKey);
+      await updateTabMeta(activeTabKey, {$unset: {draft: true}});
+      await this.refreshData();
+    }
+    
 
   }
   
@@ -360,15 +386,20 @@ class DraggableTabs extends React.Component {
                 trigger={['contextMenu']}>
                   {
                     targetNode && targetNode.conflict ? (
-                      <Popover content={<div>sdfsdf</div>} title="Title">
-                        {node}
+                      <Popover 
+                        content={
+                          <div style={{width: 300}}>
+                            <div>CONFLICT</div>
+                            <div>This {targetNode.type === TabType.REQUEST.name() ? 'request' : 'example'} has been modified since you last opened this tab</div>
+                          </div>
+                        } 
+                        title={<Typography.Title level={5}>{targetNode.name}</Typography.Title>}>
+                          {node}
                       </Popover>
                     ) : node
                   }
                 </Dropdown>
                 </div>
-                
-                {/* {node} */}
               </WrapTabNode>
             )
         }
@@ -482,6 +513,7 @@ class DraggableTabs extends React.Component {
         <RequestTabConfirm 
           ref={this.reqeustTabConfirmRef} 
           onSave={this.handleSave}
+          onSaveAs={this.handleSaveAs}
           onNotSave={this.handleNotSave}
           onCancel={this.handleCancel}
         />

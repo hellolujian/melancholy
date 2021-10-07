@@ -37,8 +37,7 @@ class RequestModal extends React.Component {
         if (requestId) {
             updateObj.requestInfo = await queryRequestMetaById(requestId);
         } else if (parentId) {
-            let collectionInfo = await queryCollectionMetaById(parentId);
-            updateObj.collectionInfo = collectionInfo
+            updateObj.collectionInfo = await queryCollectionMetaById(parentId);
         } 
         this.setState(updateObj);
     }
@@ -65,6 +64,7 @@ class RequestModal extends React.Component {
         }
         if (requestInfo) {
             data.id = requestInfo.id;
+            data.parentId = requestInfo.parentId || collectionInfo.id;
             await saveRequest(data)
         } else {
             data.id = UUID();
@@ -82,14 +82,15 @@ class RequestModal extends React.Component {
     render() {
      
         const {requestInfo, visible, collectionInfo} = this.state;
+        const hasParentId = requestInfo && requestInfo.parentId;
         return (
             <Modal 
-                title={(requestInfo ? "SAVE" : "EDIT") + " REQUEST"} 
+                title={(hasParentId ? "EDIT" : "SAVE") + " REQUEST"} 
                 centered
                 // bodyStyle={{ height: 600}}
                 destroyOnClose
-                okText={requestInfo ? "update" : `Save${collectionInfo ? (" to " + collectionInfo.name) : ""}`}
-                okButtonProps={{disabled: !(collectionInfo || requestInfo)}}
+                okText={hasParentId ? "update" : `Save${collectionInfo ? (" to " + collectionInfo.name) : ""}`}
+                okButtonProps={{disabled: !(collectionInfo || hasParentId)}}
                 width={560}
                 visible={visible} 
                 onOk={this.handleModalOk} 
@@ -102,7 +103,7 @@ class RequestModal extends React.Component {
                     initialValues={requestInfo}
                 >
                     {
-                        !requestInfo && (
+                        !hasParentId && (
                             <Form.Item>
                                 {SAVE_REQUEST_TIPS}
                             </Form.Item>
@@ -128,7 +129,7 @@ class RequestModal extends React.Component {
                     </Form.Item>
 
                     {
-                        !requestInfo && (
+                        !hasParentId && (
                             <Form.Item label="Select a collection or folder to save to:">
                                 <CollectionSelectCard 
                                     defaultValue={collectionInfo} 

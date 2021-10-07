@@ -224,13 +224,24 @@ export const saveRequest = async (doc) => {
         return;
     }
     await updateRequestMeta(id, {$set: doc});
+    if (requestMetaInfo.parentId) {
+        let parentIdArr = await getParentIdArr(requestMetaInfo.parentId);
+        let collectionInfo = await queryCollectionById(parentIdArr[0]);
+        let target = getTargetItem(collectionInfo, [...parentIdArr, id]);
+        target.name = name;
+        return await updateCollection(collectionInfo.id, {$set: { items: collectionInfo.items } })    
+    } else if (doc.parentId) {
+        let parentIdArr = await getParentIdArr(doc.parentId);
+        let collectionInfo = await queryCollectionById(parentIdArr[0]);
+        let target = getTargetItem(collectionInfo, parentIdArr)
+        if (!target.items) {
+            target.items = [];
+        } 
+        target.items = [...target.items, {id: id, name: name, method: requestMetaInfo.method}]
+        return await updateCollection(collectionInfo.id, {$set: { items: collectionInfo.items, requestCount: collectionInfo.requestCount + 1 } })
+    }
 
-    let parentIdArr = await getParentIdArr(requestMetaInfo.parentId);
-    let collectionInfo = await queryCollectionById(parentIdArr[0]);
-    let target = getTargetItem(collectionInfo, [...parentIdArr, id]);
-    target.name = name;
-    return await updateCollection(collectionInfo.id, {$set: { items: collectionInfo.items } })
-
+    
 }
 
 export const duplicateRequest = async (id) => {
