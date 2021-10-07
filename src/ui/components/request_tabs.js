@@ -336,26 +336,20 @@ class DraggableTabs extends React.Component {
     await updateTabMeta(dragKey, {$set: {sequence: hoverNode.sequence - 1}})
     this.refreshData()
   };
-
-  handleTabPopoverChange = async (id, visible) => {
-    let visibleId = null;
-    if (visible) {
-      let result = await queryTabMetaById(id);
-      visibleId = result.conflict ? id : null;
-    }
-    this.setState({popoverVisible: visibleId})
-  }
   
   renderTabBar = (props, DefaultTabBar) => (
     <DefaultTabBar {...props} >
       {
         node => {
+          const {tabData} = this.state;
+          const {key} = node;
+          const targetNode = tabData.find(item => item.id === key);
             return (
-              <WrapTabNode key={node.key} index={node.key} moveTabNode={this.moveTabNode}>
+              <WrapTabNode key={key} index={node.key} moveTabNode={this.moveTabNode}>
                 <div style={{marginRight: 2}}>
                 <Dropdown 
                 overlay={(
-                  <Menu onClick={({key}) => this.handleRequestTabItemMenuClick(key, node.key)}>
+                  <Menu onClick={({key: menuKey}) => this.handleRequestTabItemMenuClick(menuKey, key)}>
                     {
                       this.requestItemMenuArr.map((item => (
                         <Menu.Item key={item.key}>{item.label}</Menu.Item>
@@ -364,10 +358,13 @@ class DraggableTabs extends React.Component {
                   </Menu>
                 )} 
                 trigger={['contextMenu']}>
-                  <Popover visible={this.state.popoverVisible === node.key} content={<div>sdfsdf</div>} title="Title" onVisibleChange={(visible) => this.handleTabPopoverChange(node.key, visible)}>
-                  {node}
-                  </Popover>
-                  
+                  {
+                    targetNode && targetNode.conflict ? (
+                      <Popover content={<div>sdfsdf</div>} title="Title">
+                        {node}
+                      </Popover>
+                    ) : node
+                  }
                 </Dropdown>
                 </div>
                 
