@@ -96,7 +96,7 @@ class DraggableTabs extends React.Component {
   
   handleActiveTab = async (activeTab, refInfo) => {
     if (!activeTab) {
-      this.setState({activeTab: null, requestInfo: null})
+      this.setState({activeTabKey: null, requestInfo: null})
       return;
     }
     const {refId, type, id, draft = {}} = activeTab;
@@ -181,13 +181,6 @@ class DraggableTabs extends React.Component {
     }
   }
 
-  handleRequestSave = async (msg, data) => {
-    const {id, name} = data;
-    await multiUpdateTabMeta({refId: id, type: TabType.REQUEST.name()}, {$set: {name: name}})
-    const {requestInfo} = this.state;
-    this.refreshData(requestInfo && requestInfo.id === id ? {requestInfo: {...requestInfo, ...data}} : {});
-  }
-
   // 执行关闭
   doCloseTab = async (id) => {
     let closedTabs = await querySortedTab({closedAt: {$gt: 0}}, {closedAt: -1});
@@ -248,27 +241,51 @@ class DraggableTabs extends React.Component {
     }
   }
 
-  doSave = async (tabId) => {
+  // 将tab下的草稿保存到request表中
+  doSaveDraft = async (tabId) => {
     const {tabData} = this.state;
     let targetTab = tabData.find(item => item.id === tabId);
     // TODO: 需要判断tab类型
     await updateRequestMeta(targetTab.refId, {$set: targetTab.draft});
-    console.log('targetTap=======================');
-    console.log(targetTab)
-    let ooo = await queryTabMeta({ $not: { id: tabId }, $and: [{refId: targetTab.refId}, {type: targetTab.type}], draft: { $exists: true } })
-    console.log('冲突的记录');
-    console.log(ooo)
+    await updateTabMeta(tabId, {$unset: {draft: true, conflict: true}});
     await multiUpdateTabMeta({ $not: { id: tabId }, $and: [{refId: targetTab.refId}, {type: targetTab.type}], draft: { $exists: true } }, {$set: {conflict: true}});
   }
 
-  handleSave = async (tabInfo) => {
+  handleSaveDraft = async (tabInfo, justSave) => {
     const {id} = tabInfo;
-    await this.doSave(id);
+    await this.doSaveDraft(id);
+    if (justSave) {
+      await this.refreshData()
+      return;
+    }
     await this.doCloseTab(id);
   }
 
-  handleSaveAs = async (tabInfo) => {
-    const {name, url, method, body, header, description, auth, prerequest, test} = tabInfo;
+  handleRequestSave = async (msg, {metaData, extend = {}}) => {
+    const {id, name} = metaData;
+    let requestInfoId = id;
+    if (extend.hasOwnProperty('justSave')) {
+      // 通过弹框的另存为的请求，需要将tab的草稿内容更新到该请求上，并且更新该tab的refId
+      const {justSave, tabInfo} = extend;
+      await updateTabMeta(tabInfo.id, {$set: {refId: id, name: name}});
+      await this.handleSaveDraft(tabInfo, justSave);
+      requestInfoId = tabInfo.refId;
+    } else {
+      // 普通的修改请求，只需更新tab的name即可
+      await multiUpdateTabMeta({refId: id, type: TabType.REQUEST.name()}, {$set: {name: name}});
+      await this.refreshData();
+    }
+    const {requestInfo} = this.state;
+    if (requestInfo && requestInfo.id === requestInfoId) {
+      console.log({...requestInfo, ...metaData});
+      this.setState({requestInfo: {...requestInfo, ...metaData}})
+    }
+
+  }
+
+  handleSaveAs = async (tabInfo, justSave) => {
+    const {name, draft} = tabInfo;
+    const {url, method, body, header, description, auth, prerequest, test} = draft;
     const newId = UUID();
     let newRequest = {
       id: newId,
@@ -283,10 +300,13 @@ class DraggableTabs extends React.Component {
       test: test, 
     };
     await insertRequestMeta(newRequest);
-    publishRequestModalOpen({requestId: newId})
+    publishRequestModalOpen({metaData: {requestId: newId, name: name}, extend: {justSave: justSave, tabInfo: tabInfo}})
   }
 
-  handleNotSave = async (tabInfo) => {
+  handleNotSave = async (tabInfo, justSave) => {
+    if (justSave) {
+      return;
+    }
     await this.doCloseTab(tabInfo.id)
   }
 
@@ -297,12 +317,9 @@ class DraggableTabs extends React.Component {
     if (targetTab.conflict) {
       this.reqeustTabConfirmRef.show([targetTab], true);
     } else {
-      await this.doSave(activeTabKey);
-      await updateTabMeta(activeTabKey, {$unset: {draft: true}});
+      await this.doSaveDraft(activeTabKey);
       await this.refreshData();
     }
-    
-
   }
   
   componentDidMount = async () => {
@@ -489,7 +506,7 @@ class DraggableTabs extends React.Component {
     const {requestInfo, activeTabKey, tabData} = this.state;
     if (value.hasOwnProperty('name')) {
       await saveRequest({id: requestInfo.id, ...value});
-      publishRequestSave({id: requestInfo.id, name: value.name})
+      publishRequestSave({metaData: {id: requestInfo.id, name: value.name}})
     } else if (value.hasOwnProperty('description')) {
       await updateRequestMeta(requestInfo.id, {$set: value})
       this.setState({requestInfo: {...requestInfo, ...value}})
@@ -512,7 +529,7 @@ class DraggableTabs extends React.Component {
       <>
         <RequestTabConfirm 
           ref={this.reqeustTabConfirmRef} 
-          onSave={this.handleSave}
+          onSave={this.handleSaveDraft}
           onSaveAs={this.handleSaveAs}
           onNotSave={this.handleNotSave}
           onCancel={this.handleCancel}

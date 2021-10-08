@@ -21,10 +21,10 @@ class RequestTabConfirm extends React.Component {
     }
 
     handleClose = (callback) => {
-        const {tabList} = this.state;
+        const {tabList, justSave} = this.state;
         const tabInfo = tabList.pop();
         this.setState({visible: false}, async () => {
-            await callback(tabInfo);
+            await callback(tabInfo, justSave);
             if (tabList.length > 0) {
                 this.show(tabList);
             }

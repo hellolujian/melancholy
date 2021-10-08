@@ -32,13 +32,20 @@ class RequestModal extends React.Component {
     }
 
     getRequestInfo = async (key, data = {}) => {
-        const {requestId, parentId} = data;
         let updateObj = {visible: true};
+        if (data.metaData) {
+            updateObj.extend = data.extend;
+            data = data.metaData;
+        }
+        const {requestId, parentId, name} = data;
         if (requestId) {
             updateObj.requestInfo = await queryRequestMetaById(requestId);
         } else if (parentId) {
             updateObj.collectionInfo = await queryCollectionMetaById(parentId);
         } 
+        if (!updateObj.requestInfo && name) {
+            updateObj.requestInfo = {name: name};
+        }
         this.setState(updateObj);
     }
 
@@ -48,7 +55,7 @@ class RequestModal extends React.Component {
 
     handleModalCancel = () => {
         
-        this.setState({visible: false, requestInfo: null, collectionInfo: null})
+        this.setState({visible: false, requestInfo: undefined, collectionInfo: undefined})
         // this.props.onVisibleChange(false);
     }
 
@@ -57,21 +64,21 @@ class RequestModal extends React.Component {
     }
 
     handleFormFinish = async (values) => {
-        const {requestInfo, collectionInfo} = this.state;
+        const {requestInfo = {}, collectionInfo, extend} = this.state;
+        const {id, parentId} = requestInfo;
         let data = {
             name: values.name,
             description: values.description,
+            parentId: parentId || collectionInfo.id
         }
-        if (requestInfo) {
-            data.id = requestInfo.id;
-            data.parentId = requestInfo.parentId || collectionInfo.id;
+        if (id) {
+            data.id = id;
             await saveRequest(data)
         } else {
             data.id = UUID();
-            data.parentId = collectionInfo.id;
             await newRequest(data)
         }
-        publishRequestSave(data)
+        publishRequestSave({metaData: data, extend: extend})
         this.handleModalCancel()
     }
 
@@ -83,6 +90,7 @@ class RequestModal extends React.Component {
      
         const {requestInfo, visible, collectionInfo} = this.state;
         const hasParentId = requestInfo && requestInfo.parentId;
+        const hasRequestId = requestInfo && requestInfo.id;
         return (
             <Modal 
                 title={(hasParentId ? "EDIT" : "SAVE") + " REQUEST"} 
@@ -111,14 +119,14 @@ class RequestModal extends React.Component {
                     }
 
                     <Form.Item
-                        label={requestInfo ? 'Name' : 'Request name'}
+                        label={hasRequestId ? 'Name' : 'Request name'}
                         name="name"
                         rules={[{ required: true, message: '' }]}
                     >
                         <Input autoFocus placeholder="Request Name" />
                     </Form.Item>
 
-                    <Form.Item name="description" label={requestInfo ? 'description' : "Request description (Optional)"}>
+                    <Form.Item name="description" label={hasRequestId ? 'description' : "Request description (Optional)"}>
 
                         <DescriptionEditor 
                             scene="form" 

@@ -131,7 +131,7 @@ class CollectionTree extends React.Component {
     handleRequestRename = async (id, name) => {
         let saveObj = {id: id, name: name};
         await saveRequest(saveObj);
-        publishRequestSave(saveObj);
+        publishRequestSave({metaData: saveObj});
     }
 
     // 递归遍历collection下的folder
