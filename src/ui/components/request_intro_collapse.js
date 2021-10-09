@@ -46,7 +46,7 @@ class RequestIntro extends React.Component {
 
     handleActiveKeyChange = (key) => {
       const {value} = this.props;
-      if (value.deleted) {
+      if (value.deleted || !value.id) {
         return;
       }
       this.setState({activeKey: key})
@@ -56,15 +56,14 @@ class RequestIntro extends React.Component {
      
       const {activeKey} = this.state;
       const {value} = this.props;
-      console.log('=====================value================');
-      console.log(value);
-      let {name, description, deleted} = value;
+      let {name, description, deleted, id} = value;
+      let sourceRequestExist = !deleted && id;
       let header = (
       
         <RequiredInput 
             value={name}
             size="small"
-            editIcon={deleted ? false : {className: "request-intro-edit-icon"}}
+            editIcon={sourceRequestExist ? {className: "request-intro-edit-icon"} : false}
             onSave={this.handleNameSave}
             onValueChange={this.handleNameChange}
         />
@@ -82,16 +81,16 @@ class RequestIntro extends React.Component {
                 header={header} 
                 className="site-collapse-custom-collapse-panel"
                 key="description" 
-                showArrow={!deleted} 
+                showArrow={sourceRequestExist ? true : false} 
                 extra={<RequestExamples />}>
                
                 {
-                  !deleted && (
+                  sourceRequestExist && (
                     <DescriptionEditor 
-                  value={description}
-                  onSave={this.handleDescSave}
-                  onChange={this.handleDescChange}
-                />
+                      value={description}
+                      onSave={this.handleDescSave}
+                      onChange={this.handleDescChange}
+                    />
                   )
                 }
               </Panel>

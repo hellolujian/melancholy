@@ -106,11 +106,11 @@ class DraggableTabs extends React.Component {
       this.setState({activeTabKey: null, requestInfo: null})
       return;
     }
-    const {refId, type, id, draft = {}} = activeTab;
+    const {refId, type, id, draft = {}, name} = activeTab;
     let updateObj = {activeTabKey: id};
     switch (type) {
       case TabType.REQUEST.name(): 
-        let requestMetaInfo = refInfo ? refInfo : await queryRequestMetaById(refId)
+        let requestMetaInfo = refInfo ? refInfo : (refId ? await queryRequestMetaById(refId) : {name: name})
         updateObj.requestInfo = {...requestMetaInfo, ...draft};
         break;
       default: break;
@@ -154,13 +154,7 @@ class DraggableTabs extends React.Component {
       const {id, method, name} = requestInfo;
       await this.addTabMeta({name: name, refId: id, icon: method});
     } else {
-      let newRequest = {
-        id: UUID(),
-        name: 'Untitled Request',
-        method: 'get',
-      };
-      await insertRequestMeta(newRequest);
-      await this.addTabMeta({name: newRequest.name, refId: newRequest.id})
+      await this.addTabMeta({name: 'Untitled Request'})
     }
     
   }
@@ -222,8 +216,13 @@ class DraggableTabs extends React.Component {
   handleDuplicateTab = (key) => {
     const {tabData} = this.state;
     const sourceTab = tabData.find(tab => tab.id === key);
-    const {icon, type, name, draft, refId} = sourceTab;
-    this.addTabMeta({icon: icon, type: type, name: name, draft: draft, refId: refId});
+    const {icon, type, name, draft, refId, sourceDeleted} = sourceTab;
+    if (sourceDeleted) {
+      this.addTabMeta({icon: icon, type: type, name: name, draft: draft});
+    } else {
+      this.addTabMeta({icon: icon, type: type, name: name, draft: draft, refId: refId});
+    }
+    
   }
 
   // 关闭其他
@@ -275,7 +274,7 @@ class DraggableTabs extends React.Component {
       // 通过弹框的另存为的请求，需要将tab的草稿内容更新到该请求上，并且更新该tab的refId
       const {justSave, tabInfo} = extend;
       await updateTabMeta(tabInfo.id, {$set: {refId: id, name: name}});
-      let extendDraft = await queryRequestMetaById(tabInfo.refId);
+      let extendDraft = tabInfo.refId ? await queryRequestMetaById(tabInfo.refId) : {};
       const {url, method, body, header, auth, prerequest, test} = extendDraft;
       await this.handleSaveDraft({...tabInfo, refId: id}, justSave, {
           url: url,
@@ -293,7 +292,7 @@ class DraggableTabs extends React.Component {
       await this.refreshData();
     }
     const {requestInfo} = this.state;
-    if (requestInfo && requestInfo.id === requestInfoId) {
+    if (requestInfo && (requestInfo.id === requestInfoId)) {
       let newRequestMetaInfo = await queryRequestMetaById(id);
       this.setState({requestInfo: newRequestMetaInfo})
     }
@@ -303,7 +302,11 @@ class DraggableTabs extends React.Component {
   // 将请求另存为
   handleSaveAs = (tabInfo, justSave) => {
     const {name} = tabInfo;
-    publishRequestModalOpen({metaData: {name: name}, extend: {justSave: justSave, tabInfo: tabInfo}})
+    let obj = {metaData: {name: name}};
+    if (justSave !== undefined) {
+      obj.extend = {justSave: justSave, tabInfo: tabInfo};
+    }
+    publishRequestModalOpen(obj)
   }
 
   // 处理弹框中的保存
@@ -333,6 +336,8 @@ class DraggableTabs extends React.Component {
       this.handleSaveAs(targetTab, true);
     } else if (targetTab.conflict) {
       this.reqeustTabConfirmRef.show([targetTab], true);
+    } else if (!targetTab.refId) {
+      this.handleSaveAs(targetTab, true)
     } else {
       await this.doSaveDraft(targetTab);
       await this.refreshData();
@@ -405,60 +410,82 @@ class DraggableTabs extends React.Component {
     this.refreshData()
   };
   
-  renderTabBar = (props, DefaultTabBar) => (
-    <DefaultTabBar {...props} >
-      {
-        node => {
-          const {tabData} = this.state;
-          const {key} = node;
-          const targetNode = tabData.find(item => item.id === key);
-            return (
-              <WrapTabNode key={key} index={node.key} moveTabNode={this.moveTabNode}>
-                <div style={{marginRight: 2}}>
-                <Dropdown 
-                overlay={(
-                  <Menu onClick={({key: menuKey}) => this.handleRequestTabItemMenuClick(menuKey, key)}>
+  renderTabBar = (props, DefaultTabBar) => {
+    
+    return (
+      <DefaultTabBar {...props} >
+        {
+          node => {
+            let finalNode = node;
+            const {tabData, activeTabKey} = this.state;
+            const {key} = node;
+            if (node.ref.current) {
+              let style = {
+                height: 2, 
+                borderLeft: '1px solid #f0f0f0', 
+                borderRight: '1px solid #f0f0f0', 
+                position: 'absolute', bottom: 0, 
+                width: window.getComputedStyle(node.ref.current).width
+              };
+              if (activeTabKey === key) {
+                style.background = '#fafafa';
+              }
+              finalNode = (
+                <>
+                  {node}
+                  <div style={style} />
+                </>
+              )
+            }
+            const targetNode = tabData.find(item => item.id === key);
+              return (
+                <WrapTabNode key={key} index={key} moveTabNode={this.moveTabNode}>
+                  <div style={{marginRight: 2}}>
+                  <Dropdown 
+                  overlay={(
+                    <Menu onClick={({key: menuKey}) => this.handleRequestTabItemMenuClick(menuKey, key)}>
+                      {
+                        this.requestItemMenuArr.map((item => (
+                          <Menu.Item key={item.key}>{item.label}</Menu.Item>
+                        )))
+                      }
+                    </Menu>
+                  )} 
+                  trigger={['contextMenu']}>
                     {
-                      this.requestItemMenuArr.map((item => (
-                        <Menu.Item key={item.key}>{item.label}</Menu.Item>
-                      )))
+                      targetNode && (targetNode.conflict || targetNode.sourceDeleted) ? (
+                        <Popover 
+                          content={
+                            <div style={{width: 300}}>
+                              {
+                                targetNode.sourceDeleted ? (
+                                  <>
+                                    <div>DELETED</div>
+                                    <div>This {targetNode.type === TabType.REQUEST.name() ? 'request' : 'example'} has been deleted</div>
+                                  </>
+                                ) : (
+                                  <>
+                                    <div>CONFLICT</div>
+                                    <div>This {targetNode.type === TabType.REQUEST.name() ? 'request' : 'example'} has been modified since you last opened this tab</div>
+                                  </>
+                                )
+                              }
+                            </div>
+                          } 
+                          title={<Typography.Title level={5}>{targetNode.name}</Typography.Title>}>
+                            {finalNode}
+                        </Popover>
+                      ) : finalNode
                     }
-                  </Menu>
-                )} 
-                trigger={['contextMenu']}>
-                  {
-                    targetNode && (targetNode.conflict || targetNode.sourceDeleted) ? (
-                      <Popover 
-                        content={
-                          <div style={{width: 300}}>
-                            {
-                              targetNode.sourceDeleted ? (
-                                <>
-                                  <div>DELETED</div>
-                                  <div>This {targetNode.type === TabType.REQUEST.name() ? 'request' : 'example'} has been deleted</div>
-                                </>
-                              ) : (
-                                <>
-                                  <div>CONFLICT</div>
-                                  <div>This {targetNode.type === TabType.REQUEST.name() ? 'request' : 'example'} has been modified since you last opened this tab</div>
-                                </>
-                              )
-                            }
-                          </div>
-                        } 
-                        title={<Typography.Title level={5}>{targetNode.name}</Typography.Title>}>
-                          {node}
-                      </Popover>
-                    ) : node
-                  }
-                </Dropdown>
-                </div>
-              </WrapTabNode>
-            )
+                  </Dropdown>
+                  </div>
+                </WrapTabNode>
+              )
+          }
         }
-      }
-    </DefaultTabBar>
-  )
+      </DefaultTabBar>
+    )
+  }
 
   moreActionMenu = [
     {
@@ -571,6 +598,7 @@ class DraggableTabs extends React.Component {
       
         <DndProvider backend={HTML5Backend}>
           <Tabs 
+            id="request-tabs-id"
             activeKey={activeTabKey}
             className="request-tabs-class"
             type="editable-card" 

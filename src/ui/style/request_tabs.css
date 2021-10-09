@@ -19,6 +19,8 @@
 
 .request-tabs-class .ant-tabs-nav-list .ant-tabs-tab {
   padding: 4px 4px 4px 12px;
+  /* border: 1px solid #f0f0f0; */
+  border-bottom: 0;
 }
 
 .request-tab-right-icon:hover .unsaved-dot-icon {
@@ -77,6 +79,11 @@
 
 .request-tabs-class .ant-tabs-tab-active {
   background: #fafafa !important;
-  border-bottom: 1px solid #fafafa !important;
+  /* border-bottom: 1px solid #fafafa !important; */
+}
+
+.ant-tabs-card > .ant-tabs-nav .ant-tabs-ink-bar {
+  visibility: visible;
+  top: 0
 }
 
