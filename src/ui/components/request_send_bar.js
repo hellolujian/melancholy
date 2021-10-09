@@ -16,11 +16,15 @@ class RequestSendBar extends React.Component {
       
     }
 
-    handleChange = (e) => {
+    handleUrlChange = (e) => {
         this.props.onChange({url: e.target.value})
     }
 
-    handleSave = (e) => {
+    handleMethodChange = (value) => {
+        this.props.onSave({method: value})
+    }
+
+    handleUrlSave = (e) => {
         this.props.onSave({url: e.target.value})
     }
     
@@ -34,10 +38,10 @@ class RequestSendBar extends React.Component {
                     <Input 
                         value={url}
                         size="large" 
-                        addonBefore={<RequestMethodSelect />} 
-                        onChange={this.handleChange} 
-                        onBlur={this.handleSave}
-                        onPressEnter={this.handleSave}
+                        addonBefore={<RequestMethodSelect defaultValue={method} onChange={this.handleMethodChange} />} 
+                        onChange={this.handleUrlChange} 
+                        onBlur={this.handleUrlSave}
+                        onPressEnter={this.handleUrlSave}
                     />
                 </Col>
 
