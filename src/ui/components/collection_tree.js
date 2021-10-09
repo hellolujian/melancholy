@@ -30,6 +30,7 @@ import {
     subscribeCollectionSave,
     publishRequestSelected,
     publishRequestSave,
+    publishRequestDelete,
 } from '@/utils/event_utils'
 
 import {
@@ -281,6 +282,7 @@ class CollectionTree extends React.Component {
             onOk: async () => {
                 await deleteRequest(id);
                 this.refreshData();
+                publishRequestDelete({id: id})
             }
         });
     }

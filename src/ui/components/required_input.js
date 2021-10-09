@@ -54,7 +54,6 @@ class RequiredInput extends React.Component {
         
         const {value, editing, showRed} = this.state;
         let inputValue = this.props.hasOwnProperty('value') ? this.props.value : value;
-        console.log('j=============================inptVAlue: %s=========,', inputValue);
         let borderColor = !(inputValue && inputValue.trim()) && showRed ? 'red' : 'gray';
         return (
             <>

@@ -27,6 +27,7 @@ import {
   subscribeRequestSave,
   publishRequestSave,
   publishRequestModalOpen,
+  subscribeRequestDelete,
   listenShortcut
 } from '@/utils/event_utils'
 import {
@@ -94,6 +95,12 @@ class DraggableTabs extends React.Component {
     this.reqeustTabConfirmRef = ref;
   }
   
+  /**
+   * 处理activeTab的变更
+   * @param {*} activeTab 
+   * @param {*} refInfo 
+   * @returns 
+   */
   handleActiveTab = async (activeTab, refInfo) => {
     if (!activeTab) {
       this.setState({activeTabKey: null, requestInfo: null})
@@ -242,18 +249,18 @@ class DraggableTabs extends React.Component {
   }
 
   // 将tab下的草稿保存到request表中
-  doSaveDraft = async (tabId) => {
-    const {tabData} = this.state;
-    let targetTab = tabData.find(item => item.id === tabId);
+  doSaveDraft = async (targetTab, extendDraft = {}) => {
+    const {id: tabId, refId, type} = targetTab;
     // TODO: 需要判断tab类型
-    await updateRequestMeta(targetTab.refId, {$set: targetTab.draft});
-    await updateTabMeta(tabId, {$unset: {draft: true, conflict: true}});
-    await multiUpdateTabMeta({ $not: { id: tabId }, $and: [{refId: targetTab.refId}, {type: targetTab.type}], draft: { $exists: true } }, {$set: {conflict: true}});
+    let draft = targetTab.draft || {};
+    await updateRequestMeta(refId, {$set: {...extendDraft, ...draft}});
+    await updateTabMeta(tabId, {$unset: {draft: true, conflict: true, sourceDeleted: true}});
+    await multiUpdateTabMeta({ $not: { id: tabId }, $and: [{refId: refId}, {type: type}], draft: { $exists: true } }, {$set: {conflict: true}});
   }
 
-  handleSaveDraft = async (tabInfo, justSave) => {
+  handleSaveDraft = async (tabInfo, justSave, extendDraft) => {
     const {id} = tabInfo;
-    await this.doSaveDraft(id);
+    await this.doSaveDraft(tabInfo, extendDraft);
     if (justSave) {
       await this.refreshData()
       return;
@@ -268,7 +275,17 @@ class DraggableTabs extends React.Component {
       // 通过弹框的另存为的请求，需要将tab的草稿内容更新到该请求上，并且更新该tab的refId
       const {justSave, tabInfo} = extend;
       await updateTabMeta(tabInfo.id, {$set: {refId: id, name: name}});
-      await this.handleSaveDraft(tabInfo, justSave);
+      let extendDraft = await queryRequestMetaById(tabInfo.refId);
+      const {url, method, body, header, auth, prerequest, test} = extendDraft;
+      await this.handleSaveDraft({...tabInfo, refId: id}, justSave, {
+          url: url,
+          method: method,
+          body: body,
+          header: header,
+          auth: auth,
+          prerequest: prerequest,
+          test: test, 
+      });
       requestInfoId = tabInfo.refId;
     } else {
       // 普通的修改请求，只需更新tab的name即可
@@ -277,32 +294,29 @@ class DraggableTabs extends React.Component {
     }
     const {requestInfo} = this.state;
     if (requestInfo && requestInfo.id === requestInfoId) {
-      console.log({...requestInfo, ...metaData});
-      this.setState({requestInfo: {...requestInfo, ...metaData}})
+      let newRequestMetaInfo = await queryRequestMetaById(id);
+      this.setState({requestInfo: newRequestMetaInfo})
     }
 
   }
 
-  handleSaveAs = async (tabInfo, justSave) => {
-    const {name, draft} = tabInfo;
-    const {url, method, body, header, description, auth, prerequest, test} = draft;
-    const newId = UUID();
-    let newRequest = {
-      id: newId,
-      name: name,
-      url: url,
-      method: method,
-      body: body,
-      header: header,
-      description: description,
-      auth: auth,
-      prerequest: prerequest,
-      test: test, 
-    };
-    await insertRequestMeta(newRequest);
-    publishRequestModalOpen({metaData: {requestId: newId, name: name}, extend: {justSave: justSave, tabInfo: tabInfo}})
+  // 将请求另存为
+  handleSaveAs = (tabInfo, justSave) => {
+    const {name} = tabInfo;
+    publishRequestModalOpen({metaData: {name: name}, extend: {justSave: justSave, tabInfo: tabInfo}})
   }
 
+  // 处理弹框中的保存
+  handleConfirmSave = async (tabInfo, justSave) => {
+    const {sourceDeleted} = tabInfo;
+    if (sourceDeleted) {
+      this.handleSaveAs(tabInfo, justSave)
+      return;
+    }
+    await this.handleSaveDraft(tabInfo, justSave)
+  }
+
+  // 不保存
   handleNotSave = async (tabInfo, justSave) => {
     if (justSave) {
       return;
@@ -310,18 +324,28 @@ class DraggableTabs extends React.Component {
     await this.doCloseTab(tabInfo.id)
   }
 
+  // 保存当前tab
   handleSaveCurrent = async () => {
     const {activeTabKey, tabData} = this.state;
     if (!activeTabKey) return;
     let targetTab = tabData.find(item => item.id === activeTabKey);
-    if (targetTab.conflict) {
+    if (targetTab.sourceDeleted) {
+      this.handleSaveAs(targetTab, true);
+    } else if (targetTab.conflict) {
       this.reqeustTabConfirmRef.show([targetTab], true);
     } else {
-      await this.doSaveDraft(activeTabKey);
+      await this.doSaveDraft(targetTab);
       await this.refreshData();
     }
   }
   
+  // 处理请求删除
+  handleRequestDelete = async (msg, {id}) => {
+    await multiUpdateTabMeta({refId: id, type: TabType.REQUEST.name()}, {$set: {sourceDeleted: true}});
+    const {requestInfo} = this.state;
+    await this.refreshData(requestInfo && requestInfo.id === id ? {requestInfo: {...requestInfo, deleted: true}} : {});
+  }
+
   componentDidMount = async () => {
     let tabData = await this.refreshData();
     if (tabData.length > 0) {
@@ -330,6 +354,7 @@ class DraggableTabs extends React.Component {
     subscribeNewTabOpen(this.addRequestTab)
     subscribeRequestSelected(this.handleRequestSelected)
     subscribeRequestSave(this.handleRequestSave)
+    subscribeRequestDelete(this.handleRequestDelete)
     listenShortcut('saverequest', this.handleSaveCurrent)
   }
 
@@ -402,12 +427,23 @@ class DraggableTabs extends React.Component {
                 )} 
                 trigger={['contextMenu']}>
                   {
-                    targetNode && targetNode.conflict ? (
+                    targetNode && (targetNode.conflict || targetNode.sourceDeleted) ? (
                       <Popover 
                         content={
                           <div style={{width: 300}}>
-                            <div>CONFLICT</div>
-                            <div>This {targetNode.type === TabType.REQUEST.name() ? 'request' : 'example'} has been modified since you last opened this tab</div>
+                            {
+                              targetNode.sourceDeleted ? (
+                                <>
+                                  <div>DELETED</div>
+                                  <div>This {targetNode.type === TabType.REQUEST.name() ? 'request' : 'example'} has been deleted</div>
+                                </>
+                              ) : (
+                                <>
+                                  <div>CONFLICT</div>
+                                  <div>This {targetNode.type === TabType.REQUEST.name() ? 'request' : 'example'} has been modified since you last opened this tab</div>
+                                </>
+                              )
+                            }
                           </div>
                         } 
                         title={<Typography.Title level={5}>{targetNode.name}</Typography.Title>}>
@@ -518,9 +554,7 @@ class DraggableTabs extends React.Component {
       } else {
         await updateTabMeta(activeTabKey, {$unset: {draft: true}})
       }
-      
     }
-    
   }
 
   render() {
@@ -529,7 +563,7 @@ class DraggableTabs extends React.Component {
       <>
         <RequestTabConfirm 
           ref={this.reqeustTabConfirmRef} 
-          onSave={this.handleSaveDraft}
+          onSave={this.handleConfirmSave}
           onSaveAs={this.handleSaveAs}
           onNotSave={this.handleNotSave}
           onCancel={this.handleCancel}
@@ -587,6 +621,11 @@ class DraggableTabs extends React.Component {
                       {
                         item.conflict && (
                           <Typography.Text>[CONFLICT]</Typography.Text>
+                        )
+                      }
+                      {
+                        item.sourceDeleted && (
+                          <Typography.Text>[DELETED]</Typography.Text>
                         )
                       }
                       <div className="vertical-end" style={{marginTop: 2}}>

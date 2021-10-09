@@ -44,16 +44,27 @@ class RequestIntro extends React.Component {
       this.props.onChange({description: value})
     }
 
+    handleActiveKeyChange = (key) => {
+      const {value} = this.props;
+      if (value.deleted) {
+        return;
+      }
+      this.setState({activeKey: key})
+    }
+
     render() {
      
+      const {activeKey} = this.state;
       const {value} = this.props;
-      let {name, description} = value;
+      console.log('=====================value================');
+      console.log(value);
+      let {name, description, deleted} = value;
       let header = (
       
         <RequiredInput 
             value={name}
             size="small"
-            editIcon={{className: "request-intro-edit-icon"}}
+            editIcon={deleted ? false : {className: "request-intro-edit-icon"}}
             onSave={this.handleNameSave}
             onValueChange={this.handleNameChange}
         />
@@ -62,21 +73,27 @@ class RequestIntro extends React.Component {
         return (
             <Collapse
               bordered={false}
-              // defaultActiveKey={['1']}
+              activeKey={activeKey}
               expandIcon={({ isActive }) => <CaretRightOutlined rotate={isActive ? 90 : 0} />}
+              onChange={this.handleActiveKeyChange}
               // className="site-collapse-custom-collapse"
             >
               <Panel 
                 header={header} 
                 className="site-collapse-custom-collapse-panel"
-                key="1" 
+                key="description" 
+                showArrow={!deleted} 
                 extra={<RequestExamples />}>
                
-                <DescriptionEditor 
+                {
+                  !deleted && (
+                    <DescriptionEditor 
                   value={description}
                   onSave={this.handleDescSave}
                   onChange={this.handleDescChange}
                 />
+                  )
+                }
               </Panel>
             
             </Collapse>

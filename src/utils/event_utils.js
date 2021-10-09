@@ -34,6 +34,7 @@ export const subscribeCollectionSave = (handle) => {
 const REQUEST_MODAL_EVENT = 'request_modal_event';
 const REQUEST_MODAL_EVENT_OPEN = `${REQUEST_MODAL_EVENT}.open`
 const REQUEST_MODAL_EVENT_SAVE = `${REQUEST_MODAL_EVENT}.save`
+const REQUEST_MODAL_EVENT_DELETE = `${REQUEST_MODAL_EVENT}.delete`
 
 export const publishRequestModalOpen = (data) => {
     publish(REQUEST_MODAL_EVENT_OPEN, data)
@@ -50,6 +51,14 @@ export const publishRequestSave = (data) => {
 
 export const subscribeRequestSave = (handle) => {
     subscribe(REQUEST_MODAL_EVENT_SAVE, handle);
+}
+
+export const publishRequestDelete = (data) => {
+    publish(REQUEST_MODAL_EVENT_DELETE, data);
+}
+
+export const subscribeRequestDelete = (handle) => {
+    subscribe(REQUEST_MODAL_EVENT_DELETE, handle);
 }
 
 /**

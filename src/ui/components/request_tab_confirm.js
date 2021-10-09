@@ -52,7 +52,7 @@ class RequestTabConfirm extends React.Component {
      
         const { visible, tabList, justSave } = this.state;
         const tabInfo = tabList.length > 0 ? tabList[tabList.length - 1] : {};
-        const {conflict} = tabInfo;
+        const {conflict, sourceDeleted} = tabInfo;
         let commonPart = (<>This tab <Typography.Text strong>{tabInfo.name}</Typography.Text> has </>);
         let justSavePart = 'been modified from another tab. Saving these changes will overwrite the response.'
         let closeCommonPart = 'unsaved changes which will be lost if you choose to close it. ';
@@ -61,8 +61,8 @@ class RequestTabConfirm extends React.Component {
         let cancelButton = (<Button style={{width: 120}} onClick={this.handleCancel}>Cancel</Button>)
 
         let saveButton = (
-            <Button type="primary" onClick={this.handleSave}>
-                { conflict ? "Save and overwrite" : "Save changes"}
+            <Button type="primary" onClick={this.handleSave} style={sourceDeleted && {width: 120}}>
+                { sourceDeleted ? 'Save' : (conflict ? "Save and overwrite" : "Save changes")}
             </Button>
         )
         let notSaveButton = (
