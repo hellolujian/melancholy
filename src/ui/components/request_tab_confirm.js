@@ -73,54 +73,54 @@ class RequestTabConfirm extends React.Component {
 
         return (
             <Modal
-            className="request-tab-confirm-modal"
-            visible={visible}
-            title="DO YOU WANT TO SAVE? "
-            onCancel={this.handleCancel}
-            footer={(
-                <div className="request-tab-confirm-footer">
-                    <div className="justify-content-space-between">
-                        {
-                            justSave ? (
-                                <>
-                                    {cancelButton}
-                                    {saveButton}
-                                </>
-                            ) : (
-                                <>
-                                    {notSaveButton}
-                                    <Space>
-                                        {!conflict && cancelButton}
+                className="request-tab-confirm-modal"
+                visible={visible}
+                title="DO YOU WANT TO SAVE? "
+                onCancel={this.handleCancel}
+                footer={(
+                    <div className="request-tab-confirm-footer">
+                        <div className="justify-content-space-between">
+                            {
+                                justSave ? (
+                                    <>
+                                        {cancelButton}
                                         {saveButton}
-                                    </Space>
-                                </>
+                                    </>
+                                ) : (
+                                    <>
+                                        {notSaveButton}
+                                        <Space>
+                                            {!conflict && cancelButton}
+                                            {saveButton}
+                                        </Space>
+                                    </>
+                                )
+                            }
+                        </div>
+                        {
+                            conflict && (
+                                <div>
+                                    <Button type="link" onClick={this.handleSaveAs}>Save as a new request</Button>
+                                </div>
                             )
                         }
                     </div>
-                    {
-                        conflict && (
-                            <div>
-                                <Button type="link" onClick={this.handleSaveAs}>Save as a new request</Button>
-                            </div>
-                        )
-                    }
-                </div>
-                
-            )}>
-            <p>
-                {commonPart}{justSave ? justSavePart : closeCommonPart + (conflict ?  closeConflictPart : closeNotConflictPart)}
-            </p>
-            {
-                !justSave && (
-                    <Space align="start">
-                        <Checkbox />
-                        <Space direction="vertical" size={0}>
-                            <span>Do not ask me again</span>
-                            <span style={{color: 'lightgray'}}>You can change this anytime from your Settings</span>
+                    
+                )}>
+                <p>
+                    {commonPart}{justSave ? justSavePart : closeCommonPart + (conflict ?  closeConflictPart : closeNotConflictPart)}
+                </p>
+                {
+                    !justSave && (
+                        <Space align="start">
+                            <Checkbox />
+                            <Space direction="vertical" size={0}>
+                                <span>Do not ask me again</span>
+                                <span style={{color: 'lightgray'}}>You can change this anytime from your Settings</span>
+                            </Space>
                         </Space>
-                    </Space>
-                )
-            }
+                    )
+                }
             </Modal>
         )
     }

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Tabs, Typography, Space, Menu, Dropdown, Popover  } from 'antd';
+import { Tabs, Typography, Space, Menu, Dropdown, Popover, Modal  } from 'antd';
 import { ExclamationCircleOutlined , CaretRightOutlined, PlusOutlined, CaretDownFilled, PlusSquareFilled,SyncOutlined,
   ReadOutlined, SearchOutlined,EllipsisOutlined,
                     SettingFilled,NotificationFilled , EnvironmentFilled ,FolderViewOutlined ,DatabaseOutlined  , PullRequestOutlined  } from '@ant-design/icons';
@@ -235,13 +235,32 @@ class DraggableTabs extends React.Component {
   handleCloseAllTabs = async (isForced = false) => {
     const {tabData} = this.state;
     if (isForced) {
-      await multiUpdateTabMeta({closedAt: 0}, {$set: {closedAt: new Date().getTime()}});
-      let currentAllClosedTabs = await querySortedTab({}, {closedAt: -1});
-      if (currentAllClosedTabs.length >= 10) {
-        await multiRemove({id: {$in: currentAllClosedTabs.slice(10).map(item => item.id)}})
+      const notSavedCount = tabData.filter(item => item.draft).length;
+      let doCloseAll = async () => {
+        await multiUpdateTabMeta({closedAt: 0}, {$set: {closedAt: new Date().getTime()}});
+        let currentAllClosedTabs = await querySortedTab({}, {closedAt: -1});
+        if (currentAllClosedTabs.length >= 10) {
+          await multiRemove({id: {$in: currentAllClosedTabs.slice(10).map(item => item.id)}})
+        }
+        this.setState({tabData: []});
+        await this.handleActiveTab(null);
       }
-      this.setState({tabData: []});
-      await this.handleActiveTab(null);
+      if (notSavedCount > 0) {
+        Modal.confirm({
+          title: 'CONFIRM FORCE CLOSE',
+          icon: null,
+          okText: 'Force Close',
+          closable: true,
+          content: (
+            <Typography.Paragraph>
+              {notSavedCount} tab has unsaved changes. Your changes will be lost if you force close this tab. Are you sure you want to force close?
+            </Typography.Paragraph>
+          ),
+          onOk: doCloseAll
+        })
+      } else {
+        await doCloseAll();
+      }
     } else {
       this.reqeustTabConfirmRef.show(tabData);
     }
@@ -311,8 +330,8 @@ class DraggableTabs extends React.Component {
 
   // 处理弹框中的保存
   handleConfirmSave = async (tabInfo, justSave) => {
-    const {sourceDeleted} = tabInfo;
-    if (sourceDeleted) {
+    const {sourceDeleted, refId} = tabInfo;
+    if (sourceDeleted || !refId) {
       this.handleSaveAs(tabInfo, justSave)
       return;
     }
@@ -431,10 +450,10 @@ class DraggableTabs extends React.Component {
                 style.background = '#fafafa';
               }
               finalNode = (
-                <>
+                <div>
                   {node}
                   <div style={style} />
-                </>
+                </div>
               )
             }
             const targetNode = tabData.find(item => item.id === key);
@@ -501,6 +520,7 @@ class DraggableTabs extends React.Component {
     {
       key: 'force_close',
       label: 'Force Close Current Tab',
+      danger: true,
       event: (tabKey) => this.handleCloseTabClick(tabKey, true)
     },
     {
@@ -516,6 +536,7 @@ class DraggableTabs extends React.Component {
     {
       key: 'force_close_all_tabs',
       label: 'Force Close All Tabs',
+      danger: true,
       event: () => this.handleCloseAllTabs(true)
     }
   ]
@@ -624,7 +645,12 @@ class DraggableTabs extends React.Component {
                     </Menu.SubMenu>
                     {
                       this.moreActionMenu.map(item => (
-                        <Menu.Item disabled={tabData.length === 0} key={item.key}>{item.label}</Menu.Item>
+                        <Menu.Item 
+                          key={item.key}
+                          danger={item.danger}
+                          disabled={tabData.length === 0}>
+                          {item.label}
+                        </Menu.Item>
                       ))
                     }
                   </Menu>
