@@ -627,6 +627,16 @@ class DraggableTabs extends React.Component {
     }
   }
 
+  handleSaveClick = (saveAs) => {
+    if (saveAs) {
+      const {tabData, activeTabKey} = this.state;
+      let targetTab = tabData.find(item => item.id === activeTabKey);
+      this.handleSaveAs(targetTab, true);
+    } else {
+      this.handleSaveCurrent()
+    }
+  }
+
   render() {
     const { tabData, activeTabKey, recentClosedTabs = [], requestInfo } = this.state;
     return (
@@ -735,6 +745,7 @@ class DraggableTabs extends React.Component {
             <RequestTabContent 
               value={requestInfo} 
               onSave={this.handleRequestTabContentSave}
+              onSaveClick={this.handleSaveClick}
               onChange={this.handleRequestTabContentChange}
             />
           )

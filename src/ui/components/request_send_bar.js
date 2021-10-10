@@ -27,6 +27,14 @@ class RequestSendBar extends React.Component {
     handleUrlSave = (e) => {
         this.props.onSave({url: e.target.value})
     }
+
+    handleSaveClick = (e) => {
+        this.props.onSaveClick();
+    }
+
+    handleSaveMenuClick = () => {
+        this.props.onSaveClick(true)
+    }
     
     render() {
         const {value = {}} = this.props;
@@ -61,13 +69,14 @@ class RequestSendBar extends React.Component {
                             Send
                         </Dropdown.Button>
                         <Dropdown.Button overlay={(
-                                <Menu onClick={this.handleMenuClick}>
+                                <Menu onClick={this.handleSaveMenuClick}>
                                     <Menu.Item key="1">
                                         Save as ...
                                     </Menu.Item>
                                 </Menu>)
                             } 
                             size="large"
+                            onClick={this.handleSaveClick}
                             placement="bottomCenter" icon={<CaretDownOutlined />}>
                             Save
                         </Dropdown.Button>
@@ -79,6 +88,12 @@ class RequestSendBar extends React.Component {
 }
 
 export default RequestSendBar;
+
+RequestSendBar.defaultProps = {
+    onChange: () => {},
+    onSave: () => {},
+    onSaveClick: () => {},
+}
 
 
 

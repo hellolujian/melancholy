@@ -27,6 +27,10 @@ class RequestTabContent extends React.Component {
         this.props.onSave(value);
     }
 
+    handleSaveClick = (saveAs) => {
+        this.props.onSaveClick(saveAs);
+    }
+
     render() {
 
         const {value} = this.props;
@@ -41,6 +45,7 @@ class RequestTabContent extends React.Component {
                     value={value}
                     onChange={this.handleChange}
                     onSave={this.handleSave}
+                    onSaveClick={this.handleSaveClick}
                 />
                 <RequestSendSetting />
             </>
@@ -53,6 +58,7 @@ export default RequestTabContent;
 RequestTabContent.defaultProps = {
     onChange: () => {},
     onSave: () => {},
+    onSaveClick: () => {},
 }
 
 
