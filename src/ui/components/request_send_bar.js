@@ -21,7 +21,7 @@ class RequestSendBar extends React.Component {
     }
 
     handleMethodChange = (value) => {
-        this.props.onSave({method: value})
+        this.props.onChange({method: value})
     }
 
     handleUrlSave = (e) => {
@@ -30,7 +30,7 @@ class RequestSendBar extends React.Component {
     
     render() {
         const {value = {}} = this.props;
-        const {url, method} = value;
+        const {url, method = 'get'} = value;
         return (
             <Row gutter={[16, 16]} style={{marginTop: 5, marginBottom: 5}}>
                 

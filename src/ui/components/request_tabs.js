@@ -555,28 +555,50 @@ class DraggableTabs extends React.Component {
     }
   }
 
-  handleRequestTabContentChange = (value) => {
-    console.log('病根传过来的参数：%s', value.url);
+  handleRequestTabContentChange = async (value) => {
+    console.log('病根传过来的参数：');
+    console.log(value);
     const {requestInfo, activeTabKey, tabData} = this.state;
     this.setState({requestInfo: {...requestInfo, ...value}});
     if (!(value.hasOwnProperty('name') || value.hasOwnProperty('description'))) {
+      let targetKey = Object.keys(value)[0];
       let targetTab = tabData.find(item => item.id === activeTabKey);
-      const {draft} = targetTab;
+      console.log('目标对象===================');
+      console.log(targetTab);
+      let {draft} = targetTab;
       if (draft) {
-        let targetKey = Object.keys(value)[0];
-        if (Object.keys(draft).length === 1 && draft.hasOwnProperty(targetKey)) {
+        console.log('目标简直：%s', targetKey);
+        draft = {...draft, ...value}
+
+        if (draft.hasOwnProperty(targetKey)) {
           let targetValue = value[targetKey];
-          let preValue = draft[targetKey]
-          if (targetValue === preValue) {
-            console.log("sdfffffff===========================")
-            console.log(targetTab)
-            delete targetTab.draft;
-          } else {
-            targetTab.draft = {...targetTab.draft, ...value}
+          let preRequestInfo = targetTab.refId ? await queryRequestMetaById(targetTab.refId) : undefined;
+          if (preRequestInfo) {
+            let preValue = preRequestInfo[targetKey]
+            console.log('原先值：%s, 心在值： %s', preValue, targetValue);
+            if (targetValue === preValue || (!targetValue && !preValue)) {
+              console.log("sdfffffff===========================")
+              console.log(targetTab)
+              delete draft[targetKey];
+            }
+          } else if (!targetValue || (targetKey === 'method' && targetValue === 'get')) {
+            delete draft[targetKey];
           }
+          
+        }
+        if (Object.keys(draft).length === 0) {
+          delete targetTab.draft;
+        } else {
+          targetTab.draft = draft;
         }
       } else {
         targetTab.draft = {...value};
+      }
+
+      // method变更直接走保存逻辑
+      if (value.hasOwnProperty('method')) {
+        targetTab.icon = value.method;
+        await updateTabMeta(activeTabKey, {$set: {icon: value.method, draft: targetTab.draft}})
       }
 
       console.log('===变更后的tabdata纸==');
@@ -590,15 +612,15 @@ class DraggableTabs extends React.Component {
     const {requestInfo, activeTabKey, tabData} = this.state;
     if (value.hasOwnProperty('name')) {
       await saveRequest({id: requestInfo.id, ...value});
-      publishRequestSave({metaData: {id: requestInfo.id, name: value.name}})
+      publishRequestSave({metaData: {id: requestInfo.id, name: value.name}});
+      return;
     } else if (value.hasOwnProperty('description')) {
       await updateRequestMeta(requestInfo.id, {$set: value})
-      this.setState({requestInfo: {...requestInfo, ...value}})
     } else {
       const activeTab = tabData.find(item => item.id === activeTabKey);
       let updateDraft = activeTab.draft;
       if (updateDraft) {
-        await updateTabMeta(activeTabKey, {$set: {draft: {...updateDraft, ...value}}})
+        await updateTabMeta(activeTabKey, {$set: {draft: updateDraft}})
       } else {
         await updateTabMeta(activeTabKey, {$unset: {draft: true}})
       }
@@ -647,7 +669,7 @@ class DraggableTabs extends React.Component {
                       this.moreActionMenu.map(item => (
                         <Menu.Item 
                           key={item.key}
-                          danger={item.danger}
+                          danger={item.danger && tabData.length > 0}
                           disabled={tabData.length === 0}>
                           {item.label}
                         </Menu.Item>

@@ -1,5 +1,5 @@
 import { DEL_REQUEST_ICON, BOOTCAMP_ICON, EXAMPLE_ICON, POST_REQUEST_ICON, GET_REQUEST_ICON, PATCH_REQUEST_ICON, PUT_REQUEST_ICON } from 'ui/constants/icons'
-
+import {TEXT_ICON,} from 'ui/constants/icons'
 const Enum = require('node-enumjs');
 
 export const TabType= Enum.define("TabType", ["REQUEST", "EXAMPLE", "BOOTCAMP"])
@@ -52,5 +52,5 @@ export const getIconByCode = (code) => {
     if (target) {
         return target.icon;
     }
-    return '';
+    return TEXT_ICON(code.toUpperCase(), code.length > 4 ? {width: code.length * 8.5} : {});
 }

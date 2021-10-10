@@ -42,8 +42,8 @@ class RequestMethodSelect extends React.Component {
     render() {
         return (
             <Select  
-                style={{width: 100}}
-                defaultValue="GET"
+                style={{width: 120}}
+                defaultValue="get"
                 {...this.props} 
                 options={this.methodArr} 
                 onChange={this.handleChange}
