@@ -27,6 +27,7 @@ const { TabPane } = Tabs;
 const { Paragraph, Text } = Typography;
 class CollectionItem extends React.Component {
 
+    titleContainerRef = React.createRef()
     constructor(props) {
         super(props);
         this.state = {
@@ -113,6 +114,26 @@ class CollectionItem extends React.Component {
         this.setState({collectionDrawerVisible: false})
     }
 
+    getTextSize = (text) => {
+        let span = document.createElement('span');
+        let initWidth = span.offsetWidth;
+        span.style.visibility = 'hidden';
+        span.style.fontSize = '14px';
+        span.style.fontFamily = '-apple-system, "PingFang SC", "Helvetica Neue", Helvetica,\n' +
+            'STHeiTi, sans-serif';//字体 可以替换为项目中自己的字体
+        span.style.display = "inline-block";
+        document.body.appendChild(span);
+        if (typeof span.textContent !== "undefined") {
+            span.textContent = text;
+        } else {
+            span.innerText = text;
+        }
+
+        let moni = parseFloat(window.getComputedStyle(span).width) - initWidth;
+        span.parentNode.removeChild(span);//删除节点
+        return moni;
+    }
+
     render() {
 
         const menu = (
@@ -137,60 +158,80 @@ class CollectionItem extends React.Component {
                 </Tooltip>
             </Dropdown>
         )
+        let collectionName = item.name
+
+        let collectionNameWidth = 263;
+         console.log(this.titleContainerRef.current);
+        if (this.titleContainerRef.current) {
+            let widthProp = window.getComputedStyle(this.titleContainerRef.current).width;
+            collectionNameWidth = parseInt(widthProp.substring(0, widthProp.lastIndexOf('px')));
+            console.log('================width: %s==============', collectionNameWidth);
+        }
+        let guessWidth = this.getTextSize(collectionName)
+        console.log('模拟宽度：%s', guessWidth);
+        let maxWidth = collectionNameWidth - 45;
         
         return (
             <>
                 <Dropdown 
                     overlay={menu} 
                     trigger={['contextMenu']}>
-                    <Row align="middle" gutter={[12]}>
+                    <Row align="middle" gutter={[12]} style={{flexFlow: 'row nowrap'}}>
                         <Col flex="none" style={{display: 'flex'}}>{COLLECTION_FOLDER_ICON}</Col>
-                        <Col flex="auto" style={{paddingLeft: 0}}>
-                            <Space className="full-width justify-content-space-between">
-                                <div>
-                                    {
-                                        showCollectionNameInput ? (
-                                            <RequiredInput 
-                                                onSave={this.saveCollectionName}
-                                                size="small"
-                                                editing={true}
-                                                editIcon={null}
-                                                defaultValue={item.name}
-                                                onClick={stopClickPropagation} 
-                                                // onChange={this.handleCollectionNameChange}
-                                            />
-                                            
-                                        ) : (
-                                            <Space align="center">
-                                                <span style={{display: 'inline-block', border: '1px solid rgb(0,0,0,0)'}}>{item.name}</span>
-                                                <span onClick={stopClickPropagation}>
-                                                    <Rate 
-                                                        style={{fontSize: 16}} 
-                                                        count={1} 
-                                                        value={item.starred}
-                                                        onChange={this.handleRateChange} 
-                                                        className={item.starred ? '' : 'collection-item-display'} 
-                                                    />
-                                                </span>
-                                            </Space>
-                                        )
-                                    }
-                                    <div>
-                                        <Text type="secondary">{item.requestCount ? item.requestCount : 0} requests</Text>
-                                    </div>
-                                </div>
-                                <Space direction="vertical" size={0} style={{borderLeft: '1px solid rgba(0, 0, 0, 0.1)'}} className={collectionDrawerVisible ? "" : "collection-item-display"}>
-                                    <TooltipButton 
-                                        tooltipProps={{title: "View more actions"}}
-                                        buttonProps={{
-                                            type: 'text', 
-                                            icon: <CaretRightOutlined rotate={collectionDrawerVisible ? 180 : 0} />, 
-                                            onClick: this.handleCollectionDrawerShow
-                                        }}
+                        <Col flex="auto" style={{paddingLeft: 0}} ref={this.titleContainerRef}>
+                            {
+                                showCollectionNameInput ? (
+                                    <RequiredInput 
+                                        onSave={this.saveCollectionName}
+                                        size="small"
+                                        editing={true}
+                                        editIcon={null}
+                                        defaultValue={item.name}
+                                        onClick={stopClickPropagation} 
+                                        // onChange={this.handleCollectionNameChange}
                                     />
-                                    <Divider className="collection-item-action-split" />
-                                    {viewMoreActionButton}
-                                </Space>
+                                    
+                                ) : (
+                                    <Space align="center">
+                                        {
+                                            guessWidth > maxWidth ? (
+                                                <Text ellipsis style={{display: 'inline-block', border: '1px solid rgb(0,0,0,0)', width: maxWidth}} >{item.name}</Text>
+                                            ) : (
+                                                <span style={{display: 'inline-block', border: '1px solid rgb(0,0,0,0)'}} >
+                                                    {collectionName}
+                                                </span>
+                                            )
+                                        }
+                                        
+                                        <div onClick={stopClickPropagation}>
+                                            <Rate 
+                                                // style={{fontSize: 16}} 
+                                                count={1} 
+                                                value={item.starred}
+                                                onChange={this.handleRateChange} 
+                                                className={item.starred ? '' : 'collection-item-display'} 
+                                            />
+                                        </div>
+                                    </Space>
+                                )
+                            }
+                            <div>
+                            <Text type="secondary">{item.requestCount ? item.requestCount : 0} requests</Text>
+
+                            </div>
+                        </Col>
+                        <Col flex="none">
+                            <Space direction="vertical" size={0} style={{borderLeft: '1px solid rgba(0, 0, 0, 0.1)'}} className={collectionDrawerVisible ? "" : "collection-item-display"}>
+                                <TooltipButton 
+                                    tooltipProps={{title: "View more actions"}}
+                                    buttonProps={{
+                                        type: 'text', 
+                                        icon: <CaretRightOutlined rotate={collectionDrawerVisible ? 180 : 0} />, 
+                                        onClick: this.handleCollectionDrawerShow
+                                    }}
+                                />
+                                <Divider className="collection-item-action-split" />
+                                {viewMoreActionButton}
                             </Space>
                         </Col>
                     </Row>
