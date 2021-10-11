@@ -47,7 +47,7 @@ export const TabIconType = Enum.define("TabIconType", {
     }
 });
 
-export const getIconByCode = (code) => {
+export const getIconByCode = (code = 'get') => {
     let target = TabIconType.values().find(item => item.code === code);
     if (target) {
         return target.icon;

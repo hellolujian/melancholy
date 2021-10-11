@@ -21,6 +21,7 @@ import {
     REMOVE_FROM_WORKSPACE_ICON, DELETE_ICON, COLLECTION_FOLDER_ICON, GET_REQUEST_ICON, POST_REQUEST_ICON
 } from '@/ui/constants/icons'
 // import {starCollection} from '@/database/database'
+import {TabIconType, TabType, getIconByCode} from '@/enums'
 import 'ui/style/tree.css'
 
 const { TabPane } = Tabs;
@@ -32,8 +33,7 @@ class RequestItem extends React.Component {
         this.state = {
            showCollectionNameInput: false,
            item: props.item,
-           
-        }
+        };
     }
 
     componentDidMount() {
@@ -124,39 +124,36 @@ class RequestItem extends React.Component {
                 <Dropdown 
                     overlay={menu} 
                     trigger={['contextMenu']}>
-                            <Space className="full-width justify-content-space-between">
-                                <Space align="center" style={{padding: '4px 0px', display: 'flex', alignItems: 'center'}}>
-                                    <div style={{width: 28, textAlign: 'center', lineHeight: 0}}>
-                                        {
-                                            item.method === 'POST' ? POST_REQUEST_ICON : GET_REQUEST_ICON
-                                        }
-                                    </div>
-                                    <div>
-                                        {
-                                            showCollectionNameInput ? (
-                                                <RequiredInput 
-                                                    onSave={this.saveRequestName}
-                                                    size="small"
-                                                    editing={true}
-                                                    editIcon={null}
-                                                    defaultValue={item.name}
-                                                    onClick={stopClickPropagation} 
-                                                />
-                                            ) : (
-                                                <Space align="center">
-                                                    <span style={{display: 'inline-block', border: '1px solid rgb(0,0,0,0)'}}>{item.name}</span>
-                                                </Space>
-                                            )
-                                        }
-                                    </div>
-                                </Space>
-                                
+                        <Row align="middle" wrap={false} gutter={[16, 16]}>
+                            <Col style={{lineHeight: 0}}>
+                                {
+                                    getIconByCode(item.method)
+                                }
+                            </Col>
+                            <Col flex="auto">
+                                {
+                                    showCollectionNameInput ? (
+                                        <RequiredInput 
+                                            size="small"
+                                            editing={true}
+                                            editIcon={null}
+                                            defaultValue={item.name}
+                                            onSave={this.saveRequestName}
+                                            onClick={stopClickPropagation} 
+                                        />
+                                    ) : (
+                                        <Text 
+                                            ellipsis 
+                                            style={{width: '100%', border: '1px solid rgb(0,0,0,0)'}}>
+                                            {item.name}
+                                        </Text>
+                                    )
+                                }
+                            </Col>
+                            <Col flex="none">
                                 {viewMoreActionButton}
-                            </Space>
-
-                            
-
-
+                            </Col>
+                        </Row>
                 </Dropdown>
 
             </>

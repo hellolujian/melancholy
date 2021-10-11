@@ -60,6 +60,7 @@ class RequestIntro extends React.Component {
       let sourceRequestExist = !deleted && id;
       let header = (
       
+        <div className="justify-content-space-between-inline border" style={{width: '95%'}}>
         <RequiredInput 
             value={name}
             size="small"
@@ -67,6 +68,9 @@ class RequestIntro extends React.Component {
             onSave={this.handleNameSave}
             onValueChange={this.handleNameChange}
         />
+        <RequestExamples />
+        </div>
+
                                         
       )
         return (
@@ -82,7 +86,8 @@ class RequestIntro extends React.Component {
                 className="site-collapse-custom-collapse-panel"
                 key="description" 
                 showArrow={sourceRequestExist ? true : false} 
-                extra={<RequestExamples />}>
+                // extra={<RequestExamples />}
+                >
                
                 {
                   sourceRequestExist && (

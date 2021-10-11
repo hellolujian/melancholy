@@ -14,7 +14,10 @@
 .site-drawer-render-in-current-wrapper {
   position: relative;
   background: #fff;
-  padding: 20px 10px
+  padding: 20px 10px;
+  /* border: 1px solid red; */
+  /* min-width: 700px;
+  overflow: auto */
 }
 .left-side-tabs .ant-tabs-nav {
   margin: 0px

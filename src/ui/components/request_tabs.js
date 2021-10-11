@@ -38,6 +38,7 @@ import {UUID} from '@/utils/global_utils'
 import 'ui/style/request_tabs.css'
 
 const { TabPane } = Tabs;
+const  {Text} = Typography
 
 // Drag & Drop node
 class TabNode extends React.Component {
@@ -450,7 +451,7 @@ class DraggableTabs extends React.Component {
                 style.background = '#fafafa';
               }
               finalNode = (
-                <div>
+                <div className="border" style={{maxWidth: 200}}>
                   {node}
                   <div style={style} />
                 </div>
@@ -460,43 +461,43 @@ class DraggableTabs extends React.Component {
               return (
                 <WrapTabNode key={key} index={key} moveTabNode={this.moveTabNode}>
                   <div style={{marginRight: 2}}>
-                  <Dropdown 
-                  overlay={(
-                    <Menu onClick={({key: menuKey}) => this.handleRequestTabItemMenuClick(menuKey, key)}>
+                    <Dropdown 
+                      overlay={(
+                        <Menu onClick={({key: menuKey}) => this.handleRequestTabItemMenuClick(menuKey, key)}>
+                          {
+                            this.requestItemMenuArr.map((item => (
+                              <Menu.Item key={item.key}>{item.label}</Menu.Item>
+                            )))
+                          }
+                        </Menu>
+                      )} 
+                      trigger={['contextMenu']}>
                       {
-                        this.requestItemMenuArr.map((item => (
-                          <Menu.Item key={item.key}>{item.label}</Menu.Item>
-                        )))
+                        targetNode && (targetNode.conflict || targetNode.sourceDeleted) ? (
+                          <Popover 
+                            content={
+                              <div style={{width: 300}}>
+                                {
+                                  targetNode.sourceDeleted ? (
+                                    <>
+                                      <div>DELETED</div>
+                                      <div>This {targetNode.type === TabType.REQUEST.name() ? 'request' : 'example'} has been deleted</div>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <div>CONFLICT</div>
+                                      <div>This {targetNode.type === TabType.REQUEST.name() ? 'request' : 'example'} has been modified since you last opened this tab</div>
+                                    </>
+                                  )
+                                }
+                              </div>
+                            } 
+                            title={<Typography.Title level={5}>{targetNode.name}</Typography.Title>}>
+                              {finalNode}
+                          </Popover>
+                        ) : finalNode
                       }
-                    </Menu>
-                  )} 
-                  trigger={['contextMenu']}>
-                    {
-                      targetNode && (targetNode.conflict || targetNode.sourceDeleted) ? (
-                        <Popover 
-                          content={
-                            <div style={{width: 300}}>
-                              {
-                                targetNode.sourceDeleted ? (
-                                  <>
-                                    <div>DELETED</div>
-                                    <div>This {targetNode.type === TabType.REQUEST.name() ? 'request' : 'example'} has been deleted</div>
-                                  </>
-                                ) : (
-                                  <>
-                                    <div>CONFLICT</div>
-                                    <div>This {targetNode.type === TabType.REQUEST.name() ? 'request' : 'example'} has been modified since you last opened this tab</div>
-                                  </>
-                                )
-                              }
-                            </div>
-                          } 
-                          title={<Typography.Title level={5}>{targetNode.name}</Typography.Title>}>
-                            {finalNode}
-                        </Popover>
-                      ) : finalNode
-                    }
-                  </Dropdown>
+                    </Dropdown>
                   </div>
                 </WrapTabNode>
               )
@@ -717,7 +718,9 @@ class DraggableTabs extends React.Component {
                       <div className="vertical-end" style={{marginTop: 2}}>
                         {getIconByCode(item.icon)}
                       </div>
-                      <div className="vertical-start">{item.name}</div>
+                      <div className="vertical-start">
+                        <Text>{item.name}</Text>{item.name}
+                      </div>
                       <div className="vertical-end request-tab-right-icon" style={{marginTop: 2}}>
                         {
                           item.draft && (

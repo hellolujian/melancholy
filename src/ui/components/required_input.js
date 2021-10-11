@@ -1,8 +1,9 @@
 import React from 'react';
-import {Input, Button, Space} from 'antd';
+import {Input, Typography, Space} from 'antd';
 import { EDIT_ICON } from '@/ui/constants/icons'
 import {stopClickPropagation} from '@/utils/global_utils';
 import 'ui/style/required_input.css'
+const {Text} = Typography;
 
 class RequiredInput extends React.Component {
 
@@ -59,7 +60,7 @@ class RequiredInput extends React.Component {
             <>
                 {            
                     editing ? (
-                        <div style={{border: '1px solid ' + borderColor, display: 'inline-block'}}>
+                        <div style={{border: '1px solid ' + borderColor, display: 'inline-block'}} className="full-width">
                             <Input
                                 size="small"
                                 bordered={false}
@@ -67,7 +68,7 @@ class RequiredInput extends React.Component {
                                 autoFocus
                                 defaultValue={defaultValue}
                                 value={inputValue}
-                                style={{padding: 0}}
+                                style={{padding: 0, width: '100%'}}
                                 onBlur={this.handleSave}
                                 onPressEnter={this.handleSave}
                                 onClick={this.handleInputClick}
@@ -76,7 +77,9 @@ class RequiredInput extends React.Component {
                         </div>
                     ) : (
                         <Space className={editWhenHover ? "not-edit-container" : ""}>
-                            <span className={editWhenHover ? "not-editing-text" : ""} style={{border: '1px solid rgb(0,0,0,0)', display: 'inline-block'}}>{inputValue}</span>
+                            <span className={editWhenHover ? "not-editing-text" : ""} style={{border: '1px solid rgb(0,0,0,0)', display: 'inline-block'}}>
+                                <Text style={{maxWidth: 300,}} ellipsis={{rows: 1}}>{inputValue}</Text>
+                            </span>
                             {editIcon && (<span className={'not-editing-edit-icon ' + (editIcon.className ? editIcon.className : "")} onClick={this.handleEditIconClick}>{EDIT_ICON}</span>)}
                         </Space>
                     )

@@ -5,7 +5,7 @@
 }
 
 .ant-tree-node-content-wrapper {
-  width: 100%;
+  width: 90%;
   padding: 0px !important;
 }
 
@@ -49,7 +49,7 @@
   margin-left: 12px;
 }
 .ant-tree-switcher-noop {
-  width: 5px;
+  width: 8px;
 }
 .ant-tree-treenode-empty .ant-tree-switcher-noop {
   display: none !important;

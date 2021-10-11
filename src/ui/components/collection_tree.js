@@ -317,32 +317,18 @@ class CollectionTree extends React.Component {
     }
 
     handleDrop = async (info) => {
-        const {dropPosition, node, dragNode, dragNodesKeys, dropToGap} = info;
-
-        console.log('node:');
-        console.log(node);
-        console.log('dragnode:');
-        console.log(dragNode);
-        console.log('dragNodesKeys:');
-        console.log(dragNodesKeys);
-        console.log('info============================');
-        console.log(info);
+        const {dropPosition, node, dragNode, dropToGap} = info;
         await dropNode(dragNode.key, dragNode.isLeaf, node.key, node.isLeaf, dropPosition, dropToGap) 
-
-        
         this.refreshData()
     }
 
     checkAllowDrop = (dropInfo) =>  {
-        const { dropNode, dropPosition } = dropInfo;
-        console.log('======================dropinfo==================================');
-        console.log(dropInfo);
         return !dropInfo.isLeaf;
     }
 
     render() {
 
-        const {collectionData, collectionDrawerVisibleItem, expandedKeys, selectedKeys} = this.state;
+        const {collectionData, collectionDrawerVisibleItem, expandedKeys} = this.state;
         let treeData = collectionData.map(item => {
             return {
                 key: item.id,
