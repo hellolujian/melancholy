@@ -12,7 +12,7 @@ import { CaretRightOutlined,  EllipsisOutlined, FolderFilled} from '@ant-design/
 import TooltipButton from 'ui/components/tooltip_button'
 import RequiredInput from './required_input'
 import PostmanButton from './postman_button'
-import {stopClickPropagation} from '@/utils/global_utils';
+import {stopClickPropagation, getTextSize} from '@/utils/global_utils';
 import {publishNewTabOpen, publishRequestModalOpen, publishRequestSelected} from '@/utils/event_utils'
 import {
     OPEN_NEW_ICON, ELLIPSIS_ICON, RENAME_ICON, EDIT_ICON, CREATE_FORK_ICON, 
@@ -32,11 +32,17 @@ class RequestItem extends React.Component {
         super(props);
         this.state = {
            showCollectionNameInput: false,
-           item: props.item,
         };
     }
 
+    componentWillReceiveProps = (nextProps) => {
+        if (nextProps.item.name !== this.props.item.name) {
+            this.setState({nameSize: getTextSize(nextProps.item.name)})
+        }
+    }
+
     componentDidMount() {
+        this.setState({nameSize: getTextSize(this.props.item.name)})
     }
 
     // 渲染collection输入框
@@ -96,8 +102,6 @@ class RequestItem extends React.Component {
                 }
             </Menu>
         );
-        const {showCollectionNameInput} = this.state;
-        const {item} = this.props;
       
         const viewMoreActionButton = (
             <Dropdown overlay={(
@@ -117,17 +121,22 @@ class RequestItem extends React.Component {
                     <PostmanButton className="folder-item-display" onClick={stopClickPropagation} icon={ELLIPSIS_ICON} />
                 </Tooltip>
             </Dropdown>
-        )
+        );
+
+        const {showCollectionNameInput, nameSize} = this.state;
+        const {item, resizeWidth, tiledParentId} = this.props;
+        const {name, method} = item;
+        let maxWidth = resizeWidth - 102 - (tiledParentId.length - 1) * 16;
         
         return (
             <>
                 <Dropdown 
                     overlay={menu} 
                     trigger={['contextMenu']}>
-                        <Row align="middle" wrap={false} gutter={[16, 16]}>
+                        <Row align="middle" wrap={false} gutter={[12]} style={{flexFlow: 'row nowrap'}}>
                             <Col style={{lineHeight: 0}}>
                                 {
-                                    getIconByCode(item.method)
+                                    getIconByCode(method)
                                 }
                             </Col>
                             <Col flex="auto">
@@ -137,16 +146,20 @@ class RequestItem extends React.Component {
                                             size="small"
                                             editing={true}
                                             editIcon={null}
-                                            defaultValue={item.name}
+                                            defaultValue={name}
                                             onSave={this.saveRequestName}
                                             onClick={stopClickPropagation} 
                                         />
                                     ) : (
-                                        <Text 
-                                            ellipsis 
-                                            style={{width: '100%', border: '1px solid rgb(0,0,0,0)'}}>
-                                            {item.name}
-                                        </Text>
+                                        nameSize > maxWidth ? (
+                                            <Text 
+                                                ellipsis 
+                                                style={{width: maxWidth, border: '1px solid rgb(0,0,0,0)'}}>
+                                                {name}
+                                            </Text>
+                                        ) : (
+                                            <span style={{display: 'inline-block', border: '1px solid rgb(0,0,0,0)'}}>{name}</span>
+                                        )
                                     )
                                 }
                             </Col>
@@ -155,9 +168,7 @@ class RequestItem extends React.Component {
                             </Col>
                         </Row>
                 </Dropdown>
-
             </>
-            
         )
     }
 }

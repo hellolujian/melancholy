@@ -12,7 +12,7 @@ import { CaretRightOutlined,  EllipsisOutlined, FolderFilled} from '@ant-design/
 import TooltipButton from 'ui/components/tooltip_button'
 import RequiredInput from './required_input'
 import PostmanButton from './postman_button'
-import {stopClickPropagation} from '@/utils/global_utils';
+import {stopClickPropagation, getTextSize} from '@/utils/global_utils';
 import {publishCollectionModalOpen, publishRequestModalOpen} from '@/utils/event_utils'
 import {
     SHARE_COLLECTION_ICON, ELLIPSIS_ICON, RENAME_ICON, EDIT_ICON, CREATE_FORK_ICON, 
@@ -31,12 +31,18 @@ class RequestItem extends React.Component {
         super(props);
         this.state = {
            showCollectionNameInput: false,
-           item: props.item,
            
         }
     }
 
+    componentWillReceiveProps = (nextProps) => {
+        if (nextProps.item.name !== this.props.item.name) {
+            this.setState({nameSize: getTextSize(nextProps.item.name)})
+        }
+    }
+
     componentDidMount() {
+        this.setState({nameSize: getTextSize(this.props.item.name)})
     }
 
     // 渲染collection输入框
@@ -61,9 +67,9 @@ class RequestItem extends React.Component {
     // 菜单配置
     menuItems = [
         { name: 'rename', label: 'Rename', icon: RENAME_ICON, event: this.showCollectionNameInput},
-        { name: 'edit', label: 'Edit', icon: EDIT_ICON, event: () => publishCollectionModalOpen({collectionId: this.state.item.id})},
-        { name: 'add_request', label: 'Add Request', icon: ADD_REQUEST_ICON, event: () => publishRequestModalOpen({parentId: this.state.item.id})},
-        { name: 'add_folder', label: 'Add Folder', icon: ADD_FOLDER_ICON, event: () => publishCollectionModalOpen({parentId: this.state.item.id})},
+        { name: 'edit', label: 'Edit', icon: EDIT_ICON, event: () => publishCollectionModalOpen({collectionId: this.props.item.id})},
+        { name: 'add_request', label: 'Add Request', icon: ADD_REQUEST_ICON, event: () => publishRequestModalOpen({parentId: this.props.item.id})},
+        { name: 'add_folder', label: 'Add Folder', icon: ADD_FOLDER_ICON, event: () => publishCollectionModalOpen({parentId: this.props.item.id})},
         { name: 'duplicate', label: 'Duplicate', icon: DUPLICATE_ICON, event: this.duplicateCollection },
         { name: 'delete', label: 'Delete', icon: DELETE_ICON, event: this.deleteCollection },
     ]
@@ -93,8 +99,6 @@ class RequestItem extends React.Component {
                 }
             </Menu>
         );
-        const {showCollectionNameInput} = this.state;
-        const {item} = this.props;
       
         const viewMoreActionButton = (
             <Dropdown overlay={(
@@ -114,37 +118,50 @@ class RequestItem extends React.Component {
                     <PostmanButton className="folder-item-display" onClick={stopClickPropagation} icon={ELLIPSIS_ICON} />
                 </Tooltip>
             </Dropdown>
-        )
+        );
+
+        const {showCollectionNameInput, nameSize} = this.state;
+        const {item, resizeWidth, tiledParentId} = this.props;
+        const {name} = item;
+        let maxWidth = resizeWidth - 108 - (tiledParentId.length - 1) * 16;
         
         return (
             <>
                 <Dropdown 
                     overlay={menu} 
                     trigger={['contextMenu']}>
-                    <Row align="middle" gutter={[12]}>
+                    <Row align="middle" gutter={[12]} style={{flexFlow: 'row nowrap'}}>
                         <Col flex="none" style={{display: 'flex'}}><FolderFilled /></Col>
                         <Col flex="auto" style={{paddingLeft: 0}}>
-                            <Space className="full-width justify-content-space-between">
-                                <div>
-                                    {
-                                        showCollectionNameInput ? (
-                                            <RequiredInput 
-                                                onSave={this.saveFolderName}
-                                                size="small"
-                                                editing={true}
-                                                editIcon={null}
-                                                defaultValue={item.name}
-                                                onClick={stopClickPropagation} 
-                                            />
-                                        ) : (
-                                            <Space align="center">
-                                                <span style={{display: 'inline-block', border: '1px solid rgb(0,0,0,0)'}}>{item.name}</span>
-                                            </Space>
-                                        )
-                                    }
-                                </div>
-                                {viewMoreActionButton}
-                            </Space>
+                            {
+                                showCollectionNameInput ? (
+                                    <RequiredInput 
+                                        size="small"
+                                        editing={true}
+                                        editIcon={null}
+                                        defaultValue={name}
+                                        onSave={this.saveFolderName}
+                                        onClick={stopClickPropagation} 
+                                    />
+                                ) : (
+                                    <Space align="center">
+                                        {
+                                            nameSize > maxWidth ? (
+                                                <Text 
+                                                    ellipsis 
+                                                    style={{display: 'inline-block', border: '1px solid rgb(0,0,0,0)', width: maxWidth}}>
+                                                    {name}
+                                                </Text>
+                                            ) : (
+                                                <span style={{display: 'inline-block', border: '1px solid rgb(0,0,0,0)'}}>{name}</span>
+                                            )
+                                        }
+                                    </Space>
+                                )
+                            }
+                        </Col>
+                        <Col flex="none">
+                            {viewMoreActionButton}
                         </Col>
                     </Row>
                 </Dropdown>

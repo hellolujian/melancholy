@@ -136,26 +136,26 @@ class CollectionTree extends React.Component {
     }
 
     // 递归遍历collection下的folder
-    traverseCollectionItems = (list) => {
+    traverseCollectionItems = (list, parentId) => {
         return list.map(node => {
             let treeItem = {
                 key: node.id,
                 name: node.name,
             }
             if (node.items) {
-                
                 treeItem.title = (
                     <FolderItem 
                         item={node} 
+                        tiledParentId={[...parentId]}
+                        resizeWidth={this.props.resizeWidth}
                         onDelete={() => this.handleFolderDelete(node)}
                         onDuplicate={() => this.handleCollectionDuplicate(node.id)}
                         onRename={(value) => this.handleCollectionRename(node.id, value)}
                     />
                 );
-
                 
                 if (node.items.length > 0) {
-                    treeItem.children = this.traverseCollectionItems(node.items);
+                    treeItem.children = this.traverseCollectionItems(node.items, [...parentId, node.id]);
                 } else {
                     treeItem.children = [this.getEmptyNode(node, true)]
                 }
@@ -173,6 +173,8 @@ class CollectionTree extends React.Component {
                     // </Space>
                     <RequestItem 
                         item={node} 
+                        tiledParentId={[...parentId]}
+                        resizeWidth={this.props.resizeWidth}
                         onDelete={() => this.handleRequestDelete(node)}
                         onDuplicate={() => this.handleRequestDuplicate(node.id)}
                         onRename={(value) => this.handleRequestRename(node.id, value)}
@@ -336,6 +338,7 @@ class CollectionTree extends React.Component {
                 title: (
                     <CollectionItem 
                         item={item} 
+                        resizeWidth={this.props.resizeWidth}
                         collectionDrawerVisible={collectionDrawerVisibleItem === item.id} 
                         onDrawerVisibleChange={this.handleDrawerVisibleChange} 
                         onDelete={() => this.handleCollectionDelete(item.id)}
@@ -347,7 +350,7 @@ class CollectionTree extends React.Component {
                 ),
                 children: !item.items || item.items.length === 0 ? [
                     this.getEmptyNode(item)
-                ] : this.traverseCollectionItems(item.items)
+                ] : this.traverseCollectionItems(item.items, [item.id])
             }
         })
         

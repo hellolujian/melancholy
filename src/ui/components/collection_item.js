@@ -12,7 +12,7 @@ import { CaretRightOutlined,  EllipsisOutlined,} from '@ant-design/icons';
 import TooltipButton from 'ui/components/tooltip_button'
 import RequiredInput from './required_input'
 import PostmanButton from './postman_button'
-import {stopClickPropagation} from '@/utils/global_utils';
+import {stopClickPropagation, getTextSize} from '@/utils/global_utils';
 import {publishCollectionModalOpen, publishRequestModalOpen} from '@/utils/event_utils'
 import {
     SHARE_COLLECTION_ICON, MANAGE_ROLES_ICON, RENAME_ICON, EDIT_ICON, CREATE_FORK_ICON, 
@@ -27,22 +27,22 @@ const { TabPane } = Tabs;
 const { Paragraph, Text } = Typography;
 class CollectionItem extends React.Component {
 
-    titleContainerRef = React.createRef()
     constructor(props) {
         super(props);
         this.state = {
-           showCollectionNameInput: false,
-           item: props.item,
+           showCollectionNameInput: false
            
         }
     }
 
     componentWillReceiveProps = (nextProps) => {
-        this.setState({item: nextProps.item})
+        if (nextProps.item.name !== this.props.item.name) {
+            this.setState({nameSize: getTextSize(nextProps.item.name)})
+        }
     }
 
     componentDidMount() {
-       
+       this.setState({nameSize: getTextSize(this.props.item.name)})
     }
 
     // 处理详情抽屉的显示
@@ -85,11 +85,11 @@ class CollectionItem extends React.Component {
         { name: 'share_collection', label: 'Share Collection', icon: SHARE_COLLECTION_ICON,  },
         { name: 'manage_roles', label: 'Manage Roles', icon: MANAGE_ROLES_ICON, },
         { name: 'rename', label: 'Rename', icon: RENAME_ICON, event: this.showCollectionNameInput},
-        { name: 'edit', label: 'Edit', icon: EDIT_ICON, event: () => publishCollectionModalOpen({collectionId: this.state.item.id})},
+        { name: 'edit', label: 'Edit', icon: EDIT_ICON, event: () => publishCollectionModalOpen({collectionId: this.props.item.id})},
         { name: 'create_fork', label: 'Create a fork', icon: CREATE_FORK_ICON, },
         { name: 'merge_changes', label: 'Merge changes', icon: MERGE_CHANGES_ICON, },
-        { name: 'add_request', label: 'Add Request', icon: ADD_REQUEST_ICON, event: () => publishRequestModalOpen({parentId: this.state.item.id})},
-        { name: 'add_folder', label: 'Add Folder', icon: ADD_FOLDER_ICON, event: () => publishCollectionModalOpen({parentId: this.state.item.id})},
+        { name: 'add_request', label: 'Add Request', icon: ADD_REQUEST_ICON, event: () => publishRequestModalOpen({parentId: this.props.item.id})},
+        { name: 'add_folder', label: 'Add Folder', icon: ADD_FOLDER_ICON, event: () => publishCollectionModalOpen({parentId: this.props.item.id})},
         { name: 'duplicate', label: 'Duplicate', icon: DUPLICATE_ICON, event: this.duplicateCollection },
         { name: 'export', label: 'Export', icon: EXPORT_ICON, },
         { name: 'monitor_collection', label: 'Monitor Collection', icon: MONITOR_COLLECTION_ICON, },
@@ -114,26 +114,6 @@ class CollectionItem extends React.Component {
         this.setState({collectionDrawerVisible: false})
     }
 
-    getTextSize = (text) => {
-        let span = document.createElement('span');
-        let initWidth = span.offsetWidth;
-        span.style.visibility = 'hidden';
-        span.style.fontSize = '14px';
-        span.style.fontFamily = '-apple-system, "PingFang SC", "Helvetica Neue", Helvetica,\n' +
-            'STHeiTi, sans-serif';//字体 可以替换为项目中自己的字体
-        span.style.display = "inline-block";
-        document.body.appendChild(span);
-        if (typeof span.textContent !== "undefined") {
-            span.textContent = text;
-        } else {
-            span.innerText = text;
-        }
-
-        let moni = parseFloat(window.getComputedStyle(span).width) - initWidth;
-        span.parentNode.removeChild(span);//删除节点
-        return moni;
-    }
-
     render() {
 
         const menu = (
@@ -149,7 +129,6 @@ class CollectionItem extends React.Component {
                 }
             </Menu>
         );
-        const {showCollectionNameInput, item, collectionDrawerVisible, collectionModalVisible} = this.state;
       
         const viewMoreActionButton = (
             <Dropdown overlay={menu} placement="bottomRight" trigger="click">
@@ -158,18 +137,11 @@ class CollectionItem extends React.Component {
                 </Tooltip>
             </Dropdown>
         )
-        let collectionName = item.name
 
-        let collectionNameWidth = 263;
-         console.log(this.titleContainerRef.current);
-        if (this.titleContainerRef.current) {
-            let widthProp = window.getComputedStyle(this.titleContainerRef.current).width;
-            collectionNameWidth = parseInt(widthProp.substring(0, widthProp.lastIndexOf('px')));
-            console.log('================width: %s==============', collectionNameWidth);
-        }
-        let guessWidth = this.getTextSize(collectionName)
-        console.log('模拟宽度：%s', guessWidth);
-        let maxWidth = collectionNameWidth - 45;
+        const {showCollectionNameInput, collectionDrawerVisible, nameSize} = this.state;
+        const {item, resizeWidth} = this.props;
+        const {name, starred, requestCount} = item;
+        let maxWidth = resizeWidth - 120;
         
         return (
             <>
@@ -178,50 +150,58 @@ class CollectionItem extends React.Component {
                     trigger={['contextMenu']}>
                     <Row align="middle" gutter={[12]} style={{flexFlow: 'row nowrap'}}>
                         <Col flex="none" style={{display: 'flex'}}>{COLLECTION_FOLDER_ICON}</Col>
-                        <Col flex="auto" style={{paddingLeft: 0}} ref={this.titleContainerRef}>
+                        <Col flex="auto" style={{paddingLeft: 0}}>
                             {
                                 showCollectionNameInput ? (
                                     <RequiredInput 
-                                        onSave={this.saveCollectionName}
                                         size="small"
                                         editing={true}
                                         editIcon={null}
-                                        defaultValue={item.name}
+                                        defaultValue={name}
                                         onClick={stopClickPropagation} 
-                                        // onChange={this.handleCollectionNameChange}
+                                        onSave={this.saveCollectionName}
                                     />
                                     
                                 ) : (
                                     <Space align="center">
                                         {
-                                            guessWidth > maxWidth ? (
-                                                <Text ellipsis style={{display: 'inline-block', border: '1px solid rgb(0,0,0,0)', width: maxWidth}} >{item.name}</Text>
+                                            nameSize > maxWidth ? (
+                                                <Text 
+                                                    ellipsis 
+                                                    style={{display: 'inline-block', border: '1px solid rgb(0,0,0,0)', width: maxWidth}}>
+                                                    {name}
+                                                </Text>
                                             ) : (
                                                 <span style={{display: 'inline-block', border: '1px solid rgb(0,0,0,0)'}} >
-                                                    {collectionName}
+                                                    {name}
                                                 </span>
                                             )
                                         }
                                         
                                         <div onClick={stopClickPropagation}>
                                             <Rate 
-                                                // style={{fontSize: 16}} 
+                                                style={{fontSize: 16}} 
                                                 count={1} 
-                                                value={item.starred}
+                                                value={starred}
                                                 onChange={this.handleRateChange} 
-                                                className={item.starred ? '' : 'collection-item-display'} 
+                                                className={starred ? '' : 'collection-item-display'} 
                                             />
                                         </div>
                                     </Space>
                                 )
                             }
                             <div>
-                            <Text type="secondary">{item.requestCount ? item.requestCount : 0} requests</Text>
-
+                                <Text type="secondary">
+                                    {requestCount ? requestCount : 0} requests
+                                </Text>
                             </div>
                         </Col>
                         <Col flex="none">
-                            <Space direction="vertical" size={0} style={{borderLeft: '1px solid rgba(0, 0, 0, 0.1)'}} className={collectionDrawerVisible ? "" : "collection-item-display"}>
+                            <Space 
+                                direction="vertical" 
+                                size={0} 
+                                style={{borderLeft: '1px solid rgba(0, 0, 0, 0.1)'}} 
+                                className={collectionDrawerVisible ? "" : "collection-item-display"}>
                                 <TooltipButton 
                                     tooltipProps={{title: "View more actions"}}
                                     buttonProps={{
@@ -236,10 +216,7 @@ class CollectionItem extends React.Component {
                         </Col>
                     </Row>
                 </Dropdown>
-
-                {/* <CollectionModal visible={collectionModalVisible} onVisibleChange={(visible) => this.handleCollectionModalVisibleChange(visible)} /> */}
             </>
-            
         )
     }
 }
