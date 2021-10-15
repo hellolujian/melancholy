@@ -31,7 +31,9 @@ class RequestSendSetting extends React.Component {
       
     }
 
-    
+    handleParamsChange = (value) => {
+        this.props.onChange({params: value});
+    }
 
     render() {
      
@@ -39,16 +41,22 @@ class RequestSendSetting extends React.Component {
             <Tabs 
                 // type="card" 
                 className="request-send-setting-tab"
-                size='small' defaultActiveKey="body" onChange={this.callback} tabBarExtraContent={
-                <>
-                <CookieModal />
-                <Button type="link">Code</Button>
-                
-                </>
-            }>
+                size='small' 
+                defaultActiveKey="params" 
+                onChange={this.callback} 
+                tabBarExtraContent={
+                    <>
+                        <CookieModal />
+                        <Button type="link">Code</Button>
+                    </>
+                }
+            >
                 <TabPane className="request-setting-tab-param-panel" tab="Params" key="params">
-                {/* <Typography.Paragraph strong style={{margin: '5px 10px',}}>Query Params</Typography.Paragraph> */}
-                <KeyValueTable tableProps={{title: () => "Query Params"}} scene="params" />
+                    <KeyValueTable 
+                        cene="params"
+                        tableProps={{title: () => "Query Params"}}  
+                        onChange={this.handleParamsChange}
+                    />
                 </TabPane>
                 <TabPane tab="Authorization" key="authorization">
                     <AuthorizationSetting />
@@ -71,6 +79,11 @@ class RequestSendSetting extends React.Component {
 }
 
 export default RequestSendSetting;
+
+RequestSendSetting.defaultProps = {
+    onChange: () => {},
+    onSave: () => {},
+}
 
 
 

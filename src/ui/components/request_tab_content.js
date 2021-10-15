@@ -47,7 +47,11 @@ class RequestTabContent extends React.Component {
                     onSave={this.handleSave}
                     onSaveClick={this.handleSaveClick}
                 />
-                <RequestSendSetting />
+                <RequestSendSetting 
+                    value={value}
+                    onSave={this.handleSave}
+                    onChange={this.handleChange}
+                />
             </>
         )
     }
