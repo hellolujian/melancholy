@@ -87,3 +87,7 @@
   top: 0
 }
 
+.request-tabs-class > .ant-tabs-nav .ant-tabs-nav-wrap {
+  white-space: normal;
+}
+

@@ -12,6 +12,7 @@ import { CaretRightOutlined,  EllipsisOutlined, FolderFilled} from '@ant-design/
 import TooltipButton from 'ui/components/tooltip_button'
 import RequiredInput from './required_input'
 import PostmanButton from './postman_button'
+import Ellipsis from 'react-ellipsis-component';
 import {stopClickPropagation, getTextSize} from '@/utils/global_utils';
 import {publishCollectionModalOpen, publishRequestModalOpen} from '@/utils/event_utils'
 import {
@@ -140,19 +141,7 @@ class RequestItem extends React.Component {
                                         onSave={this.saveFolderName}
                                     />
                                 ) : (
-                                    <Space align="center">
-                                        {
-                                            nameSize > maxWidth ? (
-                                                <Text 
-                                                    ellipsis 
-                                                    style={{display: 'inline-block', border: '1px solid rgb(0,0,0,0)', width: maxWidth}}>
-                                                    {name}
-                                                </Text>
-                                            ) : (
-                                                <span style={{display: 'inline-block', border: '1px solid rgb(0,0,0,0)'}}>{name}</span>
-                                            )
-                                        }
-                                    </Space>
+                                    <Ellipsis text={name} />
                                 )
                             }
                         </Col>

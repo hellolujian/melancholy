@@ -80,3 +80,7 @@
   visibility: visible;
   opacity: 1;
 }
+
+.ant-tree-node-content-wrapper .__react-ellipsis {
+  padding: 1px;
+}

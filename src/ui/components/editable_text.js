@@ -37,7 +37,7 @@ class EditableText extends React.Component {
 
     render() {
      
-        const {editIconClass, editWhenHover, value, ellipisisWidth} = this.props;
+        const {editIconClass, editWhenHover, value} = this.props;
         
         const {editing} = this.state;
 
@@ -57,11 +57,8 @@ class EditableText extends React.Component {
                         //     </span>
                         //     <span className={'not-editing-edit-icon ' + (editIcon.className ? editIcon.className : "")} onClick={this.handleEditIconClick}>{EDIT_ICON}</span>
                         // </Space>
-                        <Space>
-                            <Ellipsis
-                                text={value}
-                                maxLine="1"
-                            />
+                        <Space align="center">
+                            <Ellipsis text={value} />
                             <span className={editIconClass} onClick={this.handleEditIconClick}>{EDIT_ICON}</span>
                         </Space>
                     )

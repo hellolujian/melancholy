@@ -32,3 +32,8 @@
 .request-intro-edit-icon-none {
   display: none;
 }
+
+.site-collapse-custom-collapse-panel .panel-head-customize .__react-ellipsis {
+  margin-left: 1px;
+
+}

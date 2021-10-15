@@ -12,7 +12,9 @@ import { CaretRightOutlined,  EllipsisOutlined, FolderFilled} from '@ant-design/
 import TooltipButton from 'ui/components/tooltip_button'
 import RequiredInput from './required_input'
 import PostmanButton from './postman_button'
-import {stopClickPropagation, getTextSize} from '@/utils/global_utils';
+import Ellipsis from 'react-ellipsis-component';
+
+import {stopClickPropagation} from '@/utils/global_utils';
 import {publishNewTabOpen, publishRequestModalOpen, publishRequestSelected} from '@/utils/event_utils'
 import {
     OPEN_NEW_ICON, ELLIPSIS_ICON, RENAME_ICON, EDIT_ICON, CREATE_FORK_ICON, 
@@ -33,16 +35,6 @@ class RequestItem extends React.Component {
         this.state = {
            showCollectionNameInput: false,
         };
-    }
-
-    componentWillReceiveProps = (nextProps) => {
-        if (nextProps.item.name !== this.props.item.name) {
-            this.setState({nameSize: getTextSize(nextProps.item.name)})
-        }
-    }
-
-    componentDidMount() {
-        this.setState({nameSize: getTextSize(this.props.item.name)})
     }
 
     // 渲染collection输入框
@@ -123,10 +115,9 @@ class RequestItem extends React.Component {
             </Dropdown>
         );
 
-        const {showCollectionNameInput, nameSize} = this.state;
-        const {item, resizeWidth, tiledParentId} = this.props;
+        const {showCollectionNameInput} = this.state;
+        const {item} = this.props;
         const {name, method} = item;
-        let maxWidth = resizeWidth - 102 - (tiledParentId.length - 1) * 16;
         
         return (
             <>
@@ -149,15 +140,7 @@ class RequestItem extends React.Component {
                                             onClick={stopClickPropagation} 
                                         />
                                     ) : (
-                                        nameSize > maxWidth ? (
-                                            <Text 
-                                                ellipsis 
-                                                style={{width: maxWidth, border: '1px solid rgb(0,0,0,0)'}}>
-                                                {name}
-                                            </Text>
-                                        ) : (
-                                            <span style={{display: 'inline-block', border: '1px solid rgb(0,0,0,0)'}}>{name}</span>
-                                        )
+                                        <Ellipsis text={name} />
                                     )
                                 }
                             </Col>

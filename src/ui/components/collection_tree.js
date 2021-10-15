@@ -334,6 +334,7 @@ class CollectionTree extends React.Component {
             return {
                 key: item.id,
                 name: item.name,
+                className: 'collection-tree-collection-item-class',
                 title: (
                     <CollectionItem 
                         item={item} 

@@ -11,8 +11,9 @@ import Icon from '@ant-design/icons';
 import { CaretRightOutlined,  EllipsisOutlined,} from '@ant-design/icons';
 import TooltipButton from 'ui/components/tooltip_button'
 import RequiredInput from './required_input'
+import Ellipsis from 'react-ellipsis-component';
 import PostmanButton from './postman_button'
-import {stopClickPropagation, getTextSize} from '@/utils/global_utils';
+import {stopClickPropagation} from '@/utils/global_utils';
 import {publishCollectionModalOpen, publishRequestModalOpen} from '@/utils/event_utils'
 import {
     SHARE_COLLECTION_ICON, MANAGE_ROLES_ICON, RENAME_ICON, EDIT_ICON, CREATE_FORK_ICON, 
@@ -33,16 +34,6 @@ class CollectionItem extends React.Component {
            showCollectionNameInput: false
            
         }
-    }
-
-    componentWillReceiveProps = (nextProps) => {
-        if (nextProps.item.name !== this.props.item.name) {
-            this.setState({nameSize: getTextSize(nextProps.item.name)})
-        }
-    }
-
-    componentDidMount() {
-       this.setState({nameSize: getTextSize(this.props.item.name)})
     }
 
     // 处理详情抽屉的显示
@@ -138,10 +129,9 @@ class CollectionItem extends React.Component {
             </Dropdown>
         )
 
-        const {showCollectionNameInput, collectionDrawerVisible, nameSize} = this.state;
-        const {item, resizeWidth} = this.props;
+        const {showCollectionNameInput, collectionDrawerVisible} = this.state;
+        const {item} = this.props;
         const {name, starred, requestCount} = item;
-        let maxWidth = resizeWidth - 120;
         
         return (
             <>
@@ -160,20 +150,7 @@ class CollectionItem extends React.Component {
                                     
                                 ) : (
                                     <Space align="center">
-                                        {
-                                            nameSize > maxWidth ? (
-                                                <Text 
-                                                    ellipsis 
-                                                    style={{display: 'inline-block', border: '1px solid rgb(0,0,0,0)', width: maxWidth}}>
-                                                    {name}
-                                                </Text>
-                                            ) : (
-                                                <span style={{display: 'inline-block', border: '1px solid rgb(0,0,0,0)'}} >
-                                                    {name}
-                                                </span>
-                                            )
-                                        }
-                                        
+                                        <Ellipsis text={name} maxLine={1}  />
                                         <div onClick={stopClickPropagation}>
                                             <Rate 
                                                 style={{fontSize: 16}} 

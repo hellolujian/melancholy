@@ -9,6 +9,7 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 import RequestTabContent from './request_tab_content'
 import EnvironmentSetting from './environment_setting';
 import RequestTabConfirm from './request_tab_confirm';
+import Ellipsis from 'react-ellipsis-component';
 import { UNSAVED_DOT_ICON, POST_REQUEST_ICON, GET_REQUEST_ICON, CLOSE_SVG, UNSAVED_DOT_SVG } from 'ui/constants/icons'
 
 import {
@@ -440,7 +441,8 @@ class DraggableTabs extends React.Component {
             const {tabData, activeTabKey} = this.state;
             const {key} = node;
             if (node.ref.current) {
-              let style = {
+            node.ref.current.style.maxWidth = '220px'
+            let style = {
                 height: 2, 
                 borderLeft: '1px solid #f0f0f0', 
                 borderRight: '1px solid #f0f0f0', 
@@ -719,8 +721,7 @@ class DraggableTabs extends React.Component {
                         {getIconByCode(item.icon)}
                       </div>
                       <div className="vertical-start">
-                        {/* <Text>{item.name}</Text> */}
-                        {item.name}
+                        <Ellipsis text={item.name} />
                       </div>
                       <div className="vertical-end request-tab-right-icon" style={{marginTop: 2}}>
                         {
