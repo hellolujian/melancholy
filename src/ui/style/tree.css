@@ -84,3 +84,20 @@
 .ant-tree-node-content-wrapper .__react-ellipsis {
   padding: 1px;
 }
+
+.collection-tree-folder-item-class {
+  border-top: none !important;
+}
+
+.collection-tree-collection-item-class.ant-tree-treenode-switcher-open {
+
+  /* 0px 阴影向右偏移量，为0
+
+10px 阴影向下偏移量，为10px
+
+5px 阴影的过渡距离，为5px
+
+#000阴影颜色，为黑色 */
+
+  box-shadow: 0px 2px 5px #bbb4b4;
+}

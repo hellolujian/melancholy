@@ -107,7 +107,7 @@ class Home extends React.Component {
 
                         </Space>
                         
-                        <CollectionTree resizeWidth={this.state.width} />
+                        <CollectionTree />
                       </TabPane>
                       <TabPane tab="APIs" key="apis">
                         Content of Tab Pane 3

@@ -165,7 +165,7 @@ class CollectionItem extends React.Component {
                             }
                             <div>
                                 <Text type="secondary">
-                                    {requestCount ? requestCount : 0} requests
+                                    {requestCount ? requestCount : 0} {requestCount === 1 ? 'request' : 'requests'}
                                 </Text>
                             </div>
                         </Col>

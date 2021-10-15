@@ -13,7 +13,7 @@ import TooltipButton from 'ui/components/tooltip_button'
 import RequiredInput from './required_input'
 import PostmanButton from './postman_button'
 import Ellipsis from 'react-ellipsis-component';
-import {stopClickPropagation, getTextSize} from '@/utils/global_utils';
+import {stopClickPropagation} from '@/utils/global_utils';
 import {publishCollectionModalOpen, publishRequestModalOpen} from '@/utils/event_utils'
 import {
     SHARE_COLLECTION_ICON, ELLIPSIS_ICON, RENAME_ICON, EDIT_ICON, CREATE_FORK_ICON, 
@@ -34,16 +34,6 @@ class RequestItem extends React.Component {
            showCollectionNameInput: false,
            
         }
-    }
-
-    componentWillReceiveProps = (nextProps) => {
-        if (nextProps.item.name !== this.props.item.name) {
-            this.setState({nameSize: getTextSize(nextProps.item.name)})
-        }
-    }
-
-    componentDidMount() {
-        this.setState({nameSize: getTextSize(this.props.item.name)})
     }
 
     // 渲染collection输入框
@@ -121,10 +111,9 @@ class RequestItem extends React.Component {
             </Dropdown>
         );
 
-        const {showCollectionNameInput, nameSize} = this.state;
-        const {item, resizeWidth, tiledParentId} = this.props;
+        const {showCollectionNameInput} = this.state;
+        const {item} = this.props;
         const {name} = item;
-        let maxWidth = resizeWidth - 108 - (tiledParentId.length - 1) * 16;
         
         return (
             <>
