@@ -136,12 +136,8 @@ class RequestItem extends React.Component {
                             {
                                 showCollectionNameInput ? (
                                     <RequiredInput 
-                                        size="small"
-                                        editing={true}
-                                        editIcon={null}
                                         defaultValue={name}
                                         onSave={this.saveFolderName}
-                                        onClick={stopClickPropagation} 
                                     />
                                 ) : (
                                     <Space align="center">

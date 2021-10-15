@@ -11,16 +11,7 @@ class RequiredInput extends React.Component {
         super(props);
         this.state = {
             value: props.defaultValue,
-            editing: props.editing,
         }
-    }
-
-    componentWillReceiveProps (nextProps) {
-        const { editing: newEditingValue } = nextProps;
-        const { lastPropsEditing } = this.state;
-        if (lastPropsEditing !== newEditingValue) {
-            this.setState({editing: newEditingValue, lastPropsVisible: newEditingValue})
-        } 
     }
 
     componentDidMount() {
@@ -29,19 +20,14 @@ class RequiredInput extends React.Component {
 
     handleInputChange = (e) => {
         this.setState({value: e.target.value, showRed: true});
-        this.props.onValueChange(e);
-    }
-
-    handleEditIconClick = (e) => {
-        this.setState({editing: true});
-        stopClickPropagation(e)
+        this.props.onChange(e);
     }
 
     handleSave = (e) => {
         let value = e.target.value;
         if (value && value.trim()) {
-            this.setState({editing: false});
-            this.props.onSave(value)
+            this.setState({value: value.trim()});
+            this.props.onSave(value.trim())
         }
     }
 
@@ -51,50 +37,33 @@ class RequiredInput extends React.Component {
 
     render() {
      
-        const {editIcon = {}, editWhenHover, defaultValue} = this.props;
+        const {defaultValue} = this.props;
         
-        const {value, editing, showRed} = this.state;
+        const {value, showRed} = this.state;
         let inputValue = this.props.hasOwnProperty('value') ? this.props.value : value;
         let borderColor = !(inputValue && inputValue.trim()) && showRed ? 'red' : 'gray';
         return (
-            <>
-                {            
-                    editing ? (
-                        <div style={{border: '1px solid ' + borderColor, display: 'inline-block'}} className="full-width">
-                            <Input
-                                size="small"
-                                bordered={false}
-                                onChange={this.handleInputChange}
-                                autoFocus
-                                defaultValue={defaultValue}
-                                value={inputValue}
-                                style={{padding: 0, width: '100%'}}
-                                onBlur={this.handleSave}
-                                onPressEnter={this.handleSave}
-                                onClick={this.handleInputClick}
-                            />
-                            
-                        </div>
-                    ) : (
-                        <Space className={editWhenHover ? "not-edit-container" : ""}>
-                            <span className={editWhenHover ? "not-editing-text" : ""} style={{border: '1px solid rgb(0,0,0,0)', display: 'inline-block'}}>
-                                <Text style={{maxWidth: 300,}} ellipsis={{rows: 1}}>{inputValue}</Text>
-                            </span>
-                            {editIcon && (<span className={'not-editing-edit-icon ' + (editIcon.className ? editIcon.className : "")} onClick={this.handleEditIconClick}>{EDIT_ICON}</span>)}
-                        </Space>
-                    )
-                }
-            
-            </>
-           
-            
+            <div style={{border: '1px solid ' + borderColor, display: 'inline-block'}} className="full-width">
+                <Input
+                    autoFocus
+                    size="small"
+                    bordered={false}
+                    value={inputValue}
+                    defaultValue={defaultValue}
+                    onChange={this.handleInputChange}
+                    style={{padding: 0, width: '100%'}}
+                    onBlur={this.handleSave}
+                    onPressEnter={this.handleSave}
+                    onClick={this.handleInputClick}
+                />
+            </div>
         )
     }
 }
 
 export default RequiredInput;
 RequiredInput.defaultProps = {
-    onValueChange: () => {},
+    onChange: () => {},
     onSave: () => {},
 }
 

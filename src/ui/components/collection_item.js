@@ -154,11 +154,7 @@ class CollectionItem extends React.Component {
                             {
                                 showCollectionNameInput ? (
                                     <RequiredInput 
-                                        size="small"
-                                        editing={true}
-                                        editIcon={null}
                                         defaultValue={name}
-                                        onClick={stopClickPropagation} 
                                         onSave={this.saveCollectionName}
                                     />
                                     

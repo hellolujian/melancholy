@@ -1,14 +1,34 @@
 .request-intro-edit-icon  {
-  display: none;
+  /* display: none; */
+  visibility: hidden;
 }
 .site-collapse-custom-collapse-panel:hover .request-intro-edit-icon {
-  display: inline-block;
+  /* display: inline-block; */
+  visibility: visible;
 }
 .site-collapse-custom-collapse-panel > .ant-collapse-header {
-  padding-bottom: 0px !important
+  display: flex;
+
+  padding-bottom: 6px !important;
+  padding-right: 0 !important;
+  padding-top: 6px !important;
 }
 
 .site-collapse-custom-collapse-panel .ant-collapse-content-box {
   padding-top: 0px !important;
   padding-left: 32px !important;
+}
+
+.site-collapse-custom-collapse-panel .panel-head-customize {
+  flex: 1
+
+}
+
+.site-collapse-custom-collapse > .site-collapse-custom-collapse-panel > .ant-collapse-header .ant-collapse-arrow {
+  display: inline-flex;
+  align-items: center;
+}
+
+.request-intro-edit-icon-none {
+  display: none;
 }

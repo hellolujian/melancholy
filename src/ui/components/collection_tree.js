@@ -22,7 +22,6 @@ import CollectionItem from './collection_item'
 import FolderItem from './folder_item'
 import RequestItem from './request_item'
 import PostmanButton from './postman_button'
-import RequiredInput from './required_input'
 import {stopClickPropagation} from '@/utils/global_utils';
 import {
     publishRequestModalOpen, 

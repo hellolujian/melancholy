@@ -34,12 +34,17 @@ class Home extends React.Component {
         }
     }
 
+    handleWindowResize = (e) => {
+      this.setState({contentWidth: e.target.innerWidth - this.state.width})
+    }
+
     componentDidMount() {
-    
+      this.setState({contentWidth: window.innerWidth - this.state.width})
+      window.addEventListener('resize', this.handleWindowResize)
     }
 
     componentWillUnmount() {
-      
+      window.removeEventListener('resize', this.handleWindowResize)
     }
 
     onResize = (event, {element, size, handle}) => {

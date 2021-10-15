@@ -451,7 +451,7 @@ class DraggableTabs extends React.Component {
                 style.background = '#fafafa';
               }
               finalNode = (
-                <div className="border" style={{maxWidth: 200}}>
+                <div>
                   {node}
                   <div style={style} />
                 </div>
@@ -719,7 +719,8 @@ class DraggableTabs extends React.Component {
                         {getIconByCode(item.icon)}
                       </div>
                       <div className="vertical-start">
-                        <Text>{item.name}</Text>{item.name}
+                        {/* <Text>{item.name}</Text> */}
+                        {item.name}
                       </div>
                       <div className="vertical-end request-tab-right-icon" style={{marginTop: 2}}>
                         {

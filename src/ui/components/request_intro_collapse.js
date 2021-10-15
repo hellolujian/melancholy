@@ -1,10 +1,10 @@
 import React from 'react';
-import { Collapse, Typography, Popover, Button   } from 'antd';
+import { Collapse, Typography, Popover, Button, Row, Col  } from 'antd';
 import { CaretRightOutlined, CaretDownOutlined } from '@ant-design/icons';
 import DescriptionEditor from 'ui/components/description_editor'
 
 import { EDIT_ICON } from '@/ui/constants/icons'
-import RequiredInput from './required_input'
+import EditableText from './editable_text'
 import RequestExamples from './request_examples'
 import '../style/common.css'
 import 'ui/style/request_intro_collapse.css'
@@ -16,12 +16,7 @@ class RequestIntro extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-           
         }
-    }
-
-    componentDidMount() {
-      
     }
 
     handleNameChange = (e) => {
@@ -60,18 +55,19 @@ class RequestIntro extends React.Component {
       let sourceRequestExist = !deleted && id;
       let header = (
       
-        <div className="justify-content-space-between-inline border" style={{width: '95%'}}>
-        <RequiredInput 
-            value={name}
-            size="small"
-            editIcon={sourceRequestExist ? {className: "request-intro-edit-icon"} : false}
-            onSave={this.handleNameSave}
-            onValueChange={this.handleNameChange}
-        />
-        <RequestExamples />
-        </div>
-
-                                        
+        <Row className="panel-head-customize" align="middle" style={{flexFlow: 'row nowrap'}}>
+          <Col flex="auto">
+            <EditableText 
+              value={name}
+              editIconClass={sourceRequestExist ? "request-intro-edit-icon" : 'request-intro-edit-icon-none'}
+              onSave={this.handleNameSave}
+              onChange={this.handleNameChange}
+            />
+          </Col>
+          <Col flex="none">
+            <RequestExamples />
+          </Col>
+        </Row>                      
       )
         return (
             <Collapse
@@ -79,7 +75,7 @@ class RequestIntro extends React.Component {
               activeKey={activeKey}
               expandIcon={({ isActive }) => <CaretRightOutlined rotate={isActive ? 90 : 0} />}
               onChange={this.handleActiveKeyChange}
-              // className="site-collapse-custom-collapse"
+              className="site-collapse-custom-collapse"
             >
               <Panel 
                 header={header} 
