@@ -37,14 +37,14 @@ class RequestModal extends React.Component {
             updateObj.extend = data.extend;
             data = data.metaData;
         }
-        const {requestId, parentId, name} = data;
+        const {requestId, parentId, name, method} = data;
         if (requestId) {
             updateObj.requestInfo = await queryRequestMetaById(requestId);
         } else if (parentId) {
             updateObj.collectionInfo = await queryCollectionMetaById(parentId);
         } 
         if (!updateObj.requestInfo && name) {
-            updateObj.requestInfo = {name: name};
+            updateObj.requestInfo = {name: name, method: method};
         }
         this.setState(updateObj);
     }
@@ -65,7 +65,7 @@ class RequestModal extends React.Component {
 
     handleFormFinish = async (values) => {
         const {requestInfo = {}, collectionInfo, extend} = this.state;
-        const {id, parentId} = requestInfo;
+        const {id, parentId, method = 'get'} = requestInfo;
         let data = {
             name: values.name,
             description: values.description,
@@ -76,6 +76,7 @@ class RequestModal extends React.Component {
             await saveRequest(data)
         } else {
             data.id = UUID();
+            data.method = method;
             await newRequest(data)
         }
         publishRequestSave({metaData: data, extend: extend})

@@ -5,6 +5,7 @@ import { EllipsisOutlined, InfoCircleFilled ,CaretDownOutlined } from '@ant-desi
 import EditableTable from './editable_table'
 import TooltipButton from './tooltip_button'
 import HeaderPresets from './header_presets'
+import {stopClickPropagation} from '@/utils/global_utils';
 class KeyValueTable extends React.Component {
 
     constructor(props) {
@@ -14,28 +15,26 @@ class KeyValueTable extends React.Component {
         }
     }
 
-    stopClickPropagation = (e) => {
-        e.stopPropagation();
-        e.nativeEvent.stopImmediatePropagation();
+    handleSave = (dataSource) => {
+        this.props.onSave(dataSource);
     }
 
-    onEditableTableRef = (ref) => {
-        console.log(ref);
-        this.editableTableRef = ref;
+    handleChange = (dataSource) => {
+        this.props.onChange(dataSource);
     }
     
     handlePersistAllBtnClick = (dataSource) => {
         dataSource.forEach(item => {
             item.initialValue = item.currentValue
         })
-        this.editableTableRef.setDataSourceState(dataSource)
+        this.handleChange(dataSource);
     }
     
     handleResetAllBtnClick = (dataSource) => {
         dataSource.forEach(item => {
             item.currentValue = item.initialValue
         })
-        this.editableTableRef.setDataSourceState(dataSource)
+        this.handleChange(dataSource);
     }
 
     handleCellOperationSel = ({key, selectedKeys, domEvent}, record, dataSource) => {
@@ -52,74 +51,75 @@ class KeyValueTable extends React.Component {
                 break;
             default: break;
         }
-        this.editableTableRef.setDataSourceState(dataSource)
-        this.stopClickPropagation(domEvent)
+        stopClickPropagation(domEvent)
+        this.handleChange(dataSource);
     }
 
     render() {
      
-        const {scene, editable = true, draggable = true, tableProps, dataSource} = this.props;
+        const {scene, editable = true, draggable = true, tableProps, value} = this.props;
         return (
             <EditableTable 
-                rowKey='index'
+                rowKey='id'
                 tableProps={tableProps}
                 draggable={draggable}
                 editable={editable} 
-                ref={ref => this.editableTableRef = ref}
                 columns={
-                [
-                    {
-                        title: 'KEY',
-                        dataIndex: 'name',
-                        // width: '33%',
-                        editable: editable,
-                        className: 'drag-visible',
-                        placeholder: 'Key'
-                    },
-                    {
-                        name: 'Value',
-                        title: 'VALUE',
-                        dataIndex: 'initialValue',
-                        // width: '33%',
-                        editable: editable,
-                        className: 'drag-visible',
-                        placeholder: 'Value'
-                    },
-                    {
-                        name: 'Description',
-                        title: 'DESCRIPTION',
-                        dataIndex: 'currentValue',
-                        // width: '33%',
-                        editable: editable,
-                        className: 'drag-visible',
-                        placeholder: 'Description'
+                    [
+                        {
+                            title: 'KEY',
+                            dataIndex: 'name',
+                            // width: '33%',
+                            editable: editable,
+                            className: 'drag-visible',
+                            placeholder: 'Key'
+                        },
+                        {
+                            name: 'Value',
+                            title: 'VALUE',
+                            dataIndex: 'initialValue',
+                            // width: '33%',
+                            editable: editable,
+                            className: 'drag-visible',
+                            placeholder: 'Value'
+                        },
+                        {
+                            name: 'Description',
+                            title: 'DESCRIPTION',
+                            dataIndex: 'currentValue',
+                            // width: '33%',
+                            editable: editable,
+                            className: 'drag-visible',
+                            placeholder: 'Description'
+                        }
+                    ]
+                } 
+                operations = {
+                    (dataSource) => {
+                        if (!editable) {
+                            return []
+                        }
+                        let operations = [
+                            (
+                                <TooltipButton 
+                                    label="Bulk Edit" 
+                                    buttonProps={{
+                                        type: 'link', size: 'small', 
+                                        onClick: () => this.handlePersistAllBtnClick(dataSource)
+                                    }}
+                                />
+                            )
+                        ];
+                        if (scene === 'headers') {
+                            operations.push(<HeaderPresets />)
+                        }
+                        return operations;
                     }
-                ]
-            } 
-            operations = {
-                (dataSource) => {
-                    if (!editable) {
-                        return []
-                    }
-                    let operations = [
-                        (
-                            <TooltipButton 
-                                label="Bulk Edit" 
-                                buttonProps={{type: 'link', size: 'small', onClick: () => this.handlePersistAllBtnClick(dataSource)}}
-                            />
-                        )
-                    ];
-                    if (scene === 'headers') {
-                        operations.push(<HeaderPresets />)
-                    }
-                    return operations;
                 }
-            }
-       
-            dataSource={dataSource}
-            // tableProps = {{
-            //     title: () => 'Query Params'
-            // }}
+        
+                dataSource={value}
+                onChange={this.handleChange}
+                onSave={this.handleSave}
             />
         )
     }

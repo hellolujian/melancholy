@@ -217,8 +217,20 @@ export const newRequest = async (doc) => {
 
 }
 
+export const syncRequestInCollection = async (requestId, key, value) => {
+    let requestMetaInfo = await queryRequestMetaById(requestId);
+    if (!requestMetaInfo) {
+        return;
+    }
+    let parentIdArr = await getParentIdArr(requestMetaInfo.parentId);
+    let collectionInfo = await queryCollectionById(parentIdArr[0]);
+    let target = getTargetItem(collectionInfo, [...parentIdArr, requestId]);
+    target.[key] = value;
+    return await updateCollection(collectionInfo.id, {$set: { items: collectionInfo.items } })
+}
+
 export const saveRequest = async (doc) => {
-    const {id, name} = doc;
+    const {id, name, method} = doc;
     let requestMetaInfo = await queryRequestMetaById(id);
     if (!requestMetaInfo) {
         return;
@@ -229,6 +241,9 @@ export const saveRequest = async (doc) => {
         let collectionInfo = await queryCollectionById(parentIdArr[0]);
         let target = getTargetItem(collectionInfo, [...parentIdArr, id]);
         target.name = name;
+        if (method) {
+            target.method = method;
+        }
         return await updateCollection(collectionInfo.id, {$set: { items: collectionInfo.items } })    
     } else if (doc.parentId) {
         let parentIdArr = await getParentIdArr(doc.parentId);
@@ -240,8 +255,6 @@ export const saveRequest = async (doc) => {
         target.items = [...target.items, {id: id, name: name, method: requestMetaInfo.method}]
         return await updateCollection(collectionInfo.id, {$set: { items: collectionInfo.items, requestCount: collectionInfo.requestCount + 1 } })
     }
-
-    
 }
 
 export const duplicateRequest = async (id) => {
@@ -250,7 +263,7 @@ export const duplicateRequest = async (id) => {
     if (!requestMetaInfo) {
         return;
     }
-    const {parentId, name, url, method, body, header, description, auth, prerequest, test} = requestMetaInfo;
+    const {parentId, name, url, method, body, header, description, auth, prerequest, test, param} = requestMetaInfo;
     let duplicateRequest = {
         id: UUID(),
         parentId: parentId,
@@ -261,6 +274,7 @@ export const duplicateRequest = async (id) => {
         header: header,
         description: description,
         auth: auth,
+        param: param,
         prerequest: prerequest,
         test: test, 
     }
@@ -295,7 +309,7 @@ export const getDuplicateCollectionByMeta = async (id, collectionMetaArr, reques
     
     let newId = UUID();
     let collectionMetaInfo = await queryCollectionMetaById(id);
-    const {name, parentId, description, auth, prerequest, test, variable} = collectionMetaInfo; 
+    const {name, parentId, description, auth, prerequest, test, variable, para} = collectionMetaInfo; 
     let duplicateName = collectionMetaArr.length > 0 ? name : (name + ' Copy');
     collectionMetaArr.push({
         id: newId, 
@@ -309,7 +323,7 @@ export const getDuplicateCollectionByMeta = async (id, collectionMetaArr, reques
     })
     let childrenRequest = await queryRequestMetaByParentId(id);
     let newMetaRequests = childrenRequest.map(childRequest => {
-        const  {name, url, method, body, header, description, auth, prerequest, test} = childRequest
+        const  {name, url, method, body, header, description, auth, prerequest, test, param} = childRequest
         return {
             id: UUID(),
             parentId: newId,
@@ -320,6 +334,7 @@ export const getDuplicateCollectionByMeta = async (id, collectionMetaArr, reques
             header: header,
             description: description,
             auth: auth,
+            param: param,
             prerequest: prerequest,
             test: test,
         }

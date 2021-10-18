@@ -32,10 +32,10 @@ import {
   listenShortcut
 } from '@/utils/event_utils'
 import {
-  saveRequest,
+  saveRequest, syncRequestInCollection
 } from '@/utils/database_utils'
 import {TabIconType, TabType, getIconByCode} from '@/enums'
-import {UUID} from '@/utils/global_utils'
+import {UUID, compareObject} from '@/utils/global_utils'
 import 'ui/style/request_tabs.css'
 
 const { TabPane } = Tabs;
@@ -273,7 +273,15 @@ class DraggableTabs extends React.Component {
     const {id: tabId, refId, type} = targetTab;
     // TODO: 需要判断tab类型
     let draft = targetTab.draft || {};
-    await updateRequestMeta(refId, {$set: {...extendDraft, ...draft}});
+    let setObj = {...extendDraft, ...draft};
+    await updateRequestMeta(refId, {$set: setObj});
+    console.log('开始同步集合信息');
+    console.log(setObj);
+    if (setObj.method) {
+      console.log('同步集合信息=============');
+      await syncRequestInCollection(refId, 'method', setObj.method);
+      publishRequestSave({metaData: {}})
+    }
     await updateTabMeta(tabId, {$unset: {draft: true, conflict: true, sourceDeleted: true}});
     await multiUpdateTabMeta({ $not: { id: tabId }, $and: [{refId: refId}, {type: type}], draft: { $exists: true } }, {$set: {conflict: true}});
   }
@@ -290,13 +298,14 @@ class DraggableTabs extends React.Component {
 
   handleRequestSave = async (msg, {metaData, extend = {}}) => {
     const {id, name} = metaData;
+    if (!id) return;
     let requestInfoId = id;
     if (extend.hasOwnProperty('justSave')) {
       // 通过弹框的另存为的请求，需要将tab的草稿内容更新到该请求上，并且更新该tab的refId
       const {justSave, tabInfo} = extend;
       await updateTabMeta(tabInfo.id, {$set: {refId: id, name: name}});
       let extendDraft = tabInfo.refId ? await queryRequestMetaById(tabInfo.refId) : {};
-      const {url, method, body, header, auth, prerequest, test} = extendDraft;
+      const {url, method, body, header, auth, prerequest, test, param} = extendDraft;
       await this.handleSaveDraft({...tabInfo, refId: id}, justSave, {
           url: url,
           method: method,
@@ -305,6 +314,7 @@ class DraggableTabs extends React.Component {
           auth: auth,
           prerequest: prerequest,
           test: test, 
+          param: param
       });
       requestInfoId = tabInfo.refId;
     } else {
@@ -322,8 +332,8 @@ class DraggableTabs extends React.Component {
 
   // 将请求另存为
   handleSaveAs = (tabInfo, justSave) => {
-    const {name} = tabInfo;
-    let obj = {metaData: {name: name}};
+    const {name, icon} = tabInfo;
+    let obj = {metaData: {name: name, method: icon}};
     if (justSave !== undefined) {
       obj.extend = {justSave: justSave, tabInfo: tabInfo};
     }
@@ -558,7 +568,53 @@ class DraggableTabs extends React.Component {
     }
   }
 
-  handleRequestTabContentChange = async (value) => {
+  removeUndefinedValue = (obj) => {
+    let result = {};
+    Object.keys(obj).forEach(key => {
+      let value = obj[key];
+      if (value !== undefined) {
+        result[key] = value;
+      }
+    })
+    return result;
+  }
+
+  removeTargetField = (obj, deleteField) => {
+    let newKeys = Object.keys(obj).filter(key => deleteField !== key);
+    let result = {};
+    newKeys.forEach(key => {
+      result[key] = obj[key];
+    })
+    return result;
+  }
+
+  handleRequestTabContentSave = async (value, saveTabData) => {
+    const {requestInfo, activeTabKey, tabData: oldTabData} = this.state;
+    let tabData = saveTabData || oldTabData
+    if (value.hasOwnProperty('name')) {
+      await saveRequest({id: requestInfo.id, ...value});
+      publishRequestSave({metaData: {id: requestInfo.id, name: value.name}});
+      return;
+    } else if (value.hasOwnProperty('description')) {
+      await updateRequestMeta(requestInfo.id, {$set: value})
+    } else {
+      const activeTab = tabData.find(item => item.id === activeTabKey);
+      let updateDraft = activeTab.draft;
+      console.log('baocun=================');
+      console.log(updateDraft);
+      if (updateDraft) {
+        let setObj = {draft: updateDraft};
+        if (value.hasOwnProperty('method')) {
+          setObj.icon = value.method;
+        }
+        await updateTabMeta(activeTabKey, {$set: setObj})
+      } else {
+        await updateTabMeta(activeTabKey, {$unset: {draft: true}})
+      }
+    }
+  }
+
+  handleRequestTabContentChange = async (value, saveFlag) => {
     console.log('病根传过来的参数：');
     console.log(value);
     const {requestInfo, activeTabKey, tabData} = this.state;
@@ -572,25 +628,27 @@ class DraggableTabs extends React.Component {
       if (draft) {
         console.log('目标简直：%s', targetKey);
         draft = {...draft, ...value}
-
         if (draft.hasOwnProperty(targetKey)) {
           let targetValue = value[targetKey];
-          let preRequestInfo = targetTab.refId ? await queryRequestMetaById(targetTab.refId) : undefined;
-          if (preRequestInfo) {
-            let preValue = preRequestInfo[targetKey]
-            console.log('原先值：%s, 心在值： %s', preValue, targetValue);
-            if (targetValue === preValue || (!targetValue && !preValue)) {
-              console.log("sdfffffff===========================")
-              console.log(targetTab)
-              delete draft[targetKey];
-            }
-          } else if (!targetValue || (targetKey === 'method' && targetValue === 'get')) {
-            delete draft[targetKey];
+          let preRequestInfo = targetTab.refId ? await queryRequestMetaById(targetTab.refId) : {method: 'get'};
+          let preValue = preRequestInfo[targetKey]
+          console.log('原先值：============');
+          console.log(preValue);
+          console.log('现在值：=======');
+          console.log(targetValue);
+          console.log('原先值与现在值：%s', compareObject(targetValue, preValue));
+          if (compareObject(targetValue, preValue) || ((!targetValue || (Array.isArray(targetValue) && targetValue.length === 0)) && (!preValue || (Array.isArray(preValue) && preValue.length === 0)))) {
+            console.log("sdfffffff===========================")
+            console.log(targetTab)
+            draft = this.removeTargetField(draft, targetKey);
           }
           
         }
+
+        console.log('最后的draft：');
+        console.log(draft);
         if (Object.keys(draft).length === 0) {
-          delete targetTab.draft;
+          targetTab = this.removeTargetField(targetTab, 'draft');
         } else {
           targetTab.draft = draft;
         }
@@ -598,35 +656,19 @@ class DraggableTabs extends React.Component {
         targetTab.draft = {...value};
       }
 
-      // method变更直接走保存逻辑
-      if (value.hasOwnProperty('method')) {
-        targetTab.icon = value.method;
-        await updateTabMeta(activeTabKey, {$set: {icon: value.method, draft: targetTab.draft}})
-      }
-
+      console.log('最后的targetTab');
+      console.log(targetTab);
       console.log('===变更后的tabdata纸==');
       console.log(tabData);
-      this.setState({tabData: tabData});
-      
-    }
-  }
-
-  handleRequestTabContentSave = async (value) => {
-    const {requestInfo, activeTabKey, tabData} = this.state;
-    if (value.hasOwnProperty('name')) {
-      await saveRequest({id: requestInfo.id, ...value});
-      publishRequestSave({metaData: {id: requestInfo.id, name: value.name}});
-      return;
-    } else if (value.hasOwnProperty('description')) {
-      await updateRequestMeta(requestInfo.id, {$set: value})
-    } else {
-      const activeTab = tabData.find(item => item.id === activeTabKey);
-      let updateDraft = activeTab.draft;
-      if (updateDraft) {
-        await updateTabMeta(activeTabKey, {$set: {draft: updateDraft}})
-      } else {
-        await updateTabMeta(activeTabKey, {$unset: {draft: true}})
+      if (targetTab.draft && targetTab.draft.method) {
+        targetTab.icon = targetTab.draft.method;
       }
+      tabData[tabData.findIndex(item => item.id === activeTabKey)] = targetTab;
+      this.setState({tabData: tabData});
+      if (saveFlag) {
+        this.handleRequestTabContentSave(value, tabData);
+      }
+      
     }
   }
 
@@ -718,7 +760,7 @@ class DraggableTabs extends React.Component {
                         )
                       }
                       <div className="vertical-end" style={{marginTop: 2}}>
-                        {getIconByCode(item.icon)}
+                        {getIconByCode((item.draft && item.draft.method) ? item.draft.method : item.icon)}
                       </div>
                       <div className="vertical-start">
                         <Ellipsis text={item.name} />

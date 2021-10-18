@@ -21,7 +21,7 @@ class RequestSendBar extends React.Component {
     }
 
     handleMethodChange = (value) => {
-        this.props.onChange({method: value})
+        this.props.onChange({method: value}, true)
     }
 
     handleUrlSave = (e) => {

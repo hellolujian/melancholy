@@ -25,15 +25,23 @@ class EditableTable extends React.Component {
       tableId: UUID()
     };
   }
+
+  getRealDataSource = () => {
+    return this.props.hasOwnProperty('dataSource') ? (this.props.dataSource || []) : this.state.dataSource;
+  }
+
+  handleSave = () => {
+    this.props.onSave(this.state.dataSource)
+  }
   
   onSortEnd = ({ oldIndex, newIndex }) => {
-    const { dataSource } = this.state;
+    const dataSource = this.getRealDataSource();
     if (oldIndex !== newIndex) {
       const newData = arrayMove([].concat(dataSource), oldIndex, newIndex).filter(el => !!el);
       console.log('Sorted items: ', newData);
       this.setState({ dataSource: newData });
-      
       this.props.onChange(newData);
+      this.props.onSave(newData);
     }
   };
 
@@ -64,19 +72,23 @@ class EditableTable extends React.Component {
 
   handleEditCellInputBlur = (record, dataIndex, cellId) => {
     this.setState({currentEditCell: null});
-    let {dataSource} = this.state;
+    const dataSource = this.getRealDataSource();
     const {rowKey, onCellBlur} = this.props;
     let changedRecord = dataSource.find(item => item[rowKey] === record[rowKey])
     if (changedRecord) {
       changedRecord = onCellBlur(changedRecord, dataIndex);
       this.setState({dataSource})
-      this.props.onChange(dataSource)
+      this.props.onSave(dataSource);
     }
   }
 
   // 生成当前单元格的唯一标识
   getCellId = (index, dataIndex) => {
     return index + "_" + dataIndex + "_" + this.state.tableId
+  }
+
+  getCellIdIndex = (cellId) => {
+    return cellId ? cellId.split("_")[0] : undefined;
   }
 
   // 鼠标移动
@@ -87,9 +99,12 @@ class EditableTable extends React.Component {
   // 移除
   handleCloseBtnClick = (e, record) => {
     stopClickPropagation(e)
-    const {dataSource} = this.state;
+    const dataSource = this.getRealDataSource();
     const {rowKey} = this.props;
-    this.setState({dataSource: dataSource.filter(data => data[rowKey] !== record[rowKey])})
+    const newDataSource = dataSource.filter(data => data[rowKey] !== record[rowKey])
+    this.setState({dataSource: newDataSource});
+    this.props.onChange(newDataSource);
+    this.props.onSave(newDataSource);
   }
 
   // 展示列变更
@@ -103,21 +118,20 @@ class EditableTable extends React.Component {
     this.setState({hideColumns})
   }
 
-  setDataSourceState = (dataSource) => {
-    this.setState({dataSource: dataSource});
-    this.props.onChange(dataSource);
-  }
-
   // 表格里的input变更
   handleCellInputChange = (record, dataIndex, value, cellId) => {
     
-    let {dataSource} = this.state;
-    const {rowKey} = this.props;
+    const dataSource = this.getRealDataSource();
+    const {rowKey, showCheckbox = 'disabled'} = this.props;
     let changedRecord = dataSource.find(item => item[rowKey] === record[rowKey])
     if (changedRecord) {
       changedRecord[dataIndex] = value;
     } else {
-      dataSource.push({...record, [dataIndex]: value, [rowKey]: UUID()})
+      let newObj = {...record, [dataIndex]: value, [rowKey]: UUID()};
+      if (showCheckbox) {
+        newObj[showCheckbox] = false;
+      }
+      dataSource.push(newObj)
     }
     this.setState({dataSource: dataSource}, () => {
       document.getElementById(cellId).focus()
@@ -132,18 +146,25 @@ class EditableTable extends React.Component {
     if (changedRecord) {
       changedRecord.disabled = !checked;
       this.props.onChange(dataSource);
+      this.props.onSave(dataSource);
     } 
   }
 
-  render() {
-    const { dataSource, currentHoverCell, currentEditCell, hideColumns, tableId } = this.state;
-    const {columns, showCheckbox = true, cellOperations, rowKey, tableProps, draggable = true, editable = true} = this.props;
-    const components = {
-      body: {
-        wrapper: this.DraggableContainer,
-        row: this.DraggableBodyRow,
-      },
-    };
+  isCurrentHover = (currentIndex) => {
+    const { currentHoverCell } = this.state;
+    return currentHoverCell && this.getCellIdIndex(currentHoverCell) === (currentIndex + "")
+  }
+
+  isCurrentEdit = (currentIndex) => {
+    const { currentEditCell } = this.state;
+    return currentEditCell && this.getCellIdIndex(currentEditCell) === (currentIndex + "")
+  }
+
+  getRenderColumns = () => {
+    
+    const { hideColumns } = this.state;
+    const {columns, showCheckbox = 'disabled', cellOperations, draggable = true, editable = true} = this.props;
+    let realDataSource = this.getRealDataSource();
     const realColumns = [
       {
         title: '',
@@ -153,17 +174,21 @@ class EditableTable extends React.Component {
         render: (text, record, index) => {
           let dragStyle = {
             cursor: 'grab', color: '#999', 
-            visibility: currentHoverCell && currentHoverCell.split("_")[0] === (index + "") && (!currentEditCell || currentEditCell.split("_")[0] !== (index + "")) ? 'visible' : 'hidden'
+            visibility: this.isCurrentHover(index) && !this.isCurrentEdit(index) ? 'visible' : 'hidden'
           }
          
           const DragHandle = sortableHandle(() => <MenuOutlined style={dragStyle} />);
           
-          return index < dataSource.length && draggable ? (
+          return index < realDataSource.length && draggable ? (
             <Space size={4}>
               <DragHandle />
               {
                 showCheckbox && (
-                  <Checkbox defaultChecked onChange={(e) => this.handleCellCheckboxChange(e.target.checked, record)} />
+                  <Checkbox 
+                    defaultChecked 
+                    checked={!record[showCheckbox]}
+                    onChange={(e) => this.handleCellCheckboxChange(e.target.checked, record)} 
+                  />
                 )
               }
             </Space>
@@ -204,7 +229,7 @@ class EditableTable extends React.Component {
             }
           },
           render: (text, record, index) => {
-            let {currentHoverCell, currentEditCell} = this.state;
+            let {currentEditCell} = this.state;
         
             let cellId = this.getCellId(index, col.dataIndex);
             let className = 'editable-cell-value-wrap';
@@ -220,24 +245,29 @@ class EditableTable extends React.Component {
                   ) : (
                     <Input 
                       id={cellId}
-                      defaultValue={col.defaultValue}
-                      bordered={false}
-                      onFocus={() => this.handleEditCellInputFocus(cellId)} 
                       size="small" 
                       value={text}
-                      placeholder={index === dataSource.length ? col.placeholder : ''} 
-                      // onPressEnter={this.save} 
+                      bordered={false}
+                      defaultValue={col.defaultValue}
+                      placeholder={index === realDataSource.length ? col.placeholder : ''} 
+                      onPressEnter={this.handleSave} 
+                      onFocus={() => this.handleEditCellInputFocus(cellId)} 
                       onBlur={() => this.handleEditCellInputBlur(record, col.dataIndex, cellId)} 
                       onChange={(e) => this.handleCellInputChange(record, col.dataIndex, e.target.value, cellId)}
                     />
                   )
                 }
                 {
-                  currentHoverCell && currentHoverCell.split("_")[0] === (index + "") && index < dataSource.length &&
-                  (!currentEditCell || currentEditCell.split("_")[0] !== (index + "")) && (colIndex === renderColumns.length - 1) && (
+                  this.isCurrentHover(index) && index < realDataSource.length && !this.isCurrentEdit(index) && (colIndex === renderColumns.length - 1) && (
                     <>
-                      <Button size="small" type="text" icon={<CloseOutlined />} style={{height: 10}} onClick={(e) => this.handleCloseBtnClick(e, record)} />
-                      { cellOperations && cellOperations(record, dataSource) }
+                      <Button 
+                        size="small" 
+                        type="text" 
+                        icon={<CloseOutlined />} 
+                        style={{height: 10}} 
+                        onClick={(e) => this.handleCloseBtnClick(e, record)} 
+                      />
+                      { cellOperations && cellOperations(record, realDataSource) }
                     </>
                   )
                 }
@@ -270,10 +300,6 @@ class EditableTable extends React.Component {
             } 
             
             trigger="click">
-              {/* <TooltipButton 
-                type="purelink" title="View more actions"
-                label={<EllipsisOutlined className="ant-dropdown-link" />} 
-              /> */}
               <Tooltip title="View more actions">
                 <Link>
                   <EllipsisOutlined className="ant-dropdown-link" />
@@ -290,7 +316,7 @@ class EditableTable extends React.Component {
             
             <Col>
             {
-              [...operations, ...this.props.operations(dataSource)].map((operation, index) => (
+              [...operations, ...this.props.operations(realDataSource)].map((operation, index) => (
                 <span key={index}>
                   <Divider type="vertical" />
                   {operation}
@@ -309,15 +335,28 @@ class EditableTable extends React.Component {
       }
       realColumns.push({...col, ...extraObj})
     });
-    
+
+    return realColumns;
+  }
+
+  render() {
+    const {rowKey, tableProps, editable = true} = this.props;
+    let realDataSource = this.getRealDataSource();
+    const components = {
+      body: {
+        wrapper: this.DraggableContainer,
+        row: this.DraggableBodyRow,
+      },
+    };
+
     return (
       <Table
           components={components}
           size="small"
           rowClassName={() => 'editable-row'}
           bordered
-          dataSource={editable ? [...dataSource, {}] : dataSource}
-          columns={realColumns}
+          dataSource={editable ? [...realDataSource, {}] : realDataSource}
+          columns={this.getRenderColumns()}
           rowKey={rowKey}
           pagination={false}
           // scroll={{y: 250 }}

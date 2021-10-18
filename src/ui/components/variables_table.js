@@ -6,6 +6,7 @@ import EditableTable from './editable_table'
 import TooltipButton from './tooltip_button'
 import {INITIAL_VALUE_TIPS, CURRENT_VALUE_TIPS, PERSIST_ALL_TIPS, RESET_ALL_TIPS} from 'ui/constants/tips'
 import {CIRCLE_INFO_ICON} from 'ui/constants/icons';
+import {stopClickPropagation} from '@/utils/global_utils';
 
 class VariablesTable extends React.Component {
 
@@ -16,27 +17,22 @@ class VariablesTable extends React.Component {
         }
     }
 
-    stopClickPropagation = (e) => {
-        e.stopPropagation();
-        e.nativeEvent.stopImmediatePropagation();
-    }
-
-    onEditableTableRef = (ref) => {
-        this.editableTableRef = ref;
+    handleVariableChange = (dataSource) => {
+        this.props.onChange(dataSource);
     }
     
     handlePersistAllBtnClick = (dataSource) => {
         dataSource.forEach(item => {
             item.initialValue = item.currentValue
         })
-        this.editableTableRef.setDataSourceState(dataSource)
+        this.handleVariableChange(dataSource)
     }
     
     handleResetAllBtnClick = (dataSource) => {
         dataSource.forEach(item => {
             item.currentValue = item.initialValue
         })
-        this.editableTableRef.setDataSourceState(dataSource)
+        this.handleVariableChange(dataSource)
     }
 
     handleCellOperationSel = ({key, selectedKeys, domEvent}, record, dataSource) => {
@@ -53,12 +49,8 @@ class VariablesTable extends React.Component {
                 break;
             default: break;
         }
-        this.editableTableRef.setDataSourceState(dataSource)
-        this.stopClickPropagation(domEvent)
-    }
-
-    handleVariableChange = (dataSource) => {
-        this.props.onChange(dataSource);
+        stopClickPropagation(domEvent)
+        this.handleVariableChange(dataSource)
     }
 
     handleCellBlur = (record, dataIndex) => {
@@ -74,7 +66,6 @@ class VariablesTable extends React.Component {
         return (
             <EditableTable 
                 rowKey='id'
-                ref={ref => this.editableTableRef = ref}
                 columns={[
                     {
                         title: 'VARIABLE',
@@ -162,7 +153,7 @@ class VariablesTable extends React.Component {
                                 buttonProps={{style: {height: 10}}} 
                                 title="View more actions" 
                                 label={<EllipsisOutlined />} 
-                                onClick={this.stopClickPropagation} 
+                                onClick={stopClickPropagation} 
                             />
                         </Dropdown>
                     )
@@ -185,89 +176,3 @@ export default VariablesTable;
 VariablesTable.defaultProps = {
     onChange: () => {},
 }
-
-// [
-                    //     {
-                    //     name: 'one',
-                    //     initialValue: '32',
-                    //     currentValue: 'London, Park Lane no. 0',
-                    //     index: 0,
-                    //     },
-                    //     {
-                    //     name: 'second',
-                    //     initialValue: '32',
-                    //     currentValue: 'London, Park Lane no. 1',
-                    //     index: 1
-                    //     },
-                    //     {
-                    //     name: 'third',
-                    //     initialValue: '32',
-                    //     currentValue: 'London, Park Lane no. 1',
-                    //     index: 2
-                    //     },
-                    //     {
-                    //     name: 'second',
-                    //     initialValue: '32',
-                    //     currentValue: 'London, Park Lane no. 1',
-                    //     index: 3
-                    //     },
-                    //     {
-                    //     name: 'third',
-                    //     initialValue: '32',
-                    //     currentValue: 'London, Park Lane no. 1',
-                    //     index: 4
-                    //     },
-                    //     {
-                    //     name: 'second',
-                    //     initialValue: '32',
-                    //     currentValue: 'London, Park Lane no. 1',
-                    //     index: 5
-                    //     },
-                    //     {
-                    //     name: 'third',
-                    //     initialValue: '32',
-                    //     currentValue: 'London, Park Lane no. 1',
-                    //     index: 6
-                    //     },
-                    //     {
-                    //     name: 'second',
-                    //     initialValue: '32',
-                    //     currentValue: 'London, Park Lane no. 1',
-                    //     index: 7
-                    //     },
-                    //     {
-                    //     name: 'third',
-                    //     initialValue: '32',
-                    //     currentValue: 'London, Park Lane no. 1',
-                    //     index: 8
-                    //     },
-                    //     {
-                    //     name: 'second',
-                    //     initialValue: '32',
-                    //     currentValue: 'London, Park Lane no. 1',
-                    //     index: 9
-                    //     },
-                    //     {
-                    //     name: 'third',
-                    //     initialValue: '32',
-                    //     currentValue: 'London, Park Lane no. 1',
-                    //     index: 10
-                    //     },
-                    //     {
-                    //     name: 'second',
-                    //     initialValue: '32',
-                    //     currentValue: 'London, Park Lane no. 1',
-                    //     index: 11
-                    //     },
-                    //     {
-                    //     name: 'third',
-                    //     initialValue: '32',
-                    //     currentValue: 'London, Park Lane no. 1',
-                    //     index: 12
-                    //     },
-                    // ]
-
-
-
-
-

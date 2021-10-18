@@ -32,11 +32,16 @@ class RequestSendSetting extends React.Component {
     }
 
     handleParamsChange = (value) => {
-        this.props.onChange({params: value});
+        this.props.onChange({param: value});
+    }
+
+    handleParamsSave = (value) => {
+        this.props.onSave({param: value});
     }
 
     render() {
-     
+        const {value} = this.props;
+        const {param} = value;
         return (
             <Tabs 
                 // type="card" 
@@ -54,7 +59,9 @@ class RequestSendSetting extends React.Component {
                 <TabPane className="request-setting-tab-param-panel" tab="Params" key="params">
                     <KeyValueTable 
                         cene="params"
+                        value={param}
                         tableProps={{title: () => "Query Params"}}  
+                        onSave={this.handleParamsSave}
                         onChange={this.handleParamsChange}
                     />
                 </TabPane>
