@@ -52,5 +52,5 @@ export const getIconByCode = (code = 'get') => {
     if (target) {
         return target.icon;
     }
-    return TEXT_ICON(code.toUpperCase(), code.length > 4 ? {width: code.length * 8.5} : {});
+    return TEXT_ICON(code.toUpperCase(), code.length > 3 ? {width: code.length * 8.5} : {});
 }
