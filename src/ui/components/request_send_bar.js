@@ -39,6 +39,12 @@ class RequestSendBar extends React.Component {
     render() {
         const {value = {}} = this.props;
         const {url, method = 'get'} = value;
+        const methodSelect = (
+            <RequestMethodSelect 
+                value={method}
+                onChange={this.handleMethodChange} 
+            />
+        )
         return (
             <Row gutter={[16, 16]} style={{marginTop: 5, marginBottom: 5}}>
                 
@@ -46,7 +52,7 @@ class RequestSendBar extends React.Component {
                     <Input 
                         value={url}
                         size="large" 
-                        addonBefore={<RequestMethodSelect defaultValue={method} onChange={this.handleMethodChange} />} 
+                        addonBefore={methodSelect} 
                         onChange={this.handleUrlChange} 
                         onBlur={this.handleUrlSave}
                         onPressEnter={this.handleUrlSave}

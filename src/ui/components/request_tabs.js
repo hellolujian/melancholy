@@ -35,7 +35,7 @@ import {
   saveRequest, syncRequestInCollection
 } from '@/utils/database_utils'
 import {TabIconType, TabType, getIconByCode} from '@/enums'
-import {UUID, compareObject} from '@/utils/global_utils'
+import {UUID, compareObjectIgnoreEmpty} from '@/utils/global_utils'
 import 'ui/style/request_tabs.css'
 
 const { TabPane } = Tabs;
@@ -609,7 +609,14 @@ class DraggableTabs extends React.Component {
         }
         await updateTabMeta(activeTabKey, {$set: setObj})
       } else {
-        await updateTabMeta(activeTabKey, {$unset: {draft: true}})
+        let updateObj = {$unset: {draft: true}};
+        if (value.hasOwnProperty('method')) {
+          updateObj = {
+            ...updateObj,
+            $set: {icon: value.method}
+          };
+        }
+        await updateTabMeta(activeTabKey, updateObj)
       }
     }
   }
@@ -631,13 +638,15 @@ class DraggableTabs extends React.Component {
         if (draft.hasOwnProperty(targetKey)) {
           let targetValue = value[targetKey];
           let preRequestInfo = targetTab.refId ? await queryRequestMetaById(targetTab.refId) : {method: 'get'};
+          console.log('=======================prerequestinfo=============');
+          console.log(preRequestInfo);
           let preValue = preRequestInfo[targetKey]
           console.log('原先值：============');
           console.log(preValue);
           console.log('现在值：=======');
           console.log(targetValue);
-          console.log('原先值与现在值：%s', compareObject(targetValue, preValue));
-          if (compareObject(targetValue, preValue) || ((!targetValue || (Array.isArray(targetValue) && targetValue.length === 0)) && (!preValue || (Array.isArray(preValue) && preValue.length === 0)))) {
+          console.log('原先值与现在值：%s', compareObjectIgnoreEmpty(targetValue, preValue));
+          if (compareObjectIgnoreEmpty(targetValue, preValue) || ((!targetValue || (Array.isArray(targetValue) && targetValue.length === 0)) && (!preValue || (Array.isArray(preValue) && preValue.length === 0)))) {
             console.log("sdfffffff===========================")
             console.log(targetTab)
             draft = this.removeTargetField(draft, targetKey);
@@ -660,8 +669,8 @@ class DraggableTabs extends React.Component {
       console.log(targetTab);
       console.log('===变更后的tabdata纸==');
       console.log(tabData);
-      if (targetTab.draft && targetTab.draft.method) {
-        targetTab.icon = targetTab.draft.method;
+      if (value.method) {
+        targetTab.icon = value.method;
       }
       tabData[tabData.findIndex(item => item.id === activeTabKey)] = targetTab;
       this.setState({tabData: tabData});

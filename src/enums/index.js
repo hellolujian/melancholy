@@ -18,10 +18,6 @@ export const TabIconType = Enum.define("TabIconType", {
             code: 'put',
             icon: PUT_REQUEST_ICON
         },
-        PATCH: {
-            code: 'patch',
-            icon: PATCH_REQUEST_ICON
-        },
         DELETE: {
             code: 'delete',
             icon: DEL_REQUEST_ICON
@@ -52,5 +48,5 @@ export const getIconByCode = (code = 'get') => {
     if (target) {
         return target.icon;
     }
-    return TEXT_ICON(code.toUpperCase(), code.length > 3 ? {width: code.length * 8.5} : {});
+    return TEXT_ICON(code.toUpperCase(), {width: code.length * 8});
 }

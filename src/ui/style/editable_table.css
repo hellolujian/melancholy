@@ -72,3 +72,20 @@ tr.ant-table-measure-row{
   visibility: collapse;
 }
 
+.key-value-edit-table .ant-table-tbody {
+  display: none
+}
+
+.key-value-edit-table .ant-table-thead .ant-table-cell {
+  border-bottom: none;
+}
+
+.key-value-edit-textarea {
+  border: 1px solid #f0f0f0;
+  border-bottom: 1px solid white;
+}
+textarea.key-value-edit-textarea::placeholder {
+  font-size: 14px;
+  font-weight: 1200;
+  color: gray
+}

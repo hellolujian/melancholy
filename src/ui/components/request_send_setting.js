@@ -31,8 +31,8 @@ class RequestSendSetting extends React.Component {
       
     }
 
-    handleParamsChange = (value) => {
-        this.props.onChange({param: value});
+    handleParamsChange = (value, saveFlag) => {
+        this.props.onChange({param: value}, saveFlag);
     }
 
     handleParamsSave = (value) => {

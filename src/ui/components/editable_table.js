@@ -30,8 +30,13 @@ class EditableTable extends React.Component {
     return this.props.hasOwnProperty('dataSource') ? (this.props.dataSource || []) : this.state.dataSource;
   }
 
+  refreshDataSource(newDataSource, saveFlag = true) {
+    this.setState({ dataSource: newDataSource });
+    this.props.onChange(newDataSource, saveFlag);
+  }
+
   handleSave = () => {
-    this.props.onSave(this.state.dataSource)
+    this.props.onSave(this.getRealDataSource())
   }
   
   onSortEnd = ({ oldIndex, newIndex }) => {
@@ -39,9 +44,7 @@ class EditableTable extends React.Component {
     if (oldIndex !== newIndex) {
       const newData = arrayMove([].concat(dataSource), oldIndex, newIndex).filter(el => !!el);
       console.log('Sorted items: ', newData);
-      this.setState({ dataSource: newData });
-      this.props.onChange(newData);
-      this.props.onSave(newData);
+      this.refreshDataSource(newData);
     }
   };
 
@@ -56,7 +59,7 @@ class EditableTable extends React.Component {
   );
 
   DraggableBodyRow = ({ className, style, ...restProps }) => {
-    const { dataSource } = this.state;
+    const dataSource = this.getRealDataSource();
     // function findIndex base on Table rowKey props and should always be a right array index
     const index = dataSource.findIndex(x => x[this.props.rowKey] === restProps['data-row-key']);
     if (index !== -1) {
@@ -77,8 +80,7 @@ class EditableTable extends React.Component {
     let changedRecord = dataSource.find(item => item[rowKey] === record[rowKey])
     if (changedRecord) {
       changedRecord = onCellBlur(changedRecord, dataIndex);
-      this.setState({dataSource})
-      this.props.onSave(dataSource);
+      this.refreshDataSource(dataSource);
     }
   }
 
@@ -102,9 +104,7 @@ class EditableTable extends React.Component {
     const dataSource = this.getRealDataSource();
     const {rowKey} = this.props;
     const newDataSource = dataSource.filter(data => data[rowKey] !== record[rowKey])
-    this.setState({dataSource: newDataSource});
-    this.props.onChange(newDataSource);
-    this.props.onSave(newDataSource);
+    this.refreshDataSource(newDataSource);
   }
 
   // 展示列变更
@@ -123,9 +123,9 @@ class EditableTable extends React.Component {
     
     const dataSource = this.getRealDataSource();
     const {rowKey, showCheckbox = 'disabled'} = this.props;
-    let changedRecord = dataSource.find(item => item[rowKey] === record[rowKey])
-    if (changedRecord) {
-      changedRecord[dataIndex] = value;
+    let changedRecordIndex = dataSource.findIndex(item => item[rowKey] === record[rowKey])
+    if (changedRecordIndex >= 0) {
+      dataSource[changedRecordIndex] = {...dataSource[changedRecordIndex], [dataIndex]: value}
     } else {
       let newObj = {...record, [dataIndex]: value, [rowKey]: UUID()};
       if (showCheckbox) {
@@ -140,13 +140,12 @@ class EditableTable extends React.Component {
   }
 
   handleCellCheckboxChange = (checked, record) => {
-    let {dataSource} = this.state;
+    const dataSource = this.getRealDataSource();
     const {rowKey} = this.props;
     let changedRecord = dataSource.find(item => item[rowKey] === record[rowKey]);
     if (changedRecord) {
       changedRecord.disabled = !checked;
-      this.props.onChange(dataSource);
-      this.props.onSave(dataSource);
+      this.refreshDataSource(dataSource);
     } 
   }
 

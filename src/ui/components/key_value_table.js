@@ -1,17 +1,17 @@
 import React from 'react';
-import {Tooltip, Button, Dropdown, Menu} from 'antd';
+import {Row, Col, Button, Table, Divider} from 'antd';
 
-import { EllipsisOutlined, InfoCircleFilled ,CaretDownOutlined } from '@ant-design/icons';
 import EditableTable from './editable_table'
-import TooltipButton from './tooltip_button'
 import HeaderPresets from './header_presets'
+import BulkEditTextarea from './bulk_edit_textarea'
 import {stopClickPropagation} from '@/utils/global_utils';
+import 'ui/style/editable_table.css'
+
 class KeyValueTable extends React.Component {
 
     constructor(props) {
         super(props);
         this.state = {
-           
         }
     }
 
@@ -19,8 +19,8 @@ class KeyValueTable extends React.Component {
         this.props.onSave(dataSource);
     }
 
-    handleChange = (dataSource) => {
-        this.props.onChange(dataSource);
+    handleChange = (dataSource, saveFlag) => {
+        this.props.onChange(dataSource, saveFlag);
     }
     
     handlePersistAllBtnClick = (dataSource) => {
@@ -55,10 +55,52 @@ class KeyValueTable extends React.Component {
         this.handleChange(dataSource);
     }
 
+    handleBulkEditClick = (keyValueEditFlag = true) => {
+        this.setState({keyValueEdit: keyValueEditFlag});
+    }
+
+    handleBulkTextareaBlur = (dataSource) => {
+        this.handleChange(dataSource, true)
+    }
+
     render() {
      
         const {scene, editable = true, draggable = true, tableProps, value} = this.props;
-        return (
+        const {keyValueEdit} = this.state;
+        return keyValueEdit ? (
+            <>
+                <Table
+                    bordered
+                    size="small"
+                    className="key-value-edit-table"
+                    pagination={false}
+                    columns={[
+                        {
+                            title: (
+                                <Row className="justify-content-space-between vertical-center" style={{paddingRight: 10}}>
+                                    <Col />
+                                    <Col>
+                                        <Divider type="vertical" />
+                                        <Button 
+                                            type='link' 
+                                            size='small'
+                                            onClick={() => this.handleBulkEditClick(false)}>
+                                            Key-Value Edit
+                                        </Button>
+                                    </Col>
+                                </Row>
+                            )
+                        }
+                    ]}
+                    {...tableProps}
+                />
+                <BulkEditTextarea 
+                    defaultValue={value}
+                    onBlur={(dataSource) => this.handleChange(dataSource, true)}
+                />
+            </>
+            
+        ) : (
             <EditableTable 
                 rowKey='id'
                 tableProps={tableProps}
@@ -68,7 +110,7 @@ class KeyValueTable extends React.Component {
                     [
                         {
                             title: 'KEY',
-                            dataIndex: 'name',
+                            dataIndex: 'key',
                             // width: '33%',
                             editable: editable,
                             className: 'drag-visible',
@@ -77,7 +119,7 @@ class KeyValueTable extends React.Component {
                         {
                             name: 'Value',
                             title: 'VALUE',
-                            dataIndex: 'initialValue',
+                            dataIndex: 'value',
                             // width: '33%',
                             editable: editable,
                             className: 'drag-visible',
@@ -86,7 +128,7 @@ class KeyValueTable extends React.Component {
                         {
                             name: 'Description',
                             title: 'DESCRIPTION',
-                            dataIndex: 'currentValue',
+                            dataIndex: 'description',
                             // width: '33%',
                             editable: editable,
                             className: 'drag-visible',
@@ -101,13 +143,12 @@ class KeyValueTable extends React.Component {
                         }
                         let operations = [
                             (
-                                <TooltipButton 
-                                    label="Bulk Edit" 
-                                    buttonProps={{
-                                        type: 'link', size: 'small', 
-                                        onClick: () => this.handlePersistAllBtnClick(dataSource)
-                                    }}
-                                />
+                                <Button 
+                                    type='link' 
+                                    size='small'
+                                    onClick={this.handleBulkEditClick}>
+                                    Bulk Edit
+                                </Button>
                             )
                         ];
                         if (scene === 'headers') {
@@ -121,6 +162,7 @@ class KeyValueTable extends React.Component {
                 onChange={this.handleChange}
                 onSave={this.handleSave}
             />
+            
         )
     }
 }
