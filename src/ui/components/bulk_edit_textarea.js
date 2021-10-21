@@ -8,10 +8,12 @@ const {TextArea} = Input;
 
 class BulkEditTextarea extends React.Component {
 
+    getDefaultValue = () => this.props.defaultValue ? this.props.defaultValue.map(item => `${item.disabled ? '//' : ''}${item.key || ''}:${item.value || ''}`).join("\n") : ''
+
     constructor(props) {
         super(props);
         this.state = {
-            value: props.defaultValue ? props.defaultValue.map(item => `${item.disabled ? '//' : ''}${item.key || ''}:${item.value || ''}`).join("\n") : ''
+            value: this.getDefaultValue(),
         }
     }
 
@@ -21,7 +23,7 @@ class BulkEditTextarea extends React.Component {
 
     handleBulkTextareaBlur = (e) => {
         let targetValue = e.target.value;
-        if (targetValue === this.state.value) {
+        if (targetValue === this.getDefaultValue()) {
             return;
         }
         const {defaultValue} = this.props;
