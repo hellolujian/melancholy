@@ -8,6 +8,7 @@ import {queryCollectionMetaById} from '@/database/collection_meta'
 import {UUID} from '@/utils/global_utils'
 import {subscribeCollectionModalOpen, publishCollectionSave} from '@/utils/event_utils'
 import {newCollection, saveCollection} from '@/utils/database_utils'
+import {TabIconType, TabType, AuthSceneType} from '@/enums'
 const { TabPane } = Tabs;
 const { Text, Link } = Typography;
 
@@ -25,8 +26,8 @@ class CollectionModal extends React.Component {
     }
 
     getCollectionInfo = async (key, data = {}) => {
-        const {collectionId, parentId} = data;
-        let updateObj = {visible: true};
+        const {collectionId, parentId, extend} = data;
+        let updateObj = {visible: true, extend: extend};
         if (collectionId) {
             updateObj.collectionId = collectionId;
             updateObj.collectionSettings = await queryCollectionMetaById(collectionId);
@@ -90,7 +91,7 @@ class CollectionModal extends React.Component {
 
     render() {
      
-        const {collectionSettings, visible, collectionId, parentId, parentName} = this.state;
+        const {collectionSettings, visible, collectionId, parentId, parentName, extend = {}} = this.state;
         return (
             <Modal 
                 title={parentId ? (collectionId ? 'EDIT FOLDER' : `ADD FOLDER TO ${parentName}`) : (collectionId ? 'EDIT COLLECTION' : "CREATE A NEW COLLECTION")}
@@ -118,7 +119,13 @@ class CollectionModal extends React.Component {
                     </Form.Item>
                 </Form>
 
-                <DAPTVSettingTabs value={collectionSettings} onChange={this.handleDAPTVSettingChange} />
+                <DAPTVSettingTabs 
+                    scene={AuthSceneType.COLLECTION.name()}
+                    parentId={parentId}
+                    activeKey={extend.activeKey}
+                    value={collectionSettings} 
+                    onChange={this.handleDAPTVSettingChange} 
+                />
                 
                 
             </Modal>

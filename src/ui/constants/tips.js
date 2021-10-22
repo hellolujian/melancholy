@@ -79,8 +79,8 @@ const AUTH_LEARN_TIPS = (
     <Link href="https://learning.postman.com/docs/sending-requests/authorization/">Learn more about authorization</Link>
 )
 
-const NO_AUTH_TIPS = (
-    <Text>This request does not use any authorization. {AUTH_LEARN_TIPS}</Text>
+const NO_AUTH_TIPS = (position) => (
+    <Text>This {position} does not use any authorization. {AUTH_LEARN_TIPS}</Text>
 )
 
 const HAVE_AUTH_TIPS = (

@@ -31,7 +31,8 @@ class DAPTVSettingTabs extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            value: props.value || {}
+            value: props.value || {},
+            activeKey: props.activeKey
         }
     }
 
@@ -82,13 +83,17 @@ class DAPTVSettingTabs extends React.Component {
         })
     }
 
+    handleTabChange = (activeKey) => {
+        this.setState({activeKey: activeKey})
+    }
+
     render() {
      
-        const {workspaceId, collectionId, folderId, visible, scene = 'add', initialValues} = this.props;
-        const { value, } = this.state;
+        const {scene, parentId} = this.props;
+        const { value, activeKey } = this.state;
         const { description, auth, prerequest, test, variable } = value;
         return (
-            <Tabs defaultActiveKey="description" onChange={this.handleTabChange} style={{height: '100%', position: 'relative'}}>
+            <Tabs activeKey={activeKey} defaultActiveKey="description" onChange={this.handleTabChange} style={{height: '100%', position: 'relative'}}>
                 <TabPane tab="Description" key="description">
                     <Space direction="vertical" className="full-width">
                         {COLLECTION_DESCRIPTION_TIPS}
@@ -104,8 +109,10 @@ class DAPTVSettingTabs extends React.Component {
                 <TabPane tab="Authorization" key="authorization">
                     {AUTHORIZATION_TIPS}
                     <AuthorizationSetting 
-                        onChange={this.handleAuthChange}
                         value={auth}
+                        scene={scene}
+                        parentId={parentId || value.parentId}
+                        onChange={this.handleAuthChange}
                     />
                 </TabPane>
                 <TabPane tab="Pre-request Scripts" key="prerequestscripts">

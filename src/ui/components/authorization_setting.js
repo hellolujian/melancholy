@@ -4,6 +4,8 @@ import {NO_AUTH_TIPS, HAVE_AUTH_TIPS} from 'ui/constants/tips'
 import {TabIconType, TabType, AuthSceneType} from '@/enums'
 
 import {loadCollection, getParentArr, newCollection} from '@/utils/database_utils'
+import {queryRequestMetaById, insertRequestMeta, updateRequestMeta} from '@/database/request_meta'
+import {publishCollectionModalOpen, publishRequestModalOpen} from '@/utils/event_utils'
 
 const { Option } = Select;
 const {Paragraph, Link, Text} = Typography
@@ -17,12 +19,28 @@ class AuthorizationSetting extends React.Component {
         }
     }
 
-    componentDidMount() {
-        const {id, scene} = this.props;
-        if (AuthSceneType.REQUEST.name === scene) {
-            
+    refreshParentArr = async (parentId) => {
+        if (parentId) {
+            let parentArr = await getParentArr(parentId);
+            this.setState({parentArr: parentArr});
         }
+    }
 
+    componentWillReceiveProps(nextProps) {
+        if (nextProps.parentId !== this.props.parentId) {
+            this.refreshParentArr(nextProps.parentId);
+        }
+        if (nextProps.hasOwnProperty('value')) {
+            this.setState({auth: nextProps.value})
+        }
+    }
+
+    componentDidMount() {
+        this.refreshParentArr(this.props.parentId)
+    }
+
+    getRealAuth = () => {
+        return this.props.hasOwnProperty('value') ? this.props.value : this.state.auth
     }
 
     handleAuthTypeChange = (value) => {
@@ -55,16 +73,20 @@ class AuthorizationSetting extends React.Component {
         });
     }
 
+    handleOpenCollectionModal =  () => {
+        publishCollectionModalOpen({collectionId: this.props.parentId, extend: {activeKey: 'authorization'}})
+    }
+
     render() {
 
-        const {collectionName, auth} = this.state;
+        const {parentArr = [], auth} = this.state;
 
-        const {id, scene} = this.props;
+        const {parentId, scene, deleted} = this.props;
         const authorizationTypes = [
             {
                 label: 'No Auth', 
                 value: 'noauth',
-                content: NO_AUTH_TIPS
+                content: NO_AUTH_TIPS(AuthSceneType.REQUEST.name() === scene ? 'request' : (parentId ? 'folder' : 'collection'))
             },
             {
                 label: 'API Key', 
@@ -110,14 +132,31 @@ class AuthorizationSetting extends React.Component {
                 label: 'NTLM Authentication [Beta]', value: 'ntlm'
             }
         ];
-        if (scene === AuthSceneType.REQUEST.name()) {
+        console.log('-=======================ssene: %s', scene);
+        if (scene === AuthSceneType.REQUEST.name() || parentId) {
+            let contentText = '', targetParentName = '';
+            const hasSetAuthParent = parentArr.filter(item => item.auth && item.auth.type && item.auth.type !== 'noauth' && item.auth.type !== 'inherit');
+            const targetParent = hasSetAuthParent.length === 0 ? (parentArr.length > 0 ? parentArr[0] : null) : hasSetAuthParent[hasSetAuthParent.length - 1];
+            if (AuthSceneType.REQUEST.name() === scene) {
+                if (!parentId || deleted) {
+                    contentText = "This request is not inheriting any authorization helper at the moment. Save it in a collection to use the parent's authorization helper.";
+                } else {
+                    contentText = `This request is using an authorization helper from ${hasSetAuthParent.length === 0 ? 'collection' : 'folder'} `;
+                    targetParentName = targetParent ? targetParent.name : '';
+                    targetParentName = <Typography.Link underline onClick={this.handleOpenCollectionModal}>{targetParentName}</Typography.Link>
+                }
+                
+            } else {
+                contentText = `This folder is using ${targetParent && targetParent.auth ? authorizationTypes.find(item => item.value === targetParent.auth.type).label : authorizationTypes[0].label} from ${targetParent && targetParent.parentId ? 'folder' : 'collection'} ${targetParent ? targetParent.name : ''}`
+                targetParentName = <Typography.Link underline onClick={this.handleOpenCollectionModal}>{targetParentName}</Typography.Link>
+            }
             authorizationTypes.unshift(
                 {
                     label: 'Inherit auth from parent', 
                     value: 'inherit',
                     content: (
                         <Typography.Paragraph>
-                            This request is using an authorization helper from collection <Typography.Link underline>{this.state.collectionName}</Typography.Link>
+                            {contentText}{targetParentName}
                         </Typography.Paragraph>
                     )
                 },
