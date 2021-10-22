@@ -4,7 +4,7 @@ import {Row, Col, Button, Table, Divider} from 'antd';
 import EditableTable from './editable_table'
 import HeaderPresets from './header_presets'
 import BulkEditTextarea from './bulk_edit_textarea'
-import {stopClickPropagation} from '@/utils/global_utils';
+import {stopClickPropagation, UUID} from '@/utils/global_utils';
 import 'ui/style/editable_table.css'
 
 class KeyValueTable extends React.Component {
@@ -19,7 +19,7 @@ class KeyValueTable extends React.Component {
         this.props.onSave(dataSource);
     }
 
-    handleChange = (dataSource, saveFlag) => {
+    handleChange = (dataSource, saveFlag = true) => {
         this.props.onChange(dataSource, saveFlag);
     }
     
@@ -60,7 +60,18 @@ class KeyValueTable extends React.Component {
     }
 
     handleBulkTextareaBlur = (dataSource) => {
-        this.handleChange(dataSource, true)
+        this.handleChange(dataSource)
+    }
+
+    handleHeadPresetItemClick = (keyValuePreset = []) => {
+        let alreadyData = this.props.value || [];
+        let addedData = keyValuePreset.map(item => {
+            return {
+                ...item,
+                id: UUID()
+            }
+        })
+        this.handleChange([...alreadyData, ...addedData])
     }
 
     render() {
@@ -152,7 +163,9 @@ class KeyValueTable extends React.Component {
                             )
                         ];
                         if (scene === 'headers') {
-                            operations.push(<HeaderPresets />)
+                            operations.push(
+                                <HeaderPresets onItemClick={this.handleHeadPresetItemClick} />
+                            )
                         }
                         return operations;
                     }

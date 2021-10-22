@@ -136,7 +136,7 @@ class EditableTable extends React.Component {
     this.setState({dataSource: dataSource}, () => {
       document.getElementById(cellId).focus()
     })
-    this.props.onChange(dataSource);
+    this.props.onChange(dataSource, false);
   }
 
   handleCellCheckboxChange = (checked, record) => {

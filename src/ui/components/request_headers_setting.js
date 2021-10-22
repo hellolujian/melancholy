@@ -31,6 +31,7 @@ class RequestHeaderSetting extends React.Component {
 
     render() {
      
+        const {onSave, onChange, value} = this.props;
         return (
 
             <Collapse
@@ -40,10 +41,15 @@ class RequestHeaderSetting extends React.Component {
                 className="request-header-setting-collapse"
             >
                 <Panel header="Headers (1)" key="1" className="request-header-setting-collapse-panel-first">
-                <KeyValueTable scene="headers" />
+                    <KeyValueTable 
+                        value={value}
+                        scene="headers" 
+                        onSave={onSave} 
+                        onChange={onChange} 
+                    />
                 </Panel>
                 <Panel header="Temporary Headers (1)" key="2" className="request-header-setting-collapse-panel-second">
-                <KeyValueTable scene="headers" editable={false} draggable={false} />
+                    <KeyValueTable scene="headers" editable={false} draggable={false} />
                 </Panel>
             </Collapse>
             

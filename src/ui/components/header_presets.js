@@ -5,7 +5,8 @@ import { EllipsisOutlined, InfoCircleFilled ,CaretDownOutlined } from '@ant-desi
 import Icon from '@ant-design/icons';
 import KeyValueTable from './key_value_table'
 import { UNSAVED_DOT_ICON, POST_REQUEST_ICON, GET_REQUEST_ICON, CLOSE_SVG, UNSAVED_DOT_SVG } from 'ui/constants/icons'
-import {stopClickPropagation} from '@/utils/global_utils';
+import {UUID, stopClickPropagation} from '@/utils/global_utils';
+import {insertHeaderPreset, queryHeaderPreset, updateHeaderPreset} from '@/database/header_preset'
 
 import 'ui/style/header_presets.css'
 
@@ -14,31 +15,8 @@ class HeaderPresets extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-           headerPresets: [...new Array(50).keys()].map((item, index) => {
-               return {
-                   id: index, name: index
-               }
-           })
+           headerPresets: []
         }
-    }
-
-    componentDidMount() {
-      
-    }
-
-    handleMenuClick = ({key}) => {
-        if (key === 'managepresets') {
-            this.setState({modalVisible: true});
-        }
-        
-    }
-
-    handleModalCancel = (e) => {
-        this.setState({operateType: null, modalVisible: false});
-    }
-
-    handleAddClick = () => {
-        this.setState({operateType: 'add'})
     }
 
     handleFormRef = (ref) => {
@@ -46,8 +24,59 @@ class HeaderPresets extends React.Component {
             this.formRef = ref;
         }
     }
+
+    refreshData = async () => {
+        let data = await queryHeaderPreset();
+        this.setState({headerPresets: data});
+    }
+
+    componentDidMount() {
+        this.refreshData();
+    }
+
+    handleItemClick = (item) => {
+        console.log(item)
+        this.setState({operateType: 'edit', currentPreset: item.preset}, () => {
+            this.formRef.setFieldsValue(item);
+        });
+    }
+
+    handleMenuClick = ({key}) => {
+        if (key === 'managepresets') {
+            this.setState({modalVisible: true});
+        } else {
+            const {headerPresets} = this.state;
+            let targetHeadPreset = headerPresets.find(item => item.id === key);
+            if (targetHeadPreset && targetHeadPreset.preset && targetHeadPreset.preset.length > 0) {
+                this.props.onItemClick(targetHeadPreset.preset)
+            }
+        }
+    }
+
+    handleModalCancel = (e) => {
+        this.setState({operateType: null, modalVisible: false});
+    }
+
+    handleAddClick = () => {
+        this.setState({operateType: 'add', currentPreset: []})
+    }
+
+    handleCloseTabClick = async (id) => {
+        await updateHeaderPreset(id, {$set: {deleted: true}})
+        await this.refreshData()
+    }
+
+    handleFormFinish = async (changedValues) => {
+        const {currentPreset} = this.state;
+        if (changedValues.id) {
+            await updateHeaderPreset(changedValues.id, {$set: {...changedValues, preset: currentPreset}})
+        } else {
+            await insertHeaderPreset({...changedValues, id: UUID(), preset: currentPreset})
+        }
+        await this.refreshData()
+    }
+
     handleModalOk = () => {
-        
         this.formRef.validateFields().then((values) => {
             if (!values.errorFields) {
                 this.formRef.submit();
@@ -58,42 +87,18 @@ class HeaderPresets extends React.Component {
         })
     }
 
-    handleFormValuesChange = (changedValues, allValues) => {
-       
-    }
-
-    handleCloseTabClick = (id) => {
-        const {headerPresets} = this.state;
-        this.setState({headerPresets: headerPresets.filter(preset => preset.id !== id)})
-    }
-
-    handleFormFinish = (changedValues) => {
-        console.log(changedValues)
-        const {headerPresets} = this.state;
-        let changedOne = headerPresets.find(preset => preset.id === changedValues.id);
-        if (changedOne) {
-            changedOne.name = changedValues.name;
-        } else {
-            headerPresets.push({id: new Date().getTime(), name: "new_" + headerPresets.length})
-        }
-
-        this.setState({headerPresets: headerPresets})
-    }
-
-    handleItemClick = (item) => {
-        console.log(item)
-        this.setState({operateType: 'edit'}, () => {
-            this.formRef.setFieldsValue(item)
-        });
-    }
-
     handleCancelClick = (e) => {
         stopClickPropagation(e)
         this.setState({operateType: null});
     }
+
+    handleKeyValueTableChange = (value) => {
+        this.setState({currentPreset: value})
+    }
+
     render() {
      
-        let {modalVisible, operateType, headerPresets} = this.state;
+        let {modalVisible, operateType, headerPresets, currentPreset} = this.state;
         let footerButtonProps = {};
         if (!operateType) {
             footerButtonProps.style = {
@@ -108,6 +113,13 @@ class HeaderPresets extends React.Component {
                         <Menu.Item key="managepresets">
                             Manage Presets
                         </Menu.Item>
+                        {
+                            headerPresets.map(item => (
+                                <Menu.Item key={item.id}>
+                                   {item.name}
+                                </Menu.Item>
+                            ))
+                        }
                     </Menu>)
                 } >
                     <Button type="link" size="small">Presets<CaretDownOutlined /></Button>
@@ -142,28 +154,40 @@ class HeaderPresets extends React.Component {
                                     <Input placeholder="Header Preset Name" />
                                 </Form.Item>
 
-                                <KeyValueTable />
+                                <KeyValueTable 
+                                    value={currentPreset}
+                                    onChange={this.handleKeyValueTableChange}
+                                />
 
                             </Form>
                         ) : (
                             <>
-                            <Typography.Paragraph>
-                                Quickly add groups of header key/value pairs to the request. Start typing the name of the preset name and it'll show up in the dropdown list.
-                            </Typography.Paragraph>
-                            <Button type="primary" onClick={this.handleAddClick}>
-                                Add
-                            </Button>
-                            <List
-                                className="header-presets-list"
-                                dataSource={headerPresets}
-                                renderItem={item => (
-                                    <List.Item actions={[
-                                        <Button type='text' icon={<Icon component={() => CLOSE_SVG} onClick={() => this.handleCloseTabClick(item.id)} />} />
-                                      ]}>
-                                    <Button type="text" onClick={() => this.handleItemClick(item)}>{item.name}</Button> 
-                                    </List.Item>
-                                )}
-                            />
+                                <Typography.Paragraph>
+                                    Quickly add groups of header key/value pairs to the request. Start typing the name of the preset name and it'll show up in the dropdown list.
+                                </Typography.Paragraph>
+                                <Button type="primary" onClick={this.handleAddClick}>
+                                    Add
+                                </Button>
+                                <List
+                                    className="header-presets-list"
+                                    dataSource={headerPresets}
+                                    renderItem={item => (
+                                        <List.Item 
+                                            actions={[
+                                                <Button 
+                                                    type='text' 
+                                                    icon={<Icon component={() => CLOSE_SVG} onClick={() => this.handleCloseTabClick(item.id)} />} 
+                                                />
+                                            ]}
+                                        >
+                                            <Button 
+                                                type="text" 
+                                                onClick={() => this.handleItemClick(item)}>
+                                                {item.name}
+                                            </Button> 
+                                        </List.Item>
+                                    )}
+                                />
                             </>
                         )
                     }

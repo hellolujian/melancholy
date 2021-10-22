@@ -44,20 +44,28 @@ class RequestSendSetting extends React.Component {
         this.props.onSave({param: value});
     }
 
+    handleHeadersSave = (value) => {
+        this.props.onSave({header: value});
+    }
+
+    handleHeadersChange = (value, saveFlag) => {
+        this.props.onChange({header: value}, saveFlag);
+    }
+
     handleAuthChange = (value) => {
         this.props.onChange({auth: value}, true)
     }
 
     render() {
         const {value} = this.props;
-        const {param, deleted, auth, parentId} = value;
+        const {param, deleted, auth, parentId, header} = value;
         const {activeTabKey} = this.state;
         return (
             <Tabs 
                 // type="card" 
                 className="request-send-setting-tab"
                 size='small' 
-                defaultActiveKey="authorization" 
+                defaultActiveKey="headers" 
                 onChange={this.handleTabKeyChange} 
                 tabBarExtraContent={
                     <>
@@ -86,7 +94,11 @@ class RequestSendSetting extends React.Component {
                     
                 </TabPane>
                 <TabPane tab="Headers" key="headers">
-                <RequestHeaderSetting />
+                    <RequestHeaderSetting 
+                        value={header}
+                        onSave={this.handleHeadersSave}
+                        onChange={this.handleHeadersChange}
+                    />
                 </TabPane>
                 <TabPane tab="Body" key="body">
                 <RequestBodyTab />
