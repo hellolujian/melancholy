@@ -1,6 +1,10 @@
 import React from 'react';
 import {Select , Button, Row, Col, Typography, Form, Input, Checkbox, Space} from 'antd';
 import {NO_AUTH_TIPS, HAVE_AUTH_TIPS} from 'ui/constants/tips'
+import {TabIconType, TabType, AuthSceneType} from '@/enums'
+
+import {loadCollection, getParentArr, newCollection} from '@/utils/database_utils'
+
 const { Option } = Select;
 const {Paragraph, Link, Text} = Typography
 class AuthorizationSetting extends React.Component {
@@ -14,7 +18,11 @@ class AuthorizationSetting extends React.Component {
     }
 
     componentDidMount() {
-      
+        const {id, scene} = this.props;
+        if (AuthSceneType.REQUEST.name === scene) {
+            
+        }
+
     }
 
     handleAuthTypeChange = (value) => {
@@ -50,19 +58,9 @@ class AuthorizationSetting extends React.Component {
     render() {
 
         const {collectionName, auth} = this.state;
-        let {type: authType = 'noauth'} = auth;
-        let authValue = auth[authType] || [];
 
+        const {id, scene} = this.props;
         const authorizationTypes = [
-            {
-                label: 'Inherit auth from parent', 
-                value: 'inherit',
-                content: (
-                    <Typography.Paragraph>
-                        This request is using an authorization helper from collection <Typography.Link underline>{this.state.collectionName}</Typography.Link>
-                    </Typography.Paragraph>
-                )
-            },
             {
                 label: 'No Auth', 
                 value: 'noauth',
@@ -111,7 +109,23 @@ class AuthorizationSetting extends React.Component {
             {
                 label: 'NTLM Authentication [Beta]', value: 'ntlm'
             }
-        ]
+        ];
+        if (scene === AuthSceneType.REQUEST.name()) {
+            authorizationTypes.unshift(
+                {
+                    label: 'Inherit auth from parent', 
+                    value: 'inherit',
+                    content: (
+                        <Typography.Paragraph>
+                            This request is using an authorization helper from collection <Typography.Link underline>{this.state.collectionName}</Typography.Link>
+                        </Typography.Paragraph>
+                    )
+                },
+            )
+        }
+
+        let {type: authType = authorizationTypes[0].value} = auth;
+        let authValue = auth[authType] || [];
       
         let selectedType = authorizationTypes.find(type => type.value === authType);
         return (

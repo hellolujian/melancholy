@@ -15,6 +15,10 @@ export const updateRequestMeta = (id, doc) => {
     return update(REQUEST_META, {id: id}, doc)
 }
 
+export const multiUpdateRequestMeta = async (param, doc) => {
+    return await update(REQUEST_META, param, doc, {multi: true})
+}
+
 export const queryRequestMetaByParentId = (parentId) => {
     return query(REQUEST_META, {parentId: parentId})
 }

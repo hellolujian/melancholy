@@ -9,6 +9,7 @@ import RndScriptEditor from './rnd_script_editor'
 import ScriptEditor from './script_editor'
 import AuthorizationSetting from './authorization_setting'
 import RequestHeaderSetting from './request_headers_setting'
+import {AuthSceneType} from '@/enums'
 import 'ui/style/request_send_setting.css'
 const { TabPane } = Tabs;
 const { Text, Link } = Typography;
@@ -39,15 +40,19 @@ class RequestSendSetting extends React.Component {
         this.props.onSave({param: value});
     }
 
+    handleAuthChange = (value, saveFlag) => {
+        this.props.onChange({auth: value})
+    }
+
     render() {
         const {value} = this.props;
-        const {param} = value;
+        const {param, id, auth} = value;
         return (
             <Tabs 
                 // type="card" 
                 className="request-send-setting-tab"
                 size='small' 
-                defaultActiveKey="params" 
+                defaultActiveKey="authorization" 
                 onChange={this.callback} 
                 tabBarExtraContent={
                     <>
@@ -66,7 +71,12 @@ class RequestSendSetting extends React.Component {
                     />
                 </TabPane>
                 <TabPane tab="Authorization" key="authorization">
-                    <AuthorizationSetting />
+                    <AuthorizationSetting 
+                        id={id}
+                        value={auth}
+                        scene={AuthSceneType.REQUEST.name()}
+                        onChange={this.handleAuthChange}
+                    />
                 </TabPane>
                 <TabPane tab="Headers" key="headers">
                 <RequestHeaderSetting />

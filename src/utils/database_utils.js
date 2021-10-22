@@ -1,7 +1,7 @@
 
 import {insertCollection, updateCollection, queryCollectionById, queryCollection} from '@/database/collection'
 import {insertCollectionMeta, updateCollectionMeta, queryCollectionMetaById, queryCollectionMetaByParentId} from '@/database/collection_meta'
-import {insertRequestMeta, updateRequestMeta, queryRequestMetaById, queryRequestMetaByParentId, queryRequestCount} from '@/database/request_meta'
+import {insertRequestMeta, updateRequestMeta, queryRequestMetaById, queryRequestMetaByParentId, queryRequestCount, multiUpdateRequestMeta} from '@/database/request_meta'
 
 import {UUID} from '@/utils/global_utils'
 
@@ -59,13 +59,21 @@ export const getParentArr = async (id) => {
         if (!collectionMetaInfo) {
             break;
         }
-        arr.unshift({id: collectionMetaInfo.id, name: collectionMetaInfo.name});
+        arr.unshift({id: collectionMetaInfo.id, name: collectionMetaInfo.name, auth: collectionMetaInfo.auth});
         id = collectionMetaInfo.parentId;
         if (!id) {
             break;
         }
     }           
     return arr;
+}
+
+export const getRequestParentIdArr = async (id) => {
+
+    let requestMetaInfo = await queryRequestMetaById(id);
+    if (!requestMetaInfo) {
+        return [];
+    }
 }
 
 export const sortCollectionData = (collectionData) => {
@@ -169,6 +177,20 @@ export const getRequestCount = async (id) => {
     return count;
 }
 
+export const getChildrenRequestArr = async (id) => {
+    let arr = [];
+    // 获取自己包含的请求数
+    let childrenReq = await queryRequestMetaByParentId(id);
+    arr.push(...childrenReq);
+    let childrenCollection = await queryCollectionMetaByParentId(id);
+    // 获取每个子集合的请求数
+    for (let child of childrenCollection) {
+        let childRequests = await getChildrenRequestArr(child.id);
+        arr.push(...childRequests);
+    }
+    return arr;
+}
+
 /**
  * 删除集合（如删除folder需要更新所属collection的requestCount）
  * @param {*} id 
@@ -188,11 +210,15 @@ export const deleteCollection = async (id) => {
         let target = getTargetItem(collectionInfo, parentIdArr);
         target.items = target.items.filter(item => item.id !== id);
         let subtractCount = await getRequestCount(id);
-        return await updateCollection(collectionInfo.id, { $set: { items: collectionInfo.items, requestCount: collectionInfo.requestCount - subtractCount } })
+        await updateCollection(collectionInfo.id, { $set: { items: collectionInfo.items, requestCount: collectionInfo.requestCount - subtractCount } })
     } else {
-        return await updateCollection(id, { deleted: true })
+        await updateCollection(id, { deleted: true })
     }
 
+    // 删除旗下所有req
+    let childrenReqs = await getChildrenRequestArr(id);
+    await multiUpdateRequestMeta({id: {$in: childrenReqs.map(item => item.id)}}, {$set: {deleted: true}})
+    return childrenReqs;
 }
 
 export const starCollection = async (id, starred) => {
@@ -309,7 +335,7 @@ export const getDuplicateCollectionByMeta = async (id, collectionMetaArr, reques
     
     let newId = UUID();
     let collectionMetaInfo = await queryCollectionMetaById(id);
-    const {name, parentId, description, auth, prerequest, test, variable, para} = collectionMetaInfo; 
+    const {name, parentId, description, auth, prerequest, test, variable} = collectionMetaInfo; 
     let duplicateName = collectionMetaArr.length > 0 ? name : (name + ' Copy');
     collectionMetaArr.push({
         id: newId, 

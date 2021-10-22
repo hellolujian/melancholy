@@ -66,9 +66,9 @@ class CollectionTree extends React.Component {
     }
 
     componentDidMount = async () => {
-      subscribeCollectionSave(this.refreshData)
-      subscribeRequestSave(this.refreshData)
-      this.refreshData();
+        subscribeCollectionSave(this.refreshData)
+        subscribeRequestSave(this.refreshData)
+        this.refreshData();
     }
 
     handleExpandKeys = (key, selected) => {
@@ -187,6 +187,13 @@ class CollectionTree extends React.Component {
         this.setState({collectionDrawerVisibleItem: visibleItem})
     }
 
+    handleDeleteCollection = async (id) => {
+        let childrenReqs = await deleteCollection(id);
+        childrenReqs.forEach(child => {
+            publishRequestDelete({id: child.id,})
+        })
+    }
+
     handleCollectionDelete = (id) => {
         Modal.confirm({
             title: 'DELETE COLLECTION',
@@ -209,7 +216,7 @@ class CollectionTree extends React.Component {
             okText: 'Delete',
             cancelText: 'Cancel',
             onOk: async () => {
-                await deleteCollection(id);
+                await this.handleDeleteCollection(id);
                 this.refreshData()
             }
         });
@@ -236,7 +243,7 @@ class CollectionTree extends React.Component {
             okText: 'Delete',
             cancelText: 'Cancel',
             onOk: async () => {
-                await deleteCollection(id);
+                await this.handleDeleteCollection(id);
                 this.refreshData()
             }
         });
@@ -258,7 +265,7 @@ class CollectionTree extends React.Component {
             okText: 'Delete',
             cancelText: 'Cancel',
             onOk: async () => {
-                await deleteCollection(id);
+                await this.handleDeleteCollection(id);
                 this.refreshData()
             }
         });

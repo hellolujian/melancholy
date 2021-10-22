@@ -50,3 +50,5 @@ export const getIconByCode = (code = 'get') => {
     }
     return TEXT_ICON(code.toUpperCase(), {width: code.length * 8});
 }
+
+export const AuthSceneType = Enum.define("AuthSceneType", ["REQUEST", "COLLECTION", "FOLDER"])
