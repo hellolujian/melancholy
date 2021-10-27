@@ -1,6 +1,6 @@
-.editable-cell {
+/* .editable-cell {
     position: relative;
-  }
+  } */
   
   .editable-cell-value-wrap {
     padding: 1px 1px;
@@ -89,3 +89,11 @@ textarea.key-value-edit-textarea::placeholder {
   font-weight: 1200;
   color: gray
 }
+
+.request-body-formdata-table-select .ant-select-selector {
+  height: 22px !important;
+}
+
+/* .common-editable-table .ant-table-cell {
+  position: relative;
+} */

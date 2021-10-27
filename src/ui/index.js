@@ -2,7 +2,7 @@ import React from 'react';
 import { 
     Layout, Menu, 
     Space,Row, Col ,
-    Tabs, Input,Tree,
+    Tabs, Input,Tree, Select
 } from 'antd';
 import { PlusOutlined, SearchOutlined,} from '@ant-design/icons';
 import CollectionModal from 'ui/components/collection_modal'
@@ -14,6 +14,8 @@ import ResponseTab from 'ui/components/response_tab'
 import { Resizable } from 'react-resizable';
 import {ADD_ICON} from 'ui/constants/icons'
 import {publishCollectionModalOpen} from '@/utils/event_utils'
+
+import TextareaAutosize from "react-autosize-textarea"
 import 'ui/style/resizable.css'
 import 'ui/style/common.css'
 import 'ui/style/layout.css'
@@ -23,6 +25,7 @@ const { TabPane } = Tabs;
 const { SubMenu } = Menu;
 const { Header, Content, Sider } = Layout;
 const { DirectoryTree } = Tree;
+const {Option} = Select;
 
 class Home extends React.Component {
 
@@ -126,7 +129,7 @@ class Home extends React.Component {
                   >
                     <RequestTabs />
                     
-                    <ResponseTab />
+                    {/* <ResponseTab /> */}
                   </Content>
                 </Layout>
             </Layout>

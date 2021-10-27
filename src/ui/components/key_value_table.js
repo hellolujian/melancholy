@@ -1,5 +1,5 @@
 import React from 'react';
-import {Row, Col, Button, Table, Divider} from 'antd';
+import {Row, Col, Button, Table, Divider, Select} from 'antd';
 
 import EditableTable from './editable_table'
 import HeaderPresets from './header_presets'
@@ -7,6 +7,7 @@ import BulkEditTextarea from './bulk_edit_textarea'
 import {stopClickPropagation, UUID} from '@/utils/global_utils';
 import 'ui/style/editable_table.css'
 
+const {Option} = Select;
 class KeyValueTable extends React.Component {
 
     constructor(props) {
@@ -114,6 +115,7 @@ class KeyValueTable extends React.Component {
         ) : (
             <EditableTable 
                 rowKey='id'
+                scene={scene}
                 tableProps={tableProps}
                 draggable={draggable}
                 editable={editable} 
@@ -170,7 +172,6 @@ class KeyValueTable extends React.Component {
                         return operations;
                     }
                 }
-        
                 dataSource={value}
                 onChange={this.handleChange}
                 onSave={this.handleSave}
