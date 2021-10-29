@@ -92,6 +92,6 @@
 }
 
 .main-right-sticky-class .sticky {
-  z-index: 9;
+  z-index: 99999999;
 }
 

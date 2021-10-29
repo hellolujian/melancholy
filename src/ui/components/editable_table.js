@@ -247,44 +247,25 @@ class EditableTable extends React.Component {
             let {currentEditCell} = this.state;
         
             let cellId = this.getCellId(index, col.dataIndex);
-            let className = 'editable-cell-value-wrap';
-            if (currentEditCell === cellId) {
-              className = className + ' editable-cell-value-wrap-edit'
-            }
             return (
-              <div className={className + " full-width"} style={{height: '28px'}}>
+              <div style={{height: '24px', boxSizing: 'border-box'}} className="justify-content-space-between">
                 
                 {
                   col.type === 'select' ? (
                     <RequestMethodSelect bordered={false} style={{width: 200}} size="small" />
                   ) : (
-                    // <Input 
-                    //   id={cellId}
-                    //   size="small" 
-                    //   value={text}
-                    //   bordered={false}
-                    //   defaultValue={col.defaultValue}
-                    //   placeholder={index === realDataSource.length ? col.placeholder : ''} 
-                    //   onPressEnter={this.handleSave} 
-                    //   onFocus={() => this.handleEditCellInputFocus(cellId)} 
-                    //   onBlur={() => this.handleEditCellInputBlur(record, col.dataIndex, cellId)} 
-                    //   onChange={(e) => this.handleCellInputChange(record, col.dataIndex, e.target.value, cellId)}
-                    // />
-                    
-                    // <Input.TextArea autoSize id={cellId} size="small" bordered={true} style={{width: 50, resize: 'none', position: 'fixed', top: 360, left: 400, zIndex: currentEditCell === cellId ? 99999 : 0}} />
-                    
-                    // currentEditCell === cellId ? <Textarea onBlur={() => this.handleEditCellInputBlur(record, col.dataIndex, cellId)} 
-                    // style={{position: 'fixed', top: 360, left: 400, zIndex: currentEditCell === cellId ? 9999999999 : 0}} autoSize={true} className={currentEditCell === cellId ? '' : "text-over-ellipsis"} id={cellId} />
-                    // : <Textarea onBlur={() => this.handleEditCellInputBlur(record, col.dataIndex, cellId)} 
-                    // style={{zIndex: 0, height: '24px !important'}} autoSize={{ maxRows: 1 }} className={currentEditCell === cellId ? '' : "text-over-ellipsis"} id={cellId} />
-
-//                     <textarea id={cellId}
-//   placeholder='try writing some lines' style={{position: 'fixed', top: 360, left: 400, zIndex: currentEditCell === cellId ? 9999999999 : 0}}
-// />
-currentEditCell === cellId ?
-<TextareaAutosize
-  placeholder='try writing some lines' id={cellId}
-/> : <span>sdfsdfsdfsd</span>
+                    <TextareaAutosize
+                      style={{zIndex: currentEditCell === cellId ? 9 : 1, overflowY: currentEditCell === cellId ? '' : 'hidden !important'}}
+                      className={"cell-textarea " + (currentEditCell === cellId ? "" : "text-over-ellipsis")}
+                      id={cellId} 
+                      value={text}
+                      maxRows={currentEditCell === cellId ? 0 : 1}
+                      placeholder={index === realDataSource.length ? col.placeholder : ''} 
+                      onPressEnter={this.handleSave}
+                      onFocus={() => this.handleEditCellInputFocus(cellId)} 
+                      onBlur={() => this.handleEditCellInputBlur(record, col.dataIndex, cellId)} 
+                      onChange={(e) => this.handleCellInputChange(record, col.dataIndex, e.target.value, cellId)}
+                    />
                   )
                 }
                 {
@@ -295,15 +276,15 @@ currentEditCell === cellId ?
                       size="small"  
                       type="text" 
                       icon={<CloseOutlined />} 
-                      style={{height: 10}} 
+                      style={{height: '100%'}}
                       onClick={(e) => this.handleCloseBtnClick(e, record)} 
                     />
                       { cellOperations && cellOperations(record, realDataSource, col) }
                     </> : (
-                      scene === 'formdata11' && (
+                      scene === 'formdata' && (
                         <Select 
                           value={record.type}
-                          style={{display: col.dataIndex !== 'key' ? 'none' : '', zIndex: 8888888}}
+                          style={{display: col.dataIndex !== 'key' ? 'none' : '', zIndex: 10, flexShrink: 0}}
                           className="request-body-formdata-table-select" 
                           defaultValue="text" size="small" bordered={false} 
                           onChange={this.handleKeyTypeChange}
