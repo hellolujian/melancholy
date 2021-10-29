@@ -28,10 +28,10 @@
     "react-markdown-editor-lite": "^1.2.4",
     "react-monaco-editor": "^0.44.0",
     "react-multi-toggle": "^1.1.0",
-    "react-resizable": "^3.0.1",
     "react-rnd": "^10.3.4",
     "react-router-dom": "^5.2.0",
     "react-sortable-hoc": "^2.0.0",
+    "react-sticky-el": "^2.0.9",
     "uuid": "^8.3.2",
     "web-vitals": "^1.0.1"
   },

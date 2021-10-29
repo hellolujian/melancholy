@@ -3,6 +3,11 @@
   border-top: 1px solid #f0f0f0;
 }
 
+.request-send-setting-tab > .ant-tabs-nav .ant-tabs-tab {
+  padding: 8px 16px;
+  margin: 0px
+}
+
 .request-header-form .ant-form-item {
   margin-bottom: 12px;
 }

@@ -91,3 +91,7 @@
   white-space: normal;
 }
 
+.main-right-sticky-class .sticky {
+  z-index: 9;
+}
+

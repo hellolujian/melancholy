@@ -43,7 +43,6 @@ import {
     loadCollection,
     dropNode
 } from '@/utils/database_utils'
-import 'ui/style/resizable.css'
 import 'ui/style/tree.css'
 
 const { Paragraph, Text, Link } = Typography;
@@ -361,6 +360,7 @@ class CollectionTree extends React.Component {
         return (
             <>
                 <Tree 
+                    className="collection-tree"
                     expandedKeys={expandedKeys}
                     // selectedKeys={selectedKeys}
                     treeData={treeData}

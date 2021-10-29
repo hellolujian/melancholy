@@ -24,7 +24,7 @@ class RequestSendSetting extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            activeTabKey: 'authorization',
+            activeTabKey: 'body',
         }
     }
 
@@ -65,11 +65,13 @@ class RequestSendSetting extends React.Component {
         const {param, deleted, auth, parentId, header, body} = value;
         const {activeTabKey} = this.state;
         return (
+            <>
             <Tabs 
                 // type="card" 
                 className="request-send-setting-tab"
                 size='small' 
-                defaultActiveKey="body" 
+                // tabBarStyle={{border: '1px solid red', zIndex: 1,}}
+                activeKey={activeTabKey}
                 onChange={this.handleTabKeyChange} 
                 tabBarExtraContent={
                     <>
@@ -104,13 +106,7 @@ class RequestSendSetting extends React.Component {
                         onChange={this.handleHeadersChange}
                     />
                 </TabPane>
-                <TabPane tab="Body" key="body">
-                <RequestBodyTab 
-                    value={body}
-                    onSave={this.handleBodySave}
-                    onChange={this.handleBodyChange}
-                />
-                </TabPane>
+                <TabPane tab="Body" key="body" />
                 <TabPane tab="Pre-request Script" key="prerequestscripts">
                   <RndScriptEditor />
                 </TabPane>
@@ -118,6 +114,18 @@ class RequestSendSetting extends React.Component {
                 <RndScriptEditor scriptType='tests' />
                 </TabPane>
             </Tabs>
+            {
+                activeTabKey === 'body' && (
+                    <RequestBodyTab 
+                        value={body}
+                        onSave={this.handleBodySave}
+                        onChange={this.handleBodyChange}
+                    />
+                )
+            }
+                
+
+            </>
         )
     }
 }

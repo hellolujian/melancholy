@@ -1,184 +1,183 @@
 import React from 'react';
-import { render } from 'react-dom';
-import {List, PageHeader, Button, Upload, Col, Input, Typography, Table} from 'antd'
-import { CaretLeftOutlined, SearchOutlined,} from '@ant-design/icons';
+import { 
+    Layout, Menu, 
+    Space,Row, Col ,
+    Tabs, Input,Tree, Select
+} from 'antd';
+import { PlusOutlined, SearchOutlined,} from '@ant-design/icons';
+import CollectionModal from 'ui/components/collection_modal'
+import TooltipButton from 'ui/components/tooltip_button';
+import RequestTabs from 'ui/components/request_tabs'
+import LayoutHeader from 'ui/components/layout_header'
+import CollectionTree from 'ui/components/collection_tree'
+import ResponseTab from 'ui/components/response_tab'
 
-import Icon from '@ant-design/icons';
-
-
+import {Rnd} from 'react-rnd';
+import {ADD_ICON} from 'ui/constants/icons'
+import {publishCollectionModalOpen} from '@/utils/event_utils'
 import TextareaAutosize from "react-autosize-textarea"
+import 'ui/style/common.css'
+import 'ui/style/layout.css'
+import 'ui/style/global.css'
 
-// import * as XLSX from 'xlsx';
+const { TabPane } = Tabs;
+const { SubMenu } = Menu;
+const { Header, Content, Sider, Footer } = Layout;
+const { DirectoryTree } = Tree;
+const {Option} = Select;
 
 class Home extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      code: '// type your code...',
+
+    constructor(props) {
+        super(props);
+        this.state = {
+          width: 350,
+          tabActiveKey: 'collections',
+          
+          snippetContainerHeight: 200,
+          outContainerHeight: 350, 
+          dynamicWidth: 350
+        }
     }
+
+    
+
+    handleResizeStop = (e, direction, ref, delta, position) => {
+      this.setState({
+        width: this.state.width + delta.width
+      });
+    }
+
+  handleResize = (e, direction, ref, delta, position) => {
+    console.log(delta.width);
+      let newWidth = this.state.width + delta.width;
+      this.setState({dynamicWidth: newWidth });
   }
-  editorDidMount(editor, monaco) {
-    console.log('editorDidMount', editor);
-    editor.focus();
-  }
-  onChange(newValue, e) {
-    console.log('onChange', newValue, e);
-  }
-
-//   onImportExcel = file => {
-
-//     let data = [];// 存储获取到的数据
-
-//     // 通过FileReader对象读取文件
-
-//   const fileReader =new FileReader();
-
-//   fileReader.readAsBinaryString(file);  //二进制
-
-//   fileReader.onload = event => {
-
-//  try {
-
-//                 const {result } = event.target;
-
-//             // 以二进制流方式读取得到整份excel表格对象
-
-//               const workbook = XLSX.read(result, {type:'binary' });
-
-//             // 遍历每张工作表进行读取（这里默认只读取第一张表）
-
-//              for (const sheet in workbook.Sheets) {
-
-//                 if (workbook.Sheets.hasOwnProperty(sheet)) {
-
-//                     // 利用 sheet_to_json 方法将 excel 转成 json 数据
-
-//                   data =data.concat(XLSX.utils.sheet_to_json(workbook.Sheets[sheet]));
-
-//                 // break; // 如果只取第一张表，就取消注释这行
-
-//     }
-
-// }
-
-// console.log(data);
-// this.setState({excelData: data});
-
-// }catch (e) {
-
-// // 这里可以抛出文件类型错误不正确的相关提示
-
-//   console.log('文件类型不正确');
-
-//   return;
-
-// }
-
-// };
-
-// }
-
-
-  render() {
-
-    const {excelData} = this.state;
-
-    let data = [
-
-      {
-        id: '1',
-        name: 'api-new'
-      },
-      {
-        id: '2',
-        name: 'api-seller-manager'
-      },
-      {
-        id: '3',
-        name: 'api-open'
-      },
-    ];
-    return (
-//       <PageHeader
-//       breadcrumbRender={() => (
-// <Row>
-//         <Col span={24}>
-//           <Input style={{borderRadius:'20px'}} placeholder="Filter" prefix={<SearchOutlined />} />
-//         </Col>
-//       </Row>
-//       )}
-//       backIcon={<CaretLeftOutlined />}
-//     onBack={() => null}
-  
-//     subTitle={<Typography.Link>api-new</Typography.Link>}
-//     extra={[
-//       <Button type="link">+ Create Folder</Button>
-//     ]}
-//   >
-
-// <List
-//       size="small"
-//       // header={<div>Header</div>}
-//       // footer={<div>Footer</div>}
-//       bordered
-//       dataSource={data}
-//       renderItem={item => <List.Item>{item.name}</List.Item>}
-//     />
-
-//   </PageHeader>
-
-
-<>
-
-
-{/* <Upload name="excel" action="" listType="text"  accept=".xlsx,.xls" beforeUpload={this.onImportExcel} maxCount={1} >
-
-    <Button>
-
-        <Icon type="upload" />点击上传报表
-
-    </Button>
-
-    </Upload>
-
-    {
-      excelData && excelData.length > 0 && (
-        <Table
-          size="small"
-          bordered
-          dataSource={excelData}
-          columns={Object.keys(excelData[0]).map(key => {return {dataIndex: key, title: key}})}
-          pagination={false}
-        />
-      )
-    } */}
-
-
-<Table
-          size="small"
-          bordered
-          dataSource={[{key: 'sdf', value: '1234', desc: 'sdfsd'}, {key: 'sdf', value: '1234', desc: 'sdfsd'}]}
-          columns={[{dataIndex: 'key', title: 'KEY', render: (text, record, index) => {
-            return (<TextareaAutosize
-              placeholder='try writing some lines' 
-            />)
-          }}, {dataIndex: 'value', title: 'VALUE'}, {dataIndex: 'desc', title: 'DESC'}]}
-          pagination={false}
-        />
-
-
-</>
 
 
 
-    )
+    handleWindowResize = (e) => {
+      this.setState({contentWidth: e.target.innerWidth - this.state.width})
+    }
 
-  }
+    componentDidMount() {
+      this.setState({contentWidth: window.innerWidth - this.state.width})
+      window.addEventListener('resize', this.handleWindowResize)
+    }
+
+    componentWillUnmount() {
+      window.removeEventListener('resize', this.handleWindowResize)
+    }
+
+    onResize = (event, {element, size, handle}) => {
+      if (size.width < 250) {
+        return;
+      }
+      this.setState({width: size.width, height: size.height});
+    }
+
+    handleSelectTreeNode = (selectedKeys, e) => {
+      console.log(e);
+      this.setState({expandedKeys: selectedKeys});
+    }
+
+    handleNewCollectionClick = () => {
+      publishCollectionModalOpen();
+    }
+
+    handleTabChange = (key) => {
+      this.setState({tabActiveKey: key})
+    }
+
+    render() {
+
+      const {tabActiveKey, dynamicWidth} = this.state;
+        return (
+
+          <div>
+            <LayoutHeader />
+            <div class="mainBox">
+                <Rnd  
+                    style={{zIndex: 999}}
+                    // minHeight={200}
+                    // maxHeight={600}
+                    disableDragging
+                    enableResizing={{ 
+                        top:false, right:true, 
+                        bottom:false, left:false, 
+                        topRight:false, bottomRight:false, 
+                        bottomLeft:false, topLeft:false 
+                    }}
+                    size={{ width: dynamicWidth, height: '100%' }}
+                    onResizeStop={this.handleResizeStop}
+                    onResize={this.handleResize}>
+                <div className="leftBox" style={{boxShadow: '5px 0px 5px -5px #888888', width: dynamicWidth}}>
+
+                    <Row style={{padding: '10px 10px 0px 10px'}}>
+                      <Col span={24}>
+                        <Input style={{borderRadius:'20px'}} placeholder="Filter" prefix={<SearchOutlined />} />
+                      </Col>
+                    </Row>
+
+                    <Tabs 
+                      defaultActiveKey="collections" 
+                      className="common-tabs-class left-side-tabs"
+                      onChange={this.handleTabChange} 
+                      tabBarStyle={{width: '100%'}}  >
+                      <TabPane tab="History" key="history" />
+                        
+                      <TabPane tab="Collections" key="collections" />
+                        
+                      <TabPane tab="APIs" key="apis" />
+                    </Tabs>
+
+                    
+                    <div style={{height: 'calc(100% - 90px)',  overflowY: 'scroll', overflowX: 'hidden', paddingBottom: 20}} >
+                    {/* <StickyContainer className="container relative"> */}
+                      {
+                        tabActiveKey === 'collections' && (
+                          <>
+                            <Space className="justify-content-space-between" style={{margin: '8px 0px'}}>
+                              <TooltipButton 
+                                label="New Collection"
+                                onClick={this.handleNewCollectionClick}
+                                tooltipProps={{title: 'Create new Collection'}}
+                                buttonProps={{icon: ADD_ICON, type: 'link'}}
+                              />
+                              <TooltipButton 
+                                label="Trash" 
+                                tooltipProps={{title: "Recover your deleted collections"}}
+                                buttonProps={{type: 'text'}}
+                              />
+
+                            </Space>
+
+                            
+                              {/* <Sticky relative={true}>{({ style }) => <h1 style={style}>Sticky element</h1>}</Sticky> */}
+                            
+                            
+                            <CollectionTree />
+                          </>
+                        )
+                      }
+                      {/* </StickyContainer> */}
+                    </div>
+                    
+                </div>
+                </Rnd>
+                <div className="rightBox" style={{marginLeft: dynamicWidth}}>
+                  {/* <div style={{width: 2000, height: 200, background: 'lightgray', left: 400, zIndex: 99999999}}>sdfsdf</div> */}
+                <RequestTabs />
+                </div>
+            </div>
+            <div className="bottom">底部，高度40px</div>
+          </div>
+            
+        )
+    }
 }
+
 export default Home;
-
-
-
 
 
 

@@ -796,16 +796,21 @@ class DraggableTabs extends React.Component {
             }
           </Tabs>
         </DndProvider>
-        {
-          requestInfo && (
-            <RequestTabContent 
-              value={requestInfo} 
-              onSave={this.handleRequestTabContentSave}
-              onSaveClick={this.handleSaveClick}
-              onChange={this.handleRequestTabContentChange}
-            />
-          )
-        }
+        
+        <div style={{height: 'calc(100% - 35px)',  overflowY: 'scroll', overflowX: 'hidden', paddingBottom: 20}} className="request-tab-content">
+          {
+            requestInfo && (
+              <RequestTabContent 
+                value={requestInfo} 
+                onSave={this.handleRequestTabContentSave}
+                onSaveClick={this.handleSaveClick}
+                onChange={this.handleRequestTabContentChange}
+              />
+            )
+          }
+          <div style={{height: 900}}></div>
+        </div>
+        
         
       </>
     );

@@ -1,3 +1,7 @@
+.request-body-checkbox {
+  padding: 10px 20px
+}
+
 .request-body-checkbox .ant-radio-inner {
   height: 14px;
   width: 14px;

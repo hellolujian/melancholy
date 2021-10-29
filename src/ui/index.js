@@ -11,19 +11,18 @@ import RequestTabs from 'ui/components/request_tabs'
 import LayoutHeader from 'ui/components/layout_header'
 import CollectionTree from 'ui/components/collection_tree'
 import ResponseTab from 'ui/components/response_tab'
-import { Resizable } from 'react-resizable';
+
+import {Rnd} from 'react-rnd';
 import {ADD_ICON} from 'ui/constants/icons'
 import {publishCollectionModalOpen} from '@/utils/event_utils'
-
 import TextareaAutosize from "react-autosize-textarea"
-import 'ui/style/resizable.css'
 import 'ui/style/common.css'
 import 'ui/style/layout.css'
 import 'ui/style/global.css'
 
 const { TabPane } = Tabs;
 const { SubMenu } = Menu;
-const { Header, Content, Sider } = Layout;
+const { Header, Content, Sider, Footer } = Layout;
 const { DirectoryTree } = Tree;
 const {Option} = Select;
 
@@ -33,9 +32,29 @@ class Home extends React.Component {
         super(props);
         this.state = {
           width: 350,
-          height: 200,
+          tabActiveKey: 'collections',
+          
+          snippetContainerHeight: 200,
+          outContainerHeight: 350, 
+          dynamicWidth: 350
         }
     }
+
+    
+
+    handleResizeStop = (e, direction, ref, delta, position) => {
+      this.setState({
+        width: this.state.width + delta.width
+      });
+    }
+
+  handleResize = (e, direction, ref, delta, position) => {
+    console.log(delta.width);
+      let newWidth = this.state.width + delta.width;
+      this.setState({dynamicWidth: newWidth });
+  }
+
+
 
     handleWindowResize = (e) => {
       this.setState({contentWidth: e.target.innerWidth - this.state.width})
@@ -66,13 +85,34 @@ class Home extends React.Component {
       publishCollectionModalOpen();
     }
 
+    handleTabChange = (key) => {
+      this.setState({tabActiveKey: key})
+    }
+
     render() {
+
+      const {tabActiveKey, dynamicWidth} = this.state;
         return (
-            <Layout>
-              <LayoutHeader />
-              <Layout>
-                <Resizable width={this.state.width} onResize={this.onResize} style={{zIndex: 2, boxShadow: '5px 0px 5px -5px #888888'}}>
-                  <Sider theme="light" width={this.state.width} className="site-layout-background">
+
+          <div>
+            <LayoutHeader />
+            <div class="mainBox">
+                <Rnd  
+                    style={{zIndex: 999}}
+                    // minHeight={200}
+                    // maxHeight={600}
+                    disableDragging
+                    enableResizing={{ 
+                        top:false, right:true, 
+                        bottom:false, left:false, 
+                        topRight:false, bottomRight:false, 
+                        bottomLeft:false, topLeft:false 
+                    }}
+                    size={{ width: dynamicWidth, height: '100%' }}
+                    onResizeStop={this.handleResizeStop}
+                    onResize={this.handleResize}>
+                <div className="leftBox" style={{boxShadow: '5px 0px 5px -5px #888888', width: dynamicWidth}}>
+
                     <Row style={{padding: '10px 10px 0px 10px'}}>
                       <Col span={24}>
                         <Input style={{borderRadius:'20px'}} placeholder="Filter" prefix={<SearchOutlined />} />
@@ -82,66 +122,62 @@ class Home extends React.Component {
                     <Tabs 
                       defaultActiveKey="collections" 
                       className="common-tabs-class left-side-tabs"
-                      onChange={this.callback} 
-                      tabBarStyle={{width: '100%'}}  
-                      // centered 
-                    // renderTabBar={
-                    //         () => {
-
-                    //         }
-                    // }
-                    >
-                      <TabPane tab="History" key="history">
-                        Content of Tab Pane 1
-                      </TabPane>
-                      <TabPane tab="Collections" key="collections">
-                        <Space className="justify-content-space-between" style={{margin: '8px 0px'}}>
-                          <TooltipButton 
-                            label="New Collection"
-                            onClick={this.handleNewCollectionClick}
-                            tooltipProps={{title: 'Create new Collection'}}
-                            buttonProps={{icon: ADD_ICON, type: 'link'}}
-                           />
-                          <TooltipButton 
-                            label="Trash" 
-                            tooltipProps={{title: "Recover your deleted collections"}}
-                            buttonProps={{type: 'text'}}
-                          />
-
-                        </Space>
+                      onChange={this.handleTabChange} 
+                      tabBarStyle={{width: '100%'}}  >
+                      <TabPane tab="History" key="history" />
                         
-                        <CollectionTree />
-                      </TabPane>
-                      <TabPane tab="APIs" key="apis">
-                        Content of Tab Pane 3
-                      </TabPane>
+                      <TabPane tab="Collections" key="collections" />
+                        
+                      <TabPane tab="APIs" key="apis" />
                     </Tabs>
-                  </Sider>
-                </Resizable>
 
-                <Layout className="site-drawer-render-in-current-wrapper">
-                  <Content
-                    className="site-layout-background"
-                    style={{
-                     
-                      // minHeight: 680,
-                    }}
-                  >
-                    <RequestTabs />
                     
-                    {/* <ResponseTab /> */}
-                  </Content>
-                </Layout>
-            </Layout>
-          </Layout>
+                    <div style={{height: 'calc(100% - 90px)',  overflowY: 'scroll', overflowX: 'hidden', paddingBottom: 20}} >
+                    {/* <StickyContainer className="container relative"> */}
+                      {
+                        tabActiveKey === 'collections' && (
+                          <>
+                            <Space className="justify-content-space-between" style={{margin: '8px 0px'}}>
+                              <TooltipButton 
+                                label="New Collection"
+                                onClick={this.handleNewCollectionClick}
+                                tooltipProps={{title: 'Create new Collection'}}
+                                buttonProps={{icon: ADD_ICON, type: 'link'}}
+                              />
+                              <TooltipButton 
+                                label="Trash" 
+                                tooltipProps={{title: "Recover your deleted collections"}}
+                                buttonProps={{type: 'text'}}
+                              />
+
+                            </Space>
+
+                            
+                              {/* <Sticky relative={true}>{({ style }) => <h1 style={style}>Sticky element</h1>}</Sticky> */}
+                            
+                            
+                            <CollectionTree />
+                          </>
+                        )
+                      }
+                      {/* </StickyContainer> */}
+                    </div>
+                    
+                </div>
+                </Rnd>
+                <div className="rightBox" style={{marginLeft: dynamicWidth}}>
+                  {/* <div style={{width: 2000, height: 200, background: 'lightgray', left: 400, zIndex: 99999999}}>sdfsdf</div> */}
+                <RequestTabs />
+                </div>
+            </div>
+            <div className="bottom">底部，高度40px</div>
+          </div>
+            
         )
     }
 }
 
 export default Home;
-
-
-
 
 
 

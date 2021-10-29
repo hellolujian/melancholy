@@ -101,3 +101,7 @@
 
   box-shadow: 0px 2px 5px #bbb4b4;
 }
+
+.collection-tree .collection-tree-collection-item-class:last-child {
+  border-bottom: 1px solid lightgrey
+}

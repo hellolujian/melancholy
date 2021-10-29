@@ -98,10 +98,9 @@ class RequestBodyTab extends React.Component {
         let {checkboxValue} = this.state;
           
         return (
-          <Space direction="vertical" className="full-width">
+          <Space direction="vertical" className="full-width" size={0}>
             <Radio.Group 
               value={checkboxValue} 
-              style={{padding: 10, borderBottom: '1px solid #f0f0f0'}} 
               className="full-width request-body-checkbox" 
               onChange={this.handleCheckboxChange}>
               {

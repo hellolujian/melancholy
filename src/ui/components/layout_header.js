@@ -63,7 +63,7 @@ class LayoutHeader extends React.Component {
      
         const {visibleModal, workspaceList} = this.state;
         return (
-            <Header className="header">
+            <div class="header">
                 <Space>
                     <NewButtonModal />
                     <ImportModal />
@@ -97,7 +97,7 @@ class LayoutHeader extends React.Component {
                     <TooltipButton shape="circle" icon={<UserOutlined />} title={ACCOUNT_TITLE} />
                     <Button type="primary">Upgrade</Button>
                 </Space>
-            </Header>
+            </div>
 
         )
     }
