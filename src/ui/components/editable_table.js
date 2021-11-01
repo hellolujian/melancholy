@@ -8,9 +8,9 @@ import 'ui/style/editable_table.css'
 import arrayMove from 'array-move';
 import RequestMethodSelect from './request_method_select'
 import Ellipsis from 'react-ellipsis-component';
-import Textarea from 'rc-textarea';
+import TextareaAutosize from 'rc-textarea';
 
-import TextareaAutosize from "react-autosize-textarea"
+// import TextareaAutosize from "react-autosize-textarea"
 
 // import Textarea from 'react-expanding-textarea'
 
@@ -75,7 +75,9 @@ class EditableTable extends React.Component {
 
   // 可编辑单元格聚焦
   handleEditCellInputFocus = (cellId) => {
-    this.setState({currentHoverCell: cellId, currentEditCell: cellId})
+    this.setState({currentHoverCell: cellId, currentEditCell: cellId}, () => {
+      // document.getElementById(cellId).style.width = 'calc(100% - 1px) !important'
+    });
   }
 
   handleEditCellInputBlur = (record, dataIndex, cellId) => {
@@ -154,12 +156,22 @@ class EditableTable extends React.Component {
     } 
   }
 
-  isCurrentHover = (currentIndex) => {
+  isCurrentRowHover = (currentIndex) => {
     const { currentHoverCell } = this.state;
     return currentHoverCell && this.getCellIdIndex(currentHoverCell) === (currentIndex + "")
   }
 
-  isCurrentEdit = (currentIndex) => {
+  isCurrentCellHover = (currentCellId) => {
+    const { currentHoverCell } = this.state;
+    return currentHoverCell === currentCellId;
+  }
+
+  isCurrentCellEdit = (currentCellId) => {
+    const { currentEditCell } = this.state;
+    return currentEditCell === currentCellId;
+  }
+
+  isCurrentRowEdit = (currentIndex) => {
     const { currentEditCell } = this.state;
     return currentEditCell && this.getCellIdIndex(currentEditCell) === (currentIndex + "")
   }
@@ -175,7 +187,7 @@ class EditableTable extends React.Component {
   getRenderColumns = () => {
     
     const { hideColumns } = this.state;
-    const {columns, showCheckbox = 'disabled', cellOperations, draggable = true, editable = true, scene} = this.props;
+    const {columns, showCheckbox = 'disabled', cellOperations = () => [], draggable = true, editable = true, scene} = this.props;
     let realDataSource = this.getRealDataSource();
     const realColumns = [
       {
@@ -186,7 +198,7 @@ class EditableTable extends React.Component {
         render: (text, record, index) => {
           let dragStyle = {
             cursor: 'grab', color: '#999', 
-            visibility: this.isCurrentHover(index) && !this.isCurrentEdit(index) ? 'visible' : 'hidden'
+            visibility: this.isCurrentRowHover(index) && !this.isCurrentRowEdit(index) ? 'visible' : 'hidden'
           }
          
           const DragHandle = sortableHandle(() => <MenuOutlined style={dragStyle} />);
@@ -237,65 +249,94 @@ class EditableTable extends React.Component {
               },
               onClick: (event) => {
 
-                this.setState({currentEditCell: this.getCellId(index, col.dataIndex)}, () => {
-                  document.getElementById(this.getCellId(index, col.dataIndex)).focus()
-                })
+                this.setState({currentEditCell: this.getCellId(index, col.dataIndex)})
               }
             }
           },
           render: (text, record, index) => {
-            let {currentEditCell} = this.state;
         
             let cellId = this.getCellId(index, col.dataIndex);
+            let realCellOperations = []
+            if (this.isCurrentRowHover(index) && !this.isCurrentRowEdit(index) ) {
+              let parsedCellOperations = cellOperations(record, realDataSource, col);
+              realCellOperations = Array.isArray(parsedCellOperations) ? [...parsedCellOperations] : [parsedCellOperations];
+              if (colIndex === renderColumns.length - 1 && index < realDataSource.length) {
+                realCellOperations.unshift(
+                  <Button 
+                    size="small"  
+                    type="text" 
+                    icon={<CloseOutlined />} 
+                    style={{height: '100%'}}
+                    onClick={(e) => this.handleCloseBtnClick(e, record)} 
+                  />
+                )
+              }
+                
+            }
             return (
-              <div style={{height: '24px', boxSizing: 'border-box'}} className="justify-content-space-between">
+              <div 
+              style={{height: '26px', }} 
+              className="justify-content-space-between">
                 
                 {
                   col.type === 'select' ? (
                     <RequestMethodSelect bordered={false} style={{width: 200}} size="small" />
                   ) : (
-                    <TextareaAutosize
-                      style={{zIndex: currentEditCell === cellId ? 9 : 1, overflowY: currentEditCell === cellId ? '' : 'hidden !important'}}
-                      className={"cell-textarea " + (currentEditCell === cellId ? "" : "text-over-ellipsis")}
-                      id={cellId} 
-                      value={text}
-                      maxRows={currentEditCell === cellId ? 0 : 1}
-                      placeholder={index === realDataSource.length ? col.placeholder : ''} 
-                      onPressEnter={this.handleSave}
-                      onFocus={() => this.handleEditCellInputFocus(cellId)} 
-                      onBlur={() => this.handleEditCellInputBlur(record, col.dataIndex, cellId)} 
-                      onChange={(e) => this.handleCellInputChange(record, col.dataIndex, e.target.value, cellId)}
-                    />
-                  )
-                }
-                {
-                  this.isCurrentHover(index) && !this.isCurrentEdit(index) && (
-                    colIndex === renderColumns.length - 1 && index < realDataSource.length ? 
-                    <>
-                    <Button 
-                      size="small"  
-                      type="text" 
-                      icon={<CloseOutlined />} 
-                      style={{height: '100%'}}
-                      onClick={(e) => this.handleCloseBtnClick(e, record)} 
-                    />
-                      { cellOperations && cellOperations(record, realDataSource, col) }
-                    </> : (
-                      scene === 'formdata' && (
-                        <Select 
-                          value={record.type}
-                          style={{display: col.dataIndex !== 'key' ? 'none' : '', zIndex: 10, flexShrink: 0}}
-                          className="request-body-formdata-table-select" 
-                          defaultValue="text" size="small" bordered={false} 
-                          onChange={this.handleKeyTypeChange}
-                          onClick={stopClickPropagation}>
-                          <Option value="text">Text</Option>
-                          <Option value="file">File</Option>
-                        </Select>
-                      )
+                    this.isCurrentCellEdit(cellId) ? (
+                      // <TextareaAutosize
+                      //   className={"cell-textarea"}
+                      //   style={{zIndex: 9}}
+                      //   id={cellId} 
+                      //   value={text}
+                        
+                      //   placeholder={index === realDataSource.length ? col.placeholder : ''} 
+                      //   onPressEnter={this.handleSave}
+                      //   onFocus={() => this.handleEditCellInputFocus(cellId)} 
+                      //   onBlur={() => this.handleEditCellInputBlur(record, col.dataIndex, cellId)} 
+                      //   onChange={(e) => this.handleCellInputChange(record, col.dataIndex, e.target.value, cellId)}
+                      // />
+                      <Input.TextArea
+                        className={"cell-textarea cell-textarea-edit"}
+                        style={{zIndex: 99999}}
+                        id={cellId} 
+                        value={text}
+                        autoSize={true}
+                        // autoFocus={true}
+                        bordered={false}
+                        placeholder={index === realDataSource.length ? col.placeholder : ''} 
+                        onPressEnter={this.handleSave}
+                        onFocus={() => this.handleEditCellInputFocus(cellId)} 
+                        onBlur={() => this.handleEditCellInputBlur(record, col.dataIndex, cellId)} 
+                        onChange={(e) => this.handleCellInputChange(record, col.dataIndex, e.target.value, cellId)}
+                      />
+                    ) : (
+                      // <TextareaAutosize
+                      //   className={"cell-textarea cell-textarea-not-edit text-over-ellipsis"}
+                      //   style={{zIndex: 1, 
+                      //     maxHeight: '28px !important', height: '28px !important'
+                      //   }}
+                      //   size="small"
+                      //   id={cellId} 
+                      //   value={text}
+                      //   maxRows={1}
+                      //   placeholder={index === realDataSource.length ? col.placeholder : ''} 
+                      // />
+                      <Input.TextArea
+                        className={"cell-textarea cell-textarea-not-edit text-over-ellipsis"}
+                        style={{zIndex: 1}}
+                        id={cellId} 
+                        value={text}
+                        bordered={false}
+                        autoSize={{minRows: 1, maxRows: 1}}
+                        rows={1}
+                        placeholder={index === realDataSource.length ? col.placeholder : ''} 
+                      />
                     )
+                    
+                    
                   )
                 }
+                { realCellOperations }
                 
               </div>
             )
@@ -378,6 +419,8 @@ class EditableTable extends React.Component {
     return (
       <Table
          className="common-editable-table"
+         
+         tableLayout="fixed"
           components={components}
           size="small"
           rowClassName={() => 'editable-row'}
@@ -399,4 +442,5 @@ EditableTable.defaultProps = {
   onChange: () => {},
   operations: () => [],
   onCellBlur: (record) => record,
+  onSave: () => {},
 }

@@ -172,6 +172,18 @@ class KeyValueTable extends React.Component {
                         return operations;
                     }
                 }
+                cellOperations={(record, realDataSource, col) => {
+                    return col.dataIndex === 'key' && <Select 
+                        value={record.type}
+                        // style={{display: col.dataIndex !== 'key' ? 'none' : '', zIndex: 10, flexShrink: 0}}
+                        className="request-body-formdata-table-select" 
+                        defaultValue="text" size="small" bordered={false} 
+                        onChange={this.handleKeyTypeChange}
+                        onClick={stopClickPropagation}>
+                        <Option value="text">Text</Option>
+                        <Option value="file">File</Option>
+                      </Select>
+                }} 
                 dataSource={value}
                 onChange={this.handleChange}
                 onSave={this.handleSave}
@@ -183,6 +195,9 @@ class KeyValueTable extends React.Component {
 
 export default KeyValueTable;
 
+KeyValueTable.defaultProps = {
+    onSave: () => {},
+}
 
 
 

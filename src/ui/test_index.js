@@ -1,8 +1,8 @@
 import React from 'react';
 import { 
     Layout, Menu, 
-    Space,Row, Col ,
-    Tabs, Input,Tree, Select
+    Space,Row, Col ,Input,
+    Tabs, Table,Tree, Select, 
 } from 'antd';
 import { PlusOutlined, SearchOutlined,} from '@ant-design/icons';
 import CollectionModal from 'ui/components/collection_modal'
@@ -12,6 +12,7 @@ import LayoutHeader from 'ui/components/layout_header'
 import CollectionTree from 'ui/components/collection_tree'
 import ResponseTab from 'ui/components/response_tab'
 
+import KeyValueTable from 'ui/components/key_value_table'
 import {Rnd} from 'react-rnd';
 import {ADD_ICON} from 'ui/constants/icons'
 import {publishCollectionModalOpen} from '@/utils/event_utils'
@@ -19,6 +20,7 @@ import TextareaAutosize from "react-autosize-textarea"
 import 'ui/style/common.css'
 import 'ui/style/layout.css'
 import 'ui/style/global.css'
+import 'ui/style/test.css'
 
 const { TabPane } = Tabs;
 const { SubMenu } = Menu;
@@ -88,89 +90,148 @@ class Home extends React.Component {
     handleTabChange = (key) => {
       this.setState({tabActiveKey: key})
     }
+    
+  // 生成当前单元格的唯一标识
+  getCellId = (index, dataIndex) => {
+    return index + "_" + dataIndex + "_" + this.state.tableId
+  }
+
+  // 鼠标移动
+  onMouseMove = (cellId) => {
+    const {currentEditCell} = this.state;
+    if (currentEditCell) return;
+    this.setState({currentHoverCell: cellId})
+  }
+
+  
+  getCellIdIndex = (cellId) => {
+    return cellId ? cellId.split("_")[0] : undefined;
+  }
+  
+  getCellDataIndex = (cellId) => {
+    return cellId ? cellId.split("_")[1] : undefined;
+  }
+
+  isCurrentHover = (currentIndex, dataIndex) => {
+    const { currentHoverCell } = this.state;
+    return currentHoverCell && this.getCellIdIndex(currentHoverCell) === (currentIndex + "") && this.getCellDataIndex(currentHoverCell) === dataIndex
+  }
+
+  isCurrentEdit = (currentIndex, dataIndex) => {
+    const { currentEditCell } = this.state;
+    return currentEditCell && this.getCellIdIndex(currentEditCell) === (currentIndex + "") && this.getCellDataIndex(currentEditCell) === dataIndex
+  }
+
+  
+  // 可编辑单元格聚焦
+  handleEditCellInputFocus = (cellId) => {
+    this.setState({currentHoverCell: cellId, currentEditCell: cellId})
+  }
+
+  handleEditCellInputBlur = (record, dataIndex, cellId) => {
+    this.setState({currentEditCell: null});
+   
+  }
+  // 表格里的input变更
+  handleCellInputChange = (record, dataIndex, value, cellId) => {
+    
+   
+  }
+
+
 
     render() {
 
+    let columns = [{dataIndex: 'key', title: "KEY"}, {dataIndex: 'value', title: "VALUE"}, {dataIndex: 'desc', title: 'DESC'}]
       const {tabActiveKey, dynamicWidth} = this.state;
         return (
-
+          true ? 
+          <>
+          <Input.TextArea className="my-textarea" autoSize
+          // size="small" 
+          />
+          <TextareaAutosize
+                      />
+          </>
+          :
           <div>
-            <LayoutHeader />
-            <div class="mainBox">
-                <Rnd  
-                    style={{zIndex: 999}}
-                    // minHeight={200}
-                    // maxHeight={600}
-                    disableDragging
-                    enableResizing={{ 
-                        top:false, right:true, 
-                        bottom:false, left:false, 
-                        topRight:false, bottomRight:false, 
-                        bottomLeft:false, topLeft:false 
-                    }}
-                    size={{ width: dynamicWidth, height: '100%' }}
-                    onResizeStop={this.handleResizeStop}
-                    onResize={this.handleResize}>
-                <div className="leftBox" style={{boxShadow: '5px 0px 5px -5px #888888', width: dynamicWidth}}>
-
-                    <Row style={{padding: '10px 10px 0px 10px'}}>
-                      <Col span={24}>
-                        <Input style={{borderRadius:'20px'}} placeholder="Filter" prefix={<SearchOutlined />} />
-                      </Col>
-                    </Row>
-
-                    <Tabs 
-                      defaultActiveKey="collections" 
-                      className="common-tabs-class left-side-tabs"
-                      onChange={this.handleTabChange} 
-                      tabBarStyle={{width: '100%'}}  >
-                      <TabPane tab="History" key="history" />
-                        
-                      <TabPane tab="Collections" key="collections" />
-                        
-                      <TabPane tab="APIs" key="apis" />
-                    </Tabs>
-
-                    
-                    <div style={{height: 'calc(100% - 90px)',  overflowY: 'scroll', overflowX: 'hidden', paddingBottom: 20}} >
-                    {/* <StickyContainer className="container relative"> */}
-                      {
-                        tabActiveKey === 'collections' && (
-                          <>
-                            <Space className="justify-content-space-between" style={{margin: '8px 0px'}}>
-                              <TooltipButton 
-                                label="New Collection"
-                                onClick={this.handleNewCollectionClick}
-                                tooltipProps={{title: 'Create new Collection'}}
-                                buttonProps={{icon: ADD_ICON, type: 'link'}}
-                              />
-                              <TooltipButton 
-                                label="Trash" 
-                                tooltipProps={{title: "Recover your deleted collections"}}
-                                buttonProps={{type: 'text'}}
-                              />
-
-                            </Space>
-
-                            
-                              {/* <Sticky relative={true}>{({ style }) => <h1 style={style}>Sticky element</h1>}</Sticky> */}
-                            
-                            
-                            <CollectionTree />
-                          </>
-                        )
+            <Table
+              size="small"
+              rowClassName={() => 'editable-row'}
+              bordered
+              tableLayout="fixed"
+              dataSource={[{key: 'key', value: 'value', desc: 'desc'}, {key: 'key2', value: 'value2', desc: 'desc2'}]}
+              columns={columns.map(column => {
+                return {
+                  ...column,
+                  // fixed: 'left',
+                  onCell: (record, index) => {
+          
+                    return {
+                      onMouseEnter: (event) => {
+                        this.onMouseMove(this.getCellId(index, column.dataIndex))
+                
+                      },
+                      onMouseLeave: (event) => {
+                        this.onMouseMove(null)
+                      },
+                      onClick: (event) => {
+        
+                        this.setState({currentEditCell: this.getCellId(index, column.dataIndex)}, () => {
+                          document.getElementById(this.getCellId(index, column.dataIndex)).focus()
+                        })
                       }
-                      {/* </StickyContainer> */}
-                    </div>
-                    
-                </div>
-                </Rnd>
-                <div className="rightBox" style={{marginLeft: dynamicWidth}}>
-                  {/* <div style={{width: 2000, height: 200, background: 'lightgray', left: 400, zIndex: 99999999}}>sdfsdf</div> */}
-                <RequestTabs />
-                </div>
-            </div>
-            <div className="bottom">底部，高度40px</div>
+                    }
+                  },
+                  render: (text, record, index) => {
+                    let {currentEditCell} = this.state;
+                    let cellId = this.getCellId(index, column.dataIndex);
+                    let textarea = (
+                      
+                    <TextareaAutosize
+                      // style={{width: 'calc(100% - 90px)'}}
+                    style={{zIndex: currentEditCell === cellId ? 9999 : 1, overflow: currentEditCell === cellId ? '' : 'hidden !important',overflowY: currentEditCell === cellId ? '' : 'hidden !important', width: 'calc(100% - 90px)'}}
+                    className={"cell-textarea " + (currentEditCell === cellId ? "" : "text-over-ellipsis")}
+                    id={cellId} 
+                    // value={text}
+                    maxRows={currentEditCell === cellId ? 999 : 1}
+                    // placeholder={index === realDataSource.length ? col.placeholder : ''} 
+                    // onPressEnter={this.handleSave}
+                    onFocus={() => this.handleEditCellInputFocus(cellId)} 
+                    onBlur={() => this.handleEditCellInputBlur(record, column.dataIndex, cellId)} 
+                    onChange={(e) => this.handleCellInputChange(record, column.dataIndex, e.target.value, cellId)}
+                  />
+                    )
+                    return (
+                      <div style={{height: '24px'}}>
+                        {textarea}
+                        {
+                          
+                          this.isCurrentHover(index, column.dataIndex) && !this.isCurrentEdit(index, column.dataIndex) && (
+                            <Select 
+                          // value={record.type}
+                          // style={{display: col.dataIndex !== 'key' ? 'none' : '', zIndex: 10, flexShrink: 0}}
+                          className="request-body-formdata-table-select" 
+                          defaultValue="text" size="small" 
+                          // bordered={false} 
+                          onChange={this.handleKeyTypeChange}
+                          // onClick={stopClickPropagation}
+                          >
+                          <Option value="text">Text</Option>
+                          <Option value="file">File</Option>
+                        </Select>
+                          )
+                        }
+                      </div>
+                    )
+                  }
+                }
+              })}
+              // rowKey={rowKey}
+              pagination={false}
+              // scroll={{y: 250 }}
+              // {...tableProps}
+            />
           </div>
             
         )
