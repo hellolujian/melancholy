@@ -297,7 +297,7 @@ class EditableTable extends React.Component {
                       // />
                       <Input.TextArea
                         className={"cell-textarea cell-textarea-edit"}
-                        style={{zIndex: 99999}}
+                        style={{zIndex: 9}}
                         id={cellId} 
                         value={text}
                         autoSize={true}
@@ -322,12 +322,13 @@ class EditableTable extends React.Component {
                       //   placeholder={index === realDataSource.length ? col.placeholder : ''} 
                       // />
                       <Input.TextArea
-                        className={"cell-textarea cell-textarea-not-edit text-over-ellipsis"}
+                        className={"cell-textarea cell-textarea-not-edit" + (index < realDataSource.length ? ' text-over-ellipsis' : '')}
                         style={{zIndex: 1}}
                         id={cellId} 
                         value={text}
                         bordered={false}
                         autoSize={{minRows: 1, maxRows: 1}}
+                        onFocus={() => this.handleEditCellInputFocus(cellId)} 
                         rows={1}
                         placeholder={index === realDataSource.length ? col.placeholder : ''} 
                       />

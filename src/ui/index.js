@@ -98,7 +98,7 @@ class Home extends React.Component {
             <LayoutHeader />
             <div class="mainBox">
                 <Rnd  
-                    style={{zIndex: 999}}
+                    style={{zIndex: 11}}
                     // minHeight={200}
                     // maxHeight={600}
                     disableDragging
