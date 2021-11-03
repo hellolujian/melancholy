@@ -22,7 +22,6 @@ class RequestBodyTab extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-          checkboxValue: 'formdata'
         }
     }
 
@@ -31,14 +30,15 @@ class RequestBodyTab extends React.Component {
     }
 
     handleModeValueChange = (value, saveFlag) => {
-      const {checkboxValue} = this.state;
-      if (!checkboxValue || checkboxValue === 'none') {
-        return undefined;
+      const {value: bodyValue = {}} = this.props;
+      const {mode} = bodyValue;
+      if (!mode || mode === 'none') {
+        return ;
       }
       this.props.onChange(
         {
-          mode: checkboxValue,
-          [checkboxValue]: value
+          mode: mode,
+          [mode]: value
         },
         saveFlag
       )
@@ -49,6 +49,10 @@ class RequestBodyTab extends React.Component {
     }
 
     handleFormDataChange = (value, saveFlag) => { 
+      this.handleModeValueChange(value, saveFlag)
+    }
+
+    handleUrlEncodedChange = (value, saveFlag) => {
       this.handleModeValueChange(value, saveFlag)
     }
 
@@ -95,7 +99,17 @@ class RequestBodyTab extends React.Component {
             />
           )
         },
-        { label: 'x-www-form-urlencoded', value: 'urlencoded', content: null},
+        { 
+          label: 'x-www-form-urlencoded', 
+          value: 'urlencoded', 
+          content: (
+            <KeyValueTable 
+              scene="urlencoded" 
+              value={modeValue}
+              onChange={this.handleUrlEncodedChange} 
+            />
+          )
+        },
         { label: 'raw', value: 'raw', content: (
           <JsonEditor />
         )},
@@ -109,19 +123,19 @@ class RequestBodyTab extends React.Component {
     }
 
     handleCheckboxChange = (e) => {
-      this.setState({checkboxValue: e.target.value});
       this.props.onChange({mode: e.target.value}, true)
     }
 
     render() {
      
-        let {checkboxValue} = this.state;
+        const {value = {}} = this.props;
+        const {mode = 'none'} = value;
         let checkboxOptions = this.getCheckboxOptions();
           
         return (
           <Space direction="vertical" className="full-width" size={0}>
             <Radio.Group 
-              value={checkboxValue} 
+              value={mode} 
               className="full-width request-body-checkbox" 
               onChange={this.handleCheckboxChange}>
               {
@@ -132,7 +146,7 @@ class RequestBodyTab extends React.Component {
             </Radio.Group>
             <div>
             {
-              checkboxOptions.find(option => option.value === checkboxValue).content
+              checkboxOptions.find(option => option.value === mode).content
             }
             </div>
         
