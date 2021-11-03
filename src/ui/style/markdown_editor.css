@@ -6,3 +6,7 @@
 .description-md-editor-footer {
   margin-top: 5px
 }
+
+textarea.description-md-editor::placeholder {
+  font-size: 10px;
+}

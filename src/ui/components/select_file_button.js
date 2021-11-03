@@ -1,5 +1,5 @@
 import React from 'react';
-import {Tooltip, Button, Typography} from 'antd';
+import {Tooltip, Button, Typography, Popover} from 'antd';
 
 const {Link} = Typography;
 class SelectFileButton extends React.Component {
@@ -30,11 +30,20 @@ class SelectFileButton extends React.Component {
             buttonLabel = value.length + " files selected";
         }
         return (
-            <Tooltip title={value.length > 0 ? value.join(',\n') : 'No file selected'}>
+            // <Tooltip title={value.length > 0 ? value.join(',\n') : 'No file selected'}>
+            //     <Button size="small" {...buttonProps} onClick={this.handleSelectBtnClick}>
+            //         {buttonLabel}
+            //     </Button>
+            // </Tooltip>
+
+            <Popover 
+                overlayStyle={{maxWidth: 600}}
+                content={value.length > 0 ? value.join(', \r\n') : 'No file selected'} 
+            >
                 <Button size="small" {...buttonProps} onClick={this.handleSelectBtnClick}>
                     {buttonLabel}
                 </Button>
-            </Tooltip>
+            </Popover>
             
         )
     }

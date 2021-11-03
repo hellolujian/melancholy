@@ -1,5 +1,5 @@
 import React from 'react';
-import {Row, Col, Button, Table, Divider, Select} from 'antd';
+import {Row, Col, Button, Table, Divider, Select, Popover, Typography} from 'antd';
 
 import EditableTable from './editable_table'
 import HeaderPresets from './header_presets'
@@ -8,6 +8,7 @@ import {stopClickPropagation, UUID} from '@/utils/global_utils';
 import 'ui/style/editable_table.css'
 
 const {Option} = Select;
+const {Text} = Typography
 class KeyValueTable extends React.Component {
 
     constructor(props) {
@@ -97,6 +98,60 @@ class KeyValueTable extends React.Component {
      
         const {scene, editable = true, draggable = true, tableProps, value} = this.props;
         const {keyValueEdit} = this.state;
+        let columns = [
+            {
+                title: 'KEY',
+                dataIndex: 'key',
+                // width: '33%',
+                editable: editable,
+                className: 'drag-visible',
+                placeholder: 'Key'
+            },
+            {
+                name: 'Value',
+                title: 'VALUE',
+                dataIndex: 'value',
+                // width: '33%',
+                editable: editable,
+                className: 'drag-visible',
+                placeholder: 'Value'
+            },
+            
+        ];
+        if (scene === 'formdata') {
+            let contentTypeTip = "The Content-Type entity is used to indicate the media type of the media type of the resource. Postman will automatically assign a content-type if this field is left empty."
+            columns.push(
+                {
+                    name: 'Content Type',
+                    title: (
+                        <Popover overlayStyle={{width: 300}} content={contentTypeTip} title="Content Type">
+                            CONTENT TYPE
+                        </Popover>
+                    ),
+                    dataIndex: 'contentType',
+                    // width: '33%',
+                    editable: editable,
+                    className: 'drag-visible',
+                    placeholder: 'Auto'
+                }
+            )
+        }
+        let descriptionTip = <Text>
+            This is the request meta data which shows up in Postman documentation. These are <Text strong>not sent</Text> with your HTTP request
+        </Text>
+        columns.push({
+            name: 'Description',
+            title: (
+                <Popover overlayStyle={{width: 300}} content={descriptionTip} title="Description">
+                    DESCRIPTION
+                </Popover>
+            ),
+            dataIndex: 'description',
+            // width: '33%',
+            editable: editable,
+            className: 'drag-visible',
+            placeholder: 'Description'
+        })
         return keyValueEdit ? (
             <>
                 <Table
@@ -137,36 +192,7 @@ class KeyValueTable extends React.Component {
                 tableProps={tableProps}
                 draggable={draggable}
                 editable={editable} 
-                columns={
-                    [
-                        {
-                            title: 'KEY',
-                            dataIndex: 'key',
-                            // width: '33%',
-                            editable: editable,
-                            className: 'drag-visible',
-                            placeholder: 'Key'
-                        },
-                        {
-                            name: 'Value',
-                            title: 'VALUE',
-                            dataIndex: 'value',
-                            // width: '33%',
-                            editable: editable,
-                            className: 'drag-visible',
-                            placeholder: 'Value'
-                        },
-                        {
-                            name: 'Description',
-                            title: 'DESCRIPTION',
-                            dataIndex: 'description',
-                            // width: '33%',
-                            editable: editable,
-                            className: 'drag-visible',
-                            placeholder: 'Description'
-                        }
-                    ]
-                } 
+                columns={columns} 
                 operations = {
                     (dataSource) => {
                         if (!editable) {
