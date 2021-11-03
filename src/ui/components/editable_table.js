@@ -9,6 +9,7 @@ import arrayMove from 'array-move';
 import RequestMethodSelect from './request_method_select'
 import Ellipsis from 'react-ellipsis-component';
 import TextareaAutosize from 'rc-textarea';
+import SelectFileButton from './select_file_button';
 
 // import TextareaAutosize from "react-autosize-textarea"
 
@@ -129,10 +130,14 @@ class EditableTable extends React.Component {
   handleCellInputChange = (record, dataIndex, value, cellId) => {
     
     const dataSource = this.getRealDataSource();
-    const {rowKey, showCheckbox = 'disabled'} = this.props;
+    const {rowKey, showCheckbox = 'disabled', scene} = this.props;
     let changedRecordIndex = dataSource.findIndex(item => item[rowKey] === record[rowKey])
     if (changedRecordIndex >= 0) {
-      dataSource[changedRecordIndex] = {...dataSource[changedRecordIndex], [dataIndex]: value}
+      let newRecord = {...dataSource[changedRecordIndex], [dataIndex]: value};
+      if (dataIndex === 'value' && scene === 'formdata') {
+        delete newRecord.src;
+      }
+      dataSource[changedRecordIndex] = newRecord
     } else {
       let newObj = {...record, [dataIndex]: value, [rowKey]: UUID()};
       if (showCheckbox) {
@@ -180,14 +185,21 @@ class EditableTable extends React.Component {
 
   }
 
-  handleasdfasdf = () => {
-    this.setState({currentEditCell: null});
+  handleFileSelectd = (record, selectFiles, dataIndex) => {
+    const dataSource = this.getRealDataSource();
+    const {rowKey} = this.props;
+
+    let changedRecordIndex = dataSource.findIndex(item => item[rowKey] === record[rowKey])
+    if (changedRecordIndex >= 0) {
+      dataSource[changedRecordIndex] = {...dataSource[changedRecordIndex], src: selectFiles, [dataIndex] : ''}
+      this.refreshDataSource(dataSource);
+    }
   }
 
   getRenderColumns = () => {
     
     const { hideColumns } = this.state;
-    const {columns, showCheckbox = 'disabled', cellOperations = () => [], draggable = true, editable = true, scene} = this.props;
+    const {columns, showCheckbox = 'disabled', cellOperations = () => [], draggable = true, editable = true} = this.props;
     let realDataSource = this.getRealDataSource();
     const realColumns = [
       {
@@ -271,74 +283,58 @@ class EditableTable extends React.Component {
                   />
                 )
               }
-                
+            }
+            let cellComponentType = col.dataIndex === 'value' ? (col.type || record.type) : undefined;
+            let cellComponent;
+            switch (cellComponentType) {
+              case 'select':
+                cellComponent = (
+                  <RequestMethodSelect bordered={false} style={{width: 200}} size="small" />
+                );
+                break;
+              case 'file': 
+                cellComponent = (
+                  <SelectFileButton value={record.src} onSelect={(selectedFiles) => this.handleFileSelectd(record, selectedFiles, col.dataIndex)} />
+                  
+                )
+                break;
+              default: 
+                cellComponent = this.isCurrentCellEdit(cellId) ? (
+                  <Input.TextArea
+                    className={"cell-textarea cell-textarea-edit"}
+                    style={{zIndex: 9}}
+                    id={cellId} 
+                    value={text}
+                    autoSize={true}
+                    // autoFocus={true}
+                    bordered={false}
+                    placeholder={index === realDataSource.length ? col.placeholder : ''} 
+                    onPressEnter={this.handleSave}
+                    onFocus={() => this.handleEditCellInputFocus(cellId)} 
+                    onBlur={() => this.handleEditCellInputBlur(record, col.dataIndex, cellId)} 
+                    onChange={(e) => this.handleCellInputChange(record, col.dataIndex, e.target.value, cellId)}
+                  />
+                ) : (
+                  <Input.TextArea
+                    className={"cell-textarea cell-textarea-not-edit" + (index < realDataSource.length ? ' text-over-ellipsis' : '')}
+                    style={{zIndex: 1}}
+                    id={cellId} 
+                    value={text}
+                    bordered={false}
+                    autoSize={{minRows: 1, maxRows: 1}}
+                    onFocus={() => this.handleEditCellInputFocus(cellId)} 
+                    rows={1}
+                    placeholder={index === realDataSource.length ? col.placeholder : ''} 
+                  />
+                )
+                break
             }
             return (
               <div 
               style={{height: '26px', }} 
               className="justify-content-space-between">
-                
-                {
-                  col.type === 'select' ? (
-                    <RequestMethodSelect bordered={false} style={{width: 200}} size="small" />
-                  ) : (
-                    this.isCurrentCellEdit(cellId) ? (
-                      // <TextareaAutosize
-                      //   className={"cell-textarea"}
-                      //   style={{zIndex: 9}}
-                      //   id={cellId} 
-                      //   value={text}
-                        
-                      //   placeholder={index === realDataSource.length ? col.placeholder : ''} 
-                      //   onPressEnter={this.handleSave}
-                      //   onFocus={() => this.handleEditCellInputFocus(cellId)} 
-                      //   onBlur={() => this.handleEditCellInputBlur(record, col.dataIndex, cellId)} 
-                      //   onChange={(e) => this.handleCellInputChange(record, col.dataIndex, e.target.value, cellId)}
-                      // />
-                      <Input.TextArea
-                        className={"cell-textarea cell-textarea-edit"}
-                        style={{zIndex: 9}}
-                        id={cellId} 
-                        value={text}
-                        autoSize={true}
-                        // autoFocus={true}
-                        bordered={false}
-                        placeholder={index === realDataSource.length ? col.placeholder : ''} 
-                        onPressEnter={this.handleSave}
-                        onFocus={() => this.handleEditCellInputFocus(cellId)} 
-                        onBlur={() => this.handleEditCellInputBlur(record, col.dataIndex, cellId)} 
-                        onChange={(e) => this.handleCellInputChange(record, col.dataIndex, e.target.value, cellId)}
-                      />
-                    ) : (
-                      // <TextareaAutosize
-                      //   className={"cell-textarea cell-textarea-not-edit text-over-ellipsis"}
-                      //   style={{zIndex: 1, 
-                      //     maxHeight: '28px !important', height: '28px !important'
-                      //   }}
-                      //   size="small"
-                      //   id={cellId} 
-                      //   value={text}
-                      //   maxRows={1}
-                      //   placeholder={index === realDataSource.length ? col.placeholder : ''} 
-                      // />
-                      <Input.TextArea
-                        className={"cell-textarea cell-textarea-not-edit" + (index < realDataSource.length ? ' text-over-ellipsis' : '')}
-                        style={{zIndex: 1}}
-                        id={cellId} 
-                        value={text}
-                        bordered={false}
-                        autoSize={{minRows: 1, maxRows: 1}}
-                        onFocus={() => this.handleEditCellInputFocus(cellId)} 
-                        rows={1}
-                        placeholder={index === realDataSource.length ? col.placeholder : ''} 
-                      />
-                    )
-                    
-                    
-                  )
-                }
+                {cellComponent}
                 { realCellOperations }
-                
               </div>
             )
           }

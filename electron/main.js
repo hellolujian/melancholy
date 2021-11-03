@@ -88,6 +88,15 @@ log.info('main:    ' +  __dirname);
 // global.store = store;
 global.nedb = require('nedb');
 
+global.OPEN_FILES_ELECT_DIALOG = () => {
+  return dialog.showOpenDialogSync({
+    // title: "选择项目所在目录",
+    // defaultPath: args && args.defaultPath ? args.defaultPath : "",
+    properties: ['openFile', 'multiSelections'],
+    
+  })
+}
+
 let localShortcutList = [
   { key: 'opennewtab', accelerator: 'CmdOrCtrl+T' },
   { key: 'closetab', accelerator: 'CmdOrCtrl+W' },

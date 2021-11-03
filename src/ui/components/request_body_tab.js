@@ -30,12 +30,26 @@ class RequestBodyTab extends React.Component {
       
     }
 
+    handleModeValueChange = (value, saveFlag) => {
+      const {checkboxValue} = this.state;
+      if (!checkboxValue || checkboxValue === 'none') {
+        return undefined;
+      }
+      this.props.onChange(
+        {
+          mode: checkboxValue,
+          [checkboxValue]: value
+        },
+        saveFlag
+      )
+    }
+
     handleKeyTypeChange = (value) => {
 
     }
 
-    handleFormDataChange = (value, saveFlag) => {
-      this.props.onChange(value, saveFlag)
+    handleFormDataChange = (value, saveFlag) => { 
+      this.handleModeValueChange(value, saveFlag)
     }
 
     uploadProps = {
@@ -56,46 +70,53 @@ class RequestBodyTab extends React.Component {
         },
     };
 
-    checkboxOptions = [
-      { 
-        label: 'none', 
-        value: 'none', 
-        content: (
-          <Typography.Paragraph type="secondary" className="text-align-center-class">
-            This request does not have a body
-          </Typography.Paragraph>
-        ) 
-      },
-      { 
-        label: 'form-data', 
-        value: 'formdata', 
-        content: (
-          <KeyValueTable 
-            scene="formdata" 
-            value={this.props.value}
-            onSave={this.props.onSave}
-            onChange={this.props.onChange} 
-          />
-        )
-      },
-      { label: 'x-www-form-urlencoded', value: 'xwwwformurlencoded', content: null},
-      { label: 'raw', value: 'raw', content: (
-        <JsonEditor />
-      )},
-      { label: 'binary', value: 'binary', content: (
-        <Upload {...this.uploadProps}>
-          <Button type="text" className="postman-button-class">Select File</Button>
-        </Upload>
-      )},
-      { label: 'GraphQL', value: 'graphql', content: null},
-    ]
+    getCheckboxOptions = () => {
+      const {value = {}} = this.props;
+      const {mode} = value;
+      const modeValue = value[mode];
+      return [
+        { 
+          label: 'none', 
+          value: 'none', 
+          content: (
+            <Typography.Paragraph type="secondary" className="text-align-center-class">
+              This request does not have a body
+            </Typography.Paragraph>
+          ) 
+        },
+        { 
+          label: 'form-data', 
+          value: 'formdata', 
+          content: (
+            <KeyValueTable 
+              scene="formdata" 
+              value={modeValue}
+              onChange={this.handleFormDataChange} 
+            />
+          )
+        },
+        { label: 'x-www-form-urlencoded', value: 'urlencoded', content: null},
+        { label: 'raw', value: 'raw', content: (
+          <JsonEditor />
+        )},
+        { label: 'binary', value: 'file', content: (
+          <Upload {...this.uploadProps}>
+            <Button type="text" className="postman-button-class">Select File</Button>
+          </Upload>
+        )},
+        { label: 'GraphQL', value: 'graphql', content: null},
+      ]
+    }
 
     handleCheckboxChange = (e) => {
-      this.setState({checkboxValue: e.target.value})
+      this.setState({checkboxValue: e.target.value});
+      this.props.onChange({mode: e.target.value}, true)
     }
+
     render() {
      
         let {checkboxValue} = this.state;
+        let checkboxOptions = this.getCheckboxOptions();
           
         return (
           <Space direction="vertical" className="full-width" size={0}>
@@ -104,14 +125,14 @@ class RequestBodyTab extends React.Component {
               className="full-width request-body-checkbox" 
               onChange={this.handleCheckboxChange}>
               {
-                this.checkboxOptions.map((option => (
+                checkboxOptions.map((option => (
                   <Radio key={option.value} value={option.value}>{option.label}</Radio>
                 )))
               }
             </Radio.Group>
             <div>
             {
-              this.checkboxOptions.find(option => option.value === checkboxValue).content
+              checkboxOptions.find(option => option.value === checkboxValue).content
             }
             </div>
         

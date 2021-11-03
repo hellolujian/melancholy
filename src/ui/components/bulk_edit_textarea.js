@@ -8,7 +8,7 @@ const {TextArea} = Input;
 
 class BulkEditTextarea extends React.Component {
 
-    getDefaultValue = () => this.props.defaultValue ? this.props.defaultValue.map(item => `${item.disabled ? '//' : ''}${item.key || ''}:${item.value || ''}`).join("\n") : ''
+    getDefaultValue = () => this.props.defaultValue ? this.props.defaultValue.filter(item => !item.type || item.type === 'text').map(item => `${item.disabled ? '//' : ''}${item.key || ''}:${item.value || ''}`).join("\n") : ''
 
     constructor(props) {
         super(props);

@@ -75,6 +75,24 @@ class KeyValueTable extends React.Component {
         this.handleChange([...alreadyData, ...addedData])
     }
 
+    handleKeyTypeChange = (value, record = {}) => {
+        let alreadyData = this.props.value || [];
+        let newData = [...alreadyData,];
+        if (record.id) {
+            let target = newData.find(item => item.id === record.id);
+            if (target) {
+                target.type = value;
+            }
+        } else if (value === 'file') {
+            newData.push({
+                id: UUID(),
+                type: value, 
+                src: []
+            })
+        }
+        this.handleChange(newData);
+    }
+
     render() {
      
         const {scene, editable = true, draggable = true, tableProps, value} = this.props;
@@ -173,16 +191,19 @@ class KeyValueTable extends React.Component {
                     }
                 }
                 cellOperations={(record, realDataSource, col) => {
-                    return col.dataIndex === 'key' && <Select 
-                        value={record.type}
-                        // style={{display: col.dataIndex !== 'key' ? 'none' : '', zIndex: 10, flexShrink: 0}}
-                        className="request-body-formdata-table-select" 
-                        defaultValue="text" size="small" bordered={false} 
-                        onChange={this.handleKeyTypeChange}
-                        onClick={stopClickPropagation}>
-                        <Option value="text">Text</Option>
-                        <Option value="file">File</Option>
-                      </Select>
+                    return col.dataIndex === 'key' && scene === 'formdata' && (
+                        <Select 
+                            value={record.type}
+                            className="request-body-formdata-table-select" 
+                            defaultValue="text" 
+                            size="small" 
+                            bordered={false} 
+                            onChange={(value) => this.handleKeyTypeChange(value, record)}
+                            onClick={stopClickPropagation}>
+                            <Option value="text">Text</Option>
+                            <Option value="file">File</Option>
+                        </Select>
+                    )
                 }} 
                 dataSource={value}
                 onChange={this.handleChange}
