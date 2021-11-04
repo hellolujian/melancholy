@@ -82,11 +82,6 @@ textarea.key-value-edit-textarea::placeholder {
   height: 24px !important;
 }
 
-/* .common-editable-table .ant-table-cell {
-  position: relative;
-} */
-
-
 .my-textarea {
   min-height: 22px !important;
   padding: 0 !important;

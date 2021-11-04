@@ -102,7 +102,3 @@ textarea.key-value-edit-textarea::placeholder {
 .request-body-formdata-table-select .ant-select-selector {
   height: 22px !important;
 }
-
-/* .common-editable-table .ant-table-cell {
-  position: relative;
-} */

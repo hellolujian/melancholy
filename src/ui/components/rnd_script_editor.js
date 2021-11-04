@@ -42,7 +42,7 @@ class RndScriptEditor extends React.Component {
         const {showScripts, height, snippetContainerHeight, outContainerHeight} = this.state;
         const {scriptType} = this.props;
         return (
-            <div style={{width: '100%', height: outContainerHeight,  margin: '10px 0px'}}> 
+            <div style={{width: '100%', height: outContainerHeight, position: 'relative',  margin: '10px'}}> 
                 <Rnd
                     minHeight={200}
                     maxHeight={600}
@@ -56,7 +56,7 @@ class RndScriptEditor extends React.Component {
                     size={{ width: '100%', height: height,  }}
                     onResizeStop={this.handleResizeStop}
                     onResize={this.handleResize}>
-                    <Row style={{height: '100%', marginRight: 20}}>
+                    <Row style={{marginRight: 20}}>
                         <Col flex="auto"><ScriptEditor height={outContainerHeight + 'px'} /></Col>
                         <Col flex="none" style={{fontSize: 11, paddingLeft: 10}}>
                             
@@ -64,7 +64,7 @@ class RndScriptEditor extends React.Component {
                                 <Space align="start">
                                     {
                                         showScripts && (
-                                            <div style={{width: 233, }}>
+                                            <div style={{width: 212, }} >
                                                 {scriptType === 'tests' ? TEST_SCRIPTS_CODE_TIPS : PRE_REQUEST_SCRIPTS_CODE_TIPS} 
                                             </div>
                                         )
@@ -74,7 +74,7 @@ class RndScriptEditor extends React.Component {
                                 </Space>
                                 {
                                     showScripts && (
-                                        <Space direction='vertical' style={{width: 250}}>
+                                        <Space direction='vertical' style={{width: 232}} className="bordersfsdfs">
                                             <div style={{paddingTop: 10}}>SNIPPETS</div>
                                             <div style={{height: snippetContainerHeight, overflowY: 'auto'}}>
                                                 <Space direction="vertical" size={10}>

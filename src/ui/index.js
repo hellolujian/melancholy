@@ -133,7 +133,6 @@ class Home extends React.Component {
 
                     
                     <div style={{height: 'calc(100% - 90px)',  overflowY: 'scroll', overflowX: 'hidden', paddingBottom: 20}} >
-                    {/* <StickyContainer className="container relative"> */}
                       {
                         tabActiveKey === 'collections' && (
                           <>
@@ -152,10 +151,6 @@ class Home extends React.Component {
 
                             </Space>
 
-                            
-                              {/* <Sticky relative={true}>{({ style }) => <h1 style={style}>Sticky element</h1>}</Sticky> */}
-                            
-                            
                             <CollectionTree />
                           </>
                         )
