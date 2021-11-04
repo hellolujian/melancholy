@@ -20,35 +20,50 @@ class JsonEditor extends React.Component {
       
     }
 
+    handleChange = (value) => {
+        this.props.onChange(value)
+    }
+
+    handleBlur = (e) => {
+        this.props.onBlur(e)
+    }
+
     render() {
      
+        const {value, mode = 'json'} = this.props;
         return (
             <AceEditor
-                            style={{border: '1px solid lightgray', width: '100%', height: 300,}}
-                            ref={ref => this.aceRef = ref}
-                            mode="json"
-                            theme="tomorrow"
-                            name="blah2"
-                            onLoad={this.onLoad}
-                            
-                            // fontSize={14}
-                            showPrintMargin={true}
-                            showGutter={true}
-                            highlightActiveLine={true}
-                            value={`console.log('sdfsd')`}
-                            onChange={this.handleChange}
-                            setOptions={{
-                            enableBasicAutocompletion: true,
-                            enableLiveAutocompletion: true,
-                            enableSnippets: true,
-                            showLineNumbers: true
-                            }}
-                        />
+                style={{border: '1px solid lightgray', width: '100%', height: 300,}}
+                ref={ref => this.aceRef = ref}
+                mode={mode}
+                theme="tomorrow"
+                name="blah2"
+                onLoad={this.onLoad}
+                
+                // fontSize={14}
+                showPrintMargin={true}
+                showGutter={true}
+                highlightActiveLine={true}
+                value={value}
+                onChange={this.handleChange}
+                onBlur={this.handleBlur}
+                setOptions={{
+                    enableBasicAutocompletion: true,
+                    enableLiveAutocompletion: true,
+                    enableSnippets: true,
+                    showLineNumbers: true
+                }}
+            />
         )
     }
 }
 
 export default JsonEditor;
+
+JsonEditor.defaultProps = {
+    onChange: () => {},
+    onBlur: () => {},
+}
 
 
 

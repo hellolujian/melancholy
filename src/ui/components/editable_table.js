@@ -294,7 +294,11 @@ class EditableTable extends React.Component {
                 break;
               case 'file': 
                 cellComponent = (
-                  <SelectFileButton value={record.src} onSelect={(selectedFiles) => this.handleFileSelectd(record, selectedFiles, col.dataIndex)} />
+                  <SelectFileButton 
+                    value={record.src} 
+                    multiple
+                    onSelect={(selectedFiles) => this.handleFileSelectd(record, selectedFiles, col.dataIndex)} 
+                  />
                   
                 )
                 break;

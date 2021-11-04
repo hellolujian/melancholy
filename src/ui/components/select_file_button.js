@@ -16,18 +16,19 @@ class SelectFileButton extends React.Component {
 
     handleSelectBtnClick = () => {
         const openFileSelect = window.require('@electron/remote').getGlobal('OPEN_FILES_ELECT_DIALOG');
-        let selectedFiles = openFileSelect();
+        let selectedFiles = openFileSelect({multiple: this.props.multiple});
         this.props.onSelect(selectedFiles || [])
     }
 
     render() {
         const {buttonProps = {}, defaultLabel = 'Select Files', value = []} = this.props;
+        let realValue = Array.isArray(value) ? value : [value];
         let buttonLabel = defaultLabel;
-        if (value.length === 1) {
-            let firstFilePath = value[0];
+        if (realValue.length === 1) {
+            let firstFilePath = realValue[0];
             buttonLabel = firstFilePath.substr(firstFilePath.lastIndexOf(window.require('path').sep) + 1)
-        } else if (value.length > 1) {
-            buttonLabel = value.length + " files selected";
+        } else if (realValue.length > 1) {
+            buttonLabel = realValue.length + " files selected";
         }
         return (
             // <Tooltip title={value.length > 0 ? value.join(',\n') : 'No file selected'}>
@@ -38,7 +39,7 @@ class SelectFileButton extends React.Component {
 
             <Popover 
                 overlayStyle={{maxWidth: 600}}
-                content={value.length > 0 ? value.join(', \r\n') : 'No file selected'} 
+                content={realValue.length > 0 ? realValue.join(', \r\n') : 'No file selected'} 
             >
                 <Button size="small" {...buttonProps} onClick={this.handleSelectBtnClick}>
                     {buttonLabel}

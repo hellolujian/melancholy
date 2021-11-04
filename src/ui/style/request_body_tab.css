@@ -11,3 +11,7 @@
   height: 6px;
   width: 6px;
 }
+
+.request-body-raw-type-select .ant-select-selection-item {
+  color: #1890ff;
+}

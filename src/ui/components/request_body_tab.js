@@ -3,6 +3,7 @@ import { message, Button, Upload, Radio , Collapse, Tabs, Typography, Space, Sel
 import { EyeOutlined, CaretDownOutlined  } from '@ant-design/icons';
 import KeyValueTable from './key_value_table'
 import JsonEditor from './json_editor'
+import SelectFileButton from './select_file_button';
 import 'ui/style/request_body_tab.css'
 
 
@@ -29,7 +30,7 @@ class RequestBodyTab extends React.Component {
       
     }
 
-    handleModeValueChange = (value, saveFlag) => {
+    handleModeValueChange = (value, saveFlag = true) => {
       const {value: bodyValue = {}} = this.props;
       const {mode} = bodyValue;
       if (!mode || mode === 'none') {
@@ -56,6 +57,15 @@ class RequestBodyTab extends React.Component {
       this.handleModeValueChange(value, saveFlag)
     }
 
+    handleBodyRawChange = (value) => {
+      let oldBodyValue = this.props.value || {};
+      this.props.onChange({...oldBodyValue, raw: value}, false)
+    }
+
+    handleBodyRawBlur = (e) => {
+      this.props.onChange(this.props.value, true)
+    }
+
     uploadProps = {
         name: 'file',
         action: 'https://www.mocky.io/v2/5cc8019d300000980a055e76',
@@ -74,10 +84,26 @@ class RequestBodyTab extends React.Component {
         },
     };
 
+    rawTypeOptions = [
+      {label: 'Text', value: 'text',},
+      {label: 'Text', value: 'plain_text', contentType: 'text/plain'},
+      {label: 'JSON', value: 'json', contentType: 'application/json'},
+      {label: 'Javascript', value: 'javascript', contentType: 'application/javascript'},
+      {label: 'XML', value: 'xml', contentType: 'application/xml'},
+      {label: 'XML', value: 'xml_text', mode: 'xml', contentType: 'text/xml'},
+      {label: 'HTML', value: 'html', contentType: 'text/html'}
+    ]
+
+    handleBodyFileSelectd = (selectFiles) => {
+      this.handleModeValueChange(selectFiles)
+    }
+
     getCheckboxOptions = () => {
       const {value = {}} = this.props;
-      const {mode} = value;
+      const {mode, rawType} = value;
       const modeValue = value[mode];
+
+      let rawTypeOption = this.rawTypeOptions.find(o => o.value === rawType) || this.rawTypeOptions[0];
       return [
         { 
           label: 'none', 
@@ -111,12 +137,20 @@ class RequestBodyTab extends React.Component {
           )
         },
         { label: 'raw', value: 'raw', content: (
-          <JsonEditor />
+          <JsonEditor 
+            value={modeValue}
+            mode={rawTypeOption.mode || rawTypeOption.value}
+            onChange={this.handleBodyRawChange}
+            onBlur={this.handleBodyRawBlur}
+          />
         )},
         { label: 'binary', value: 'file', content: (
-          <Upload {...this.uploadProps}>
-            <Button type="text" className="postman-button-class">Select File</Button>
-          </Upload>
+          <Space>
+            <SelectFileButton 
+              value={modeValue} 
+              onSelect={this.handleBodyFileSelectd} 
+            />
+          </Space>
         )},
         { label: 'GraphQL', value: 'graphql', content: null},
       ]
@@ -126,24 +160,50 @@ class RequestBodyTab extends React.Component {
       this.props.onChange({mode: e.target.value}, true)
     }
 
+    handleRawValueTypeChange = (value, option) => {
+      let oldBodyValue = this.props.value || {};
+      this.props.onChange({...oldBodyValue, rawType: value}, true)
+    }
+
     render() {
      
         const {value = {}} = this.props;
-        const {mode = 'none'} = value;
+        const {mode = 'none', rawType = 'text'} = value;
         let checkboxOptions = this.getCheckboxOptions();
           
         return (
           <Space direction="vertical" className="full-width" size={0}>
-            <Radio.Group 
-              value={mode} 
-              className="full-width request-body-checkbox" 
-              onChange={this.handleCheckboxChange}>
+            <Space size={0}>
+              <Radio.Group 
+                value={mode} 
+                className="full-width request-body-checkbox" 
+                onChange={this.handleCheckboxChange}>
+                {
+                  checkboxOptions.map((option => (
+                    <Radio key={option.value} value={option.value}>{option.label}</Radio>
+                  )))
+                }
+              </Radio.Group>
               {
-                checkboxOptions.map((option => (
-                  <Radio key={option.value} value={option.value}>{option.label}</Radio>
-                )))
+                mode === 'raw' && (
+                  <Select
+                    value={rawType}
+                    dropdownMatchSelectWidth={false}
+                    onChange={this.handleRawValueTypeChange}
+                    bordered={false}
+                    defaultValue="text"
+                    className="request-body-raw-type-select"
+                    options={this.rawTypeOptions.map(item => {
+                      return {
+                        label: `${item.label}${item.contentType ? ' (' + item.contentType + ')' : ''}`,
+                        value: item.value,
+                      }
+                    })}
+                  />
+                )
               }
-            </Radio.Group>
+            </Space>
+            
             <div>
             {
               checkboxOptions.find(option => option.value === mode).content

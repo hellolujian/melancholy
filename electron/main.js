@@ -88,11 +88,14 @@ log.info('main:    ' +  __dirname);
 // global.store = store;
 global.nedb = require('nedb');
 
-global.OPEN_FILES_ELECT_DIALOG = () => {
+global.OPEN_FILES_ELECT_DIALOG = (uploadProps = {}) => {
+  const {multiple} = uploadProps;
+  let properties = ['openFile'];
+  if (multiple) properties.push('multiSelections')
   return dialog.showOpenDialogSync({
     // title: "选择项目所在目录",
     // defaultPath: args && args.defaultPath ? args.defaultPath : "",
-    properties: ['openFile', 'multiSelections'],
+    properties: properties,
     
   })
 }
