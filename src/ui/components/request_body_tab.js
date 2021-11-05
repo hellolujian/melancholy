@@ -1,5 +1,5 @@
 import React from 'react';
-import { message, Button, Upload, Radio , Collapse, Tabs, Typography, Space, Select  } from 'antd';
+import { message, Button, Upload, Radio , Collapse, Tabs, Typography, Space, Select, Row, Col } from 'antd';
 import { EyeOutlined, CaretDownOutlined  } from '@ant-design/icons';
 import KeyValueTable from './key_value_table'
 import JsonEditor from './json_editor'
@@ -173,36 +173,47 @@ class RequestBodyTab extends React.Component {
           
         return (
           <Space direction="vertical" className="full-width" size={0}>
-            <Space size={0}>
-              <Radio.Group 
-                value={mode} 
-                className="full-width request-body-checkbox" 
-                onChange={this.handleCheckboxChange}>
-                {
-                  checkboxOptions.map((option => (
-                    <Radio key={option.value} value={option.value}>{option.label}</Radio>
-                  )))
-                }
-              </Radio.Group>
+            <Row>
+              <Col flex="none">
+                <Radio.Group 
+                  value={mode} 
+                  className="full-width request-body-checkbox" 
+                  onChange={this.handleCheckboxChange}>
+                  {
+                    checkboxOptions.map((option => (
+                      <Radio key={option.value} value={option.value}>{option.label}</Radio>
+                    )))
+                  }
+                </Radio.Group>
+              </Col>
+              
               {
                 mode === 'raw' && (
-                  <Select
-                    value={rawType}
-                    dropdownMatchSelectWidth={false}
-                    onChange={this.handleRawValueTypeChange}
-                    bordered={false}
-                    defaultValue="text"
-                    className="request-body-raw-type-select"
-                    options={this.rawTypeOptions.map(item => {
-                      return {
-                        label: `${item.label}${item.contentType ? ' (' + item.contentType + ')' : ''}`,
-                        value: item.value,
-                      }
-                    })}
-                  />
+                  <Col flex='auto' className="justify-content-space-between vertical-center">
+                    <Select
+                      value={rawType}
+                      dropdownMatchSelectWidth={false}
+                      onChange={this.handleRawValueTypeChange}
+                      bordered={false}
+                      defaultValue="text"
+                      className="request-body-raw-type-select"
+                      options={this.rawTypeOptions.map(item => {
+                        return {
+                          label: `${item.label}${item.contentType ? ' (' + item.contentType + ')' : ''}`,
+                          value: item.value,
+                        }
+                      })}
+                    />
+                    {
+                      rawType === 'json' && (
+                        <Button type="link">Beautify</Button>
+                      )
+                    }
+                  </Col>
+                  
                 )
               }
-            </Space>
+            </Row>
             
             <div>
             {
