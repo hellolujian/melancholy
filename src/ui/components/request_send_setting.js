@@ -24,7 +24,7 @@ class RequestSendSetting extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            activeTabKey: 'body',
+            activeTabKey: 'prerequestscripts',
         }
     }
 
@@ -60,9 +60,26 @@ class RequestSendSetting extends React.Component {
         this.props.onChange({body: value}, saveFlag);
     }
 
+    handlePreRequestScriptChange = (value, saveFlag) => {
+        this.props.onChange({prerequest: value}, saveFlag);
+    }
+
+    handlePreRequestScriptSave = (e) => {
+        this.props.onSave({prerequest: e.target.value});
+    }
+
+    handleTestScriptChange = (value, saveFlag) => {
+        this.props.onChange({test: value}, saveFlag);
+    }
+
+    handleTestScriptSave = (e) => {
+        this.props.onSave({test: e.target.value})
+    }
+
     render() {
         const {value} = this.props;
-        const {param, deleted, auth, parentId, header, body} = value;
+        const {param, deleted, auth, parentId, header, body, prerequest, test} = value;
+
         const {activeTabKey} = this.state;
         return (
             <>
@@ -108,10 +125,21 @@ class RequestSendSetting extends React.Component {
                 </TabPane>
                 <TabPane tab="Body" key="body" />
                 <TabPane tab="Pre-request Script" key="prerequestscripts">
-                  <RndScriptEditor />
+                    <RndScriptEditor 
+                        value={prerequest}
+                        defaultValue={prerequest}
+                        onChange={this.handlePreRequestScriptChange}
+                        onSave={this.handlePreRequestScriptSave}
+                    />
                 </TabPane>
                 <TabPane tab="Tests" key="tests">
-                <RndScriptEditor scriptType='tests' />
+                    <RndScriptEditor 
+                        scriptType='tests' 
+                        value={test}
+                        defaultValue={test}
+                        onChange={this.handleTestScriptChange}
+                        onSave={this.handleTestScriptSave}
+                    />
                 </TabPane>
             </Tabs>
             {
@@ -123,7 +151,7 @@ class RequestSendSetting extends React.Component {
                     />
                 )
             }
-                
+            
 
             </>
         )
