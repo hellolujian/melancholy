@@ -35,14 +35,30 @@ class DropdownTooltip extends React.Component {
 
     render() {
      
-        const {label, type = 'primary', buttonProps = {}, tooltipProps = {}, title, icon, shape, size, trigger, dropdownProps, overlay} = this.props;
+        const {label, type = 'primary', buttonProps = {}, 
+        tooltipProps = {}, title, icon, shape, size, 
+        trigger, dropdownProps, overlay, overlayMenu = {}} = this.props;
+        const {items = [], menuProps = {}} = overlayMenu;
+        let realOverlay = overlay || (
+            <Menu
+                {...menuProps}
+            >
+                {
+                    items.map(item => (
+                        <Menu.Item key={item.value}>
+                            {item.label}
+                        </Menu.Item>
+                    ))
+                }
+            </Menu>
+        );
       
         const {visible} = this.state;
         return (
 
             <Dropdown 
                 trigger={trigger}
-                overlay={overlay}
+                overlay={realOverlay}
                 {...dropdownProps}>
                 <Tooltip visible={visible} color='gray' title={title} {...tooltipProps}>
                     {

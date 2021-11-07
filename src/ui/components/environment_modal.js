@@ -111,6 +111,12 @@ class EnvironmentModal extends React.Component {
         await this.refreshData();
     } 
 
+    handleMoreActionClick = async (key, item) => {
+        const {id} = item;
+        await updateEnvironmentMeta(id, {$set: {deleted: true}})
+        await this.refreshData();
+    }
+
     render() {
      
         const {workspaceId, collectionId, folderId, visible} = this.props;
@@ -186,108 +192,95 @@ class EnvironmentModal extends React.Component {
                 
                 {
                     scene === 'view' && (
-                        <>
                         <Space direction="vertical" size="large">
-                        {ENVIRONMENT_TIPS}
-                        {
-                            environments.length === 0 && (
-                                <Paragraph>
-                                    {ENVIRONMENT_EXT_TIPS}
-                                    <Link onClick={this.handleAddClick}>Create an environment</Link> to get started.
-                                </Paragraph>
-                            )
-                        }
-                            
-                        </Space>
-                            
-                            
-                        {
-                            environments.length > 0 && (
-                                <List
-                                className="environment_modal_list"
-                                size="small"
-                                //   header={<div>Header</div>}
-                                //   footer={<div>Footer</div>}
-                                //   bordered
-                                dataSource={environments}
-                                renderItem={item => (
-                                    <List.Item actions={[
-                                        (
-                                            <Space>
-                                                <ButtonModal 
-                                                    buttonLabel="share"
-                                                    buttonProps={{
-                                                        className: "postman-button-class", type: "text", icon: SHARE_COLLECTION_ICON, 
-                                                    }} 
-                                                    modalProps={{
-                                                        okText: 'Share', cancelText: 'Cancel', title: 'SHARE ENVIRONMENT'
-                                                    }} 
-                                                    modalContent={
-                                                        <>
-                                                            <p>Share in Workspace</p>
-                                                            <Select defaultValue="lucy" style={{ width: '100%' }} onChange={this.handleChange}>
-                                                                <Option value="jack">Jack</Option>
-                                                                <Option value="lucy">Lucy</Option>
-                                                                <Option value="disabled" disabled>
-                                                                    Disabled
-                                                                </Option>
-                                                                <Option value="Yiminghe">yiminghe</Option>
-                                                            </Select>
-                                                        </>
-                                                    }
-                                                />
-                                                {/* <Button className="postman-button-class" type="text" icon={SHARE_COLLECTION_ICON}>share</Button> */}
-                                                <span>
-                                                    <TooltipButton 
-                                                        onClick={() => this.handleDuplicateClick(item)}
-                                                        tooltipProps={{title: 'Duplicate Environment'}}
-                                                        buttonProps={{icon: DUPLICATE_ICON, type: 'text', className: 'postman-button-class'}}
-                                                    />
-                                                    <TooltipButton 
-                                                        onClick={() => this.handleDownloadClick(item)}
-                                                        tooltipProps={{title: 'Download Environment'}}
-                                                        buttonProps={{icon: EXPORT_ICON, type: 'text', className: 'postman-button-class'}}
-                                                    />
-                                                    <TooltipButton 
-                                                        onClick={() => this.handleDownloadClick(item)}
-                                                        tooltipProps={{title: 'Download Environment'}}
-                                                        buttonProps={{icon: ELLIPSIS_ICON, type: 'text', className: 'postman-button-class'}}
-                                                    />
-                                                    <DropdownTooltip 
-                                                        trigger="click"
-                                                        overlay={
-                                                            <Menu mode="horizontal" onClick={this.handleOpenNewBtnClick}>
-                                                                <Menu.ItemGroup title="OPEN NEW">
-                                                                    <Menu.Item key="tab">Tab</Menu.Item>
-                                                                    <Menu.Item key="melancholywindow">Melancholy Window</Menu.Item>
-                                                                    <Menu.Item key="runnerwindow">Runner Window</Menu.Item>
-                                                                </Menu.ItemGroup>
-                                                            </Menu>
-                                                        }
-                                                        title="Open New"
-                                                        type="primary" 
-                                                        onClick={this.handleOpenNewBtnClick} 
-                                                        buttonProps={{className: "open-new-button"}} 
-                                                        // label={<>{OPEN_NEW_ICON} <CaretDownFilled /></>}
-                                                    />
-                                                    {/* <Button type="text" icon={DUPLICATE_ICON} className="postman-button-class" /> */}
-                                                    {/* <Button type="text" icon={EXPORT_ICON} className="postman-button-class" title="Download Environment" alt="Down" /> */}
-                                                    <Button type="text" icon={ELLIPSIS_ICON} className="postman-button-class" />
-                                                </span>
-                                            </Space>
-                                            
-                                        )
-                                    ]}>
-                                        <Button type="text" size="small" onClick={() => this.handleEnvironmentItemClick(item)}>{item.name}</Button>
-                                    </List.Item>
-                                )}
-                            />
-                            )
-                        }
+                            <Space direction="vertical" size="large">
+                                {ENVIRONMENT_TIPS}
+                                {
+                                    environments.length === 0 && (
+                                        <Paragraph>
+                                            {ENVIRONMENT_EXT_TIPS}
+                                            <Link onClick={this.handleAddClick}>Create an environment</Link> to get started.
+                                        </Paragraph>
+                                    )
+                                }
                                 
+                            </Space>
                             
-                            
-                        </>
+                            {
+                                environments.length > 0 && (
+                                    <List
+                                    className="environment_modal_list"
+                                    size="small"
+                                    //   header={<div>Header</div>}
+                                    //   footer={<div>Footer</div>}
+                                    //   bordered
+                                    dataSource={environments}
+                                    renderItem={item => (
+                                        <List.Item actions={[
+                                            (
+                                                <Space>
+                                                    <ButtonModal 
+                                                        label="share"
+                                                        buttonProps={{
+                                                            className: "postman-button-class", type: "text", icon: SHARE_COLLECTION_ICON, 
+                                                        }} 
+                                                        modalProps={{
+                                                            okText: 'Share', cancelText: 'Cancel', title: 'SHARE ENVIRONMENT'
+                                                        }} 
+                                                        modalContent={
+                                                            <>
+                                                                <p>Share in Workspace</p>
+                                                                <Select defaultValue="lucy" style={{ width: '100%' }} onChange={this.handleChange}>
+                                                                    <Option value="jack">Jack</Option>
+                                                                    <Option value="lucy">Lucy</Option>
+                                                                    <Option value="disabled" disabled>
+                                                                        Disabled
+                                                                    </Option>
+                                                                    <Option value="Yiminghe">yiminghe</Option>
+                                                                </Select>
+                                                            </>
+                                                        }
+                                                    />
+                                                    <span>
+                                                        <TooltipButton 
+                                                            onClick={() => this.handleDuplicateClick(item)}
+                                                            tooltipProps={{title: 'Duplicate Environment'}}
+                                                            buttonProps={{icon: DUPLICATE_ICON, type: 'text', className: 'postman-button-class'}}
+                                                        />
+                                                        <TooltipButton 
+                                                            onClick={() => this.handleDownloadClick(item)}
+                                                            tooltipProps={{title: 'Download Environment'}}
+                                                            buttonProps={{icon: EXPORT_ICON, type: 'text', className: 'postman-button-class'}}
+                                                        />
+                                                        <DropdownTooltip 
+                                                            trigger="click"
+                                                            overlayMenu={{
+                                                                menuProps: {
+                                                                    onClick: ({key}) => this.handleMoreActionClick(key, item)
+                                                                },
+                                                                items: [
+                                                                    {label: 'Delete', value: 'delete'},
+                                                                    {label: 'Remove from workspace', value: 'remove'}
+                                                                ]
+                                                            }}
+                                                            title="View more actions"
+                                                            type="text" 
+                                                            onClick={this.handleOpenNewBtnClick} 
+                                                            buttonProps={{className: "postman-button-class", icon: ELLIPSIS_ICON}} 
+                                                        />
+                                                    </span>
+                                                </Space>
+                                                
+                                            )
+                                        ]}>
+                                            <Button type="text" size="small" onClick={() => this.handleEnvironmentItemClick(item)}>{item.name}</Button>
+                                        </List.Item>
+                                    )}
+                                />
+                                )
+                            }
+                                
+                        </Space>
                     )
                 }
                 {

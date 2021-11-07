@@ -49,14 +49,24 @@ class ButtonModal extends React.Component {
             <>
             {
                 buttonProps && (
-                    <TooltipButton 
-                        buttonProps={buttonProps}
-                        tooltipProps={tooltipProps}
-                        label={label} 
-                        title={title}
-                        icon={icon}
-                        onClick={this.handletriggerBtnClick} 
-                    />
+                    tooltipProps ? (
+                        <TooltipButton 
+                            buttonProps={buttonProps}
+                            tooltipProps={tooltipProps}
+                            label={label} 
+                            title={title}
+                            icon={icon}
+                            onClick={this.handletriggerBtnClick} 
+                        />
+                    ) : (
+                        <Button 
+                            icon={icon} 
+                            onClick={this.handletriggerBtnClick} 
+                            {...buttonProps}>
+                            {label}
+                        </Button>
+                    )
+                    
                 )
             }
             <Modal 

@@ -25,9 +25,13 @@ class EnvironmentSetting extends React.Component {
       
     }
 
+    handleEnvironmentModalVisible = (visible) => {
+        this.setState({environmentModalVisible: visible});
+    }
+
     render() {
     
-        const {environments} = this.state;
+        const {environments, environmentModalVisible} = this.state;
        
         return (
             <Space style={{marginLeft: 20}}>
@@ -59,9 +63,12 @@ class EnvironmentSetting extends React.Component {
 
             <EnvironmentDetailCard />
             
-            <Button icon={<SettingFilled  />} onClick={() => this.setState({environmentModalVisible: true})} />
+            <Button icon={<SettingFilled  />} onClick={() => this.handleEnvironmentModalVisible(true)} />
 
-            <EnvironmentModal visible={this.state.environmentModalVisible} />
+            <EnvironmentModal 
+                visible={environmentModalVisible} 
+                onVisibleChange={this.handleEnvironmentModalVisible}
+            />
             </Space>
         )
     }
