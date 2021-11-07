@@ -3,6 +3,7 @@ import { Select, Button, Space } from 'antd';
 import { EyeOutlined, SettingFilled  } from '@ant-design/icons';
 import EnvironmentDetailCard from './environment_detail_card'
 import EnvironmentModal from './environment_modal'
+import {queryEnvironmentMeta} from '@/database/environment_meta'
 
 const { Option } = Select;
 class EnvironmentSetting extends React.Component {

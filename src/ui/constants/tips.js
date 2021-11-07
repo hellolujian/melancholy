@@ -54,6 +54,11 @@ const ENVIRONMENT_TIPS = (
         An environment is a set of variables that allow you to switch the context of your requests. Environments can be shared between multiple workspaces. {ENVIRONMENT_LINK_TIPS}
     </Text>
 )
+const ENVIRONMENT_EXT_TIPS = (
+    <Text>
+        You can declare a variable in an environment and give it a starting value, then use it in a request by putting the variable name within curly-braces.
+    </Text>
+)
 
 const NO_ENVIRONMENT_VARIABLES_TIPS = (
     <Text strong>No Environment variables</Text>
@@ -147,5 +152,6 @@ export {
     RESET_ALL_TIPS,
     DOCUMENTATION_DESC_TIPS,
     DOCUMENTATION_DESC_MARKDOWN_TIPS,
-    DOCUMENTATION_NAME_TIPS
+    DOCUMENTATION_NAME_TIPS,
+    ENVIRONMENT_EXT_TIPS
 }

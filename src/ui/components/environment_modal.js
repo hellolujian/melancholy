@@ -3,6 +3,7 @@ import {Input, Alert, Button, Form, Modal, Typography, List, Space, Upload, Sele
 import {
     ENVIRONMENT_TIPS,
     VARIABLE_VALUE_TIPS,
+    ENVIRONMENT_EXT_TIPS,
 } from 'ui/constants/tips'
 import {
     SHARE_COLLECTION_ICON, ELLIPSIS_ICON, RENAME_ICON, EDIT_ICON, CREATE_FORK_ICON, 
@@ -11,6 +12,12 @@ import {
     REMOVE_FROM_WORKSPACE_ICON, DELETE_ICON, COLLECTION_FOLDER_ICON, 
 } from '@/ui/constants/icons'
 
+import TooltipButton from './tooltip_button';
+import DropdownTooltip from './dropdown_tooltip'
+
+import {queryEnvironmentMeta, updateEnvironmentMeta, insertEnvironmentMeta} from '@/database/environment_meta'
+
+import {UUID, compareObjectIgnoreEmpty} from '@/utils/global_utils'
 import VariablesTable from './variables_table';
 import ButtonModal from './button_modal'
 import 'ui/style/environment_modal.css'
@@ -19,18 +26,23 @@ const { Link, Text, Paragraph } = Typography;
 const { Option } = Select;
 class EnvironmentModal extends React.Component {
 
+    formRef = React.createRef();
+
     constructor(props) {
         super(props);
         this.state = {
-            environments: [
-                {id: 'qa', name: 'qa',},
-                {id: 'qa1', name: 'qa1',},
-            ],
+            environments: [],
             scene: 'view'
         }
     }
 
-    componentDidMount() {
+    refreshData = async (extra) => {
+        let environments = await queryEnvironmentMeta();
+        this.setState({ environments: environments || [] , ...extra});
+    }
+
+    componentDidMount = async () => {
+        await this.refreshData();
       
     }
 
@@ -40,12 +52,33 @@ class EnvironmentModal extends React.Component {
         this.props.onVisibleChange(false);
     }
 
-    handleEnvironmentItemClick = () => {
-        this.setState({scene: 'update'})
+    handleEnvironmentItemClick = (item) => {
+        this.setState({scene: 'update', editValues: item})
+    }
+
+    handleFormFinish = async (values) => {
+        const {id, name} = values;
+        if (id) {
+            await updateEnvironmentMeta(id, {$set: {name: name, variable: []}})
+        } else {
+            await insertEnvironmentMeta(
+                {
+                    id: UUID(),
+                    name: name,
+                    variable: []
+                }
+            )
+        }
+        await this.refreshData({scene: 'view'})
     }
 
     handleAddClick = () => {
-        this.setState({scene: 'add'})
+        const {scene} = this.state;
+        if (scene === 'add') {
+            this.formRef.current.submit()  
+        } else {
+            this.setState({scene: 'add', editValues: {}})
+        }
     }
 
     handleImportClick = () => {
@@ -61,17 +94,27 @@ class EnvironmentModal extends React.Component {
     }
 
     handleUpdateClick = () => {
-        this.setState({scene: 'view'})
+        this.formRef.current.submit()  
     }
 
     handleGlobalClick = () => {
         this.setState({scene: 'global'})
     }
 
+    handleDuplicateClick = async (item) => {
+        const {name, variable} = item;
+        await insertEnvironmentMeta({
+            id: UUID(),
+            name: name + " Copy",
+            variable: variable,
+        })
+        await this.refreshData();
+    } 
+
     render() {
      
         const {workspaceId, collectionId, folderId, visible} = this.props;
-        const { environments, scene} = this.state;
+        const { environments, scene, editValues} = this.state;
         return (
             <Modal 
                 title="MANAGE ENVIRONMENTS" 
@@ -144,8 +187,23 @@ class EnvironmentModal extends React.Component {
                 {
                     scene === 'view' && (
                         <>
-                            {ENVIRONMENT_TIPS}
-                            <List
+                        <Space direction="vertical" size="large">
+                        {ENVIRONMENT_TIPS}
+                        {
+                            environments.length === 0 && (
+                                <Paragraph>
+                                    {ENVIRONMENT_EXT_TIPS}
+                                    <Link onClick={this.handleAddClick}>Create an environment</Link> to get started.
+                                </Paragraph>
+                            )
+                        }
+                            
+                        </Space>
+                            
+                            
+                        {
+                            environments.length > 0 && (
+                                <List
                                 className="environment_modal_list"
                                 size="small"
                                 //   header={<div>Header</div>}
@@ -180,18 +238,55 @@ class EnvironmentModal extends React.Component {
                                                 />
                                                 {/* <Button className="postman-button-class" type="text" icon={SHARE_COLLECTION_ICON}>share</Button> */}
                                                 <span>
-                                                    <Button type="text" icon={DUPLICATE_ICON} className="postman-button-class" />
-                                                    <Button type="text" icon={EXPORT_ICON} className="postman-button-class" />
+                                                    <TooltipButton 
+                                                        onClick={() => this.handleDuplicateClick(item)}
+                                                        tooltipProps={{title: 'Duplicate Environment'}}
+                                                        buttonProps={{icon: DUPLICATE_ICON, type: 'text', className: 'postman-button-class'}}
+                                                    />
+                                                    <TooltipButton 
+                                                        onClick={() => this.handleDownloadClick(item)}
+                                                        tooltipProps={{title: 'Download Environment'}}
+                                                        buttonProps={{icon: EXPORT_ICON, type: 'text', className: 'postman-button-class'}}
+                                                    />
+                                                    <TooltipButton 
+                                                        onClick={() => this.handleDownloadClick(item)}
+                                                        tooltipProps={{title: 'Download Environment'}}
+                                                        buttonProps={{icon: ELLIPSIS_ICON, type: 'text', className: 'postman-button-class'}}
+                                                    />
+                                                    <DropdownTooltip 
+                                                        trigger="click"
+                                                        overlay={
+                                                            <Menu mode="horizontal" onClick={this.handleOpenNewBtnClick}>
+                                                                <Menu.ItemGroup title="OPEN NEW">
+                                                                    <Menu.Item key="tab">Tab</Menu.Item>
+                                                                    <Menu.Item key="melancholywindow">Melancholy Window</Menu.Item>
+                                                                    <Menu.Item key="runnerwindow">Runner Window</Menu.Item>
+                                                                </Menu.ItemGroup>
+                                                            </Menu>
+                                                        }
+                                                        title="Open New"
+                                                        type="primary" 
+                                                        onClick={this.handleOpenNewBtnClick} 
+                                                        buttonProps={{className: "open-new-button"}} 
+                                                        // label={<>{OPEN_NEW_ICON} <CaretDownFilled /></>}
+                                                    />
+                                                    {/* <Button type="text" icon={DUPLICATE_ICON} className="postman-button-class" /> */}
+                                                    {/* <Button type="text" icon={EXPORT_ICON} className="postman-button-class" title="Download Environment" alt="Down" /> */}
                                                     <Button type="text" icon={ELLIPSIS_ICON} className="postman-button-class" />
                                                 </span>
                                             </Space>
                                             
                                         )
                                     ]}>
-                                        <Button type="text" size="small" onClick={this.handleEnvironmentItemClick}>{item.id}</Button>
+                                        <Button type="text" size="small" onClick={() => this.handleEnvironmentItemClick(item)}>{item.name}</Button>
                                     </List.Item>
                                 )}
                             />
+                            )
+                        }
+                                
+                            
+                            
                         </>
                     )
                 }
@@ -200,9 +295,12 @@ class EnvironmentModal extends React.Component {
                         <>
                             <Form
                                 layout="vertical"
-                                //   onFinish={onFinish}
-                                //   onFinishFailed={onFinishFailed}
+                                preserve={false}
+                                ref={this.formRef}
+                                initialValues={editValues}
+                                onFinish={this.handleFormFinish}
                                 >
+                                <Form.Item name="id" hidden />
                                 <Form.Item
                                     label="Add Environment"
                                     name="name"
