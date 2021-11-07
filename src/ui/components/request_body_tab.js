@@ -6,13 +6,6 @@ import JsonEditor from './json_editor'
 import SelectFileButton from './select_file_button';
 import 'ui/style/request_body_tab.css'
 
-
-import AceEditor from "react-ace";
-import "ace-builds/src-noconflict/mode-json";
-import "ace-builds/src-noconflict/theme-tomorrow";
-import "ace-builds/src-noconflict/ext-language_tools"
-
-
 const {Option} = Select;
 
 const { TabPane } = Tabs;
@@ -98,6 +91,12 @@ class RequestBodyTab extends React.Component {
       this.handleModeValueChange(selectFiles)
     }
 
+    handleJsonEditorRef = (ref) => {
+      if (ref) {
+        this.jsonEditorRef = ref;
+      }
+      
+    }
     getCheckboxOptions = () => {
       const {value = {}} = this.props;
       const {mode, rawType} = value;
@@ -139,6 +138,7 @@ class RequestBodyTab extends React.Component {
         { label: 'raw', value: 'raw', content: (
           <JsonEditor 
             value={modeValue}
+            ref={this.handleJsonEditorRef}
             mode={rawTypeOption.mode || rawTypeOption.value}
             onChange={this.handleBodyRawChange}
             onBlur={this.handleBodyRawBlur}
@@ -163,6 +163,10 @@ class RequestBodyTab extends React.Component {
     handleRawValueTypeChange = (value, option) => {
       let oldBodyValue = this.props.value || {};
       this.props.onChange({...oldBodyValue, rawType: value}, true)
+    }
+
+    handleBeautify = () => {
+      this.jsonEditorRef.handleBeautify()
     }
 
     render() {
@@ -205,8 +209,8 @@ class RequestBodyTab extends React.Component {
                       })}
                     />
                     {
-                      rawType === 'json' && (
-                        <Button type="link">Beautify</Button>
+                      ['json', 'html', 'xml', 'xml_text'].includes(rawType) && (
+                        <Button type="link" onClick={this.handleBeautify}>Beautify</Button>
                       )
                     }
                   </Col>
