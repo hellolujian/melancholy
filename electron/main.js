@@ -89,15 +89,30 @@ log.info('main:    ' +  __dirname);
 global.nedb = require('nedb');
 
 global.OPEN_FILES_ELECT_DIALOG = (uploadProps = {}) => {
-  const {multiple} = uploadProps;
-  let properties = ['openFile'];
+  const {multiple, directory, file = true, defaultPath, title} = uploadProps;
+  let properties = ['createDirectory'];
+  if (file) {
+    properties.push('openFile')
+  }
+  if (directory) {
+    properties.push('openDirectory')
+  }
   if (multiple) properties.push('multiSelections')
   return dialog.showOpenDialogSync({
-    // title: "选择项目所在目录",
-    // defaultPath: args && args.defaultPath ? args.defaultPath : "",
+    title: title,
+    defaultPath: defaultPath,
     properties: properties,
     
   })
+}
+
+global.SHOW_SAVE_DIALOG = (saveProps = {}, callback) => {
+  const {defaultPath, title} = saveProps;
+  return dialog.showSaveDialogSync({
+    title: title,
+    defaultPath: defaultPath,
+    
+  }, callback)
 }
 
 let localShortcutList = [

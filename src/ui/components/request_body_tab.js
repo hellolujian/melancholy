@@ -3,7 +3,7 @@ import { message, Button, Upload, Radio , Collapse, Tabs, Typography, Space, Sel
 import { EyeOutlined, CaretDownOutlined  } from '@ant-design/icons';
 import KeyValueTable from './key_value_table'
 import JsonEditor from './json_editor'
-import SelectFileButton from './select_file_button';
+import RequestBodySelectFile from './request_body_select_file';
 import 'ui/style/request_body_tab.css'
 
 const {Option} = Select;
@@ -146,7 +146,7 @@ class RequestBodyTab extends React.Component {
         )},
         { label: 'binary', value: 'file', content: (
           <Space>
-            <SelectFileButton 
+            <RequestBodySelectFile 
               value={modeValue} 
               onSelect={this.handleBodyFileSelectd} 
             />

@@ -4,6 +4,7 @@ import {
     ENVIRONMENT_TIPS,
     VARIABLE_VALUE_TIPS,
     ENVIRONMENT_EXT_TIPS,
+    GLOBALS_TIPS
 } from 'ui/constants/tips'
 import {
     SHARE_COLLECTION_ICON, ELLIPSIS_ICON, RENAME_ICON, EDIT_ICON, CREATE_FORK_ICON, 
@@ -16,10 +17,14 @@ import TooltipButton from './tooltip_button';
 import DropdownTooltip from './dropdown_tooltip'
 
 import {queryEnvironmentMeta, updateEnvironmentMeta, insertEnvironmentMeta} from '@/database/environment_meta'
+import {queryCommonMeta, updateCommonMeta, queryCommonMetaByType} from '@/database/common_meta'
 
 import {UUID, compareObjectIgnoreEmpty} from '@/utils/global_utils'
 import VariablesTable from './variables_table';
 import ButtonModal from './button_modal'
+import CommonSelectFile from './common_select_file'
+
+import {CommonValueType} from '@/enums'
 import 'ui/style/environment_modal.css'
 
 const { Link, Text, Paragraph } = Typography;
@@ -50,22 +55,24 @@ class EnvironmentModal extends React.Component {
 
     handleModalCancel = () => {
         this.props.onVisibleChange(false);
+        this.setState({scene: 'view'})
     }
 
     handleEnvironmentItemClick = (item) => {
-        this.setState({scene: 'update', editValues: item})
+        this.setState({scene: 'update', editValues: item, variable: item.variable})
     }
 
     handleFormFinish = async (values) => {
+        const {variable} = this.state;
         const {id, name} = values;
         if (id) {
-            await updateEnvironmentMeta(id, {$set: {name: name, variable: []}})
+            await updateEnvironmentMeta(id, {$set: {name: name, variable: variable}})
         } else {
             await insertEnvironmentMeta(
                 {
                     id: UUID(),
                     name: name,
-                    variable: []
+                    variable: variable
                 }
             )
         }
@@ -89,16 +96,19 @@ class EnvironmentModal extends React.Component {
         this.setState({scene: 'view'})
     }
 
-    handleSaveClick = () => {
-        this.setState({scene: 'view'})
+    handleSaveClick = async () => {
+        const {variable} = this.state;
+        await updateCommonMeta({type: CommonValueType.GLOBALS.name()}, {type: CommonValueType.GLOBALS.name(), value: variable}, {upsert: true})
+        this.setState({scene: 'view', variable: []})
     }
 
     handleUpdateClick = () => {
         this.formRef.current.submit()  
     }
 
-    handleGlobalClick = () => {
-        this.setState({scene: 'global'})
+    handleGlobalClick = async () => {
+        let globalVariable = await queryCommonMetaByType( CommonValueType.GLOBALS.name()) || {}
+        this.setState({scene: 'global', variable: globalVariable.value, globalVariableChange: false})
     }
 
     handleDuplicateClick = async (item) => {
@@ -117,10 +127,98 @@ class EnvironmentModal extends React.Component {
         await this.refreshData();
     }
 
+    handleVariableChange = (value) => {
+        let updateObj = {variable: value,}
+        if (this.state.scene === 'global') {
+            updateObj.globalVariableChange = true;
+        }
+        this.setState(updateObj);
+    }
+
+    writeFileSync = (filePath, fileContent) => {
+        const fs = window.require('fs');
+        
+        fs.writeFileSync(  
+            filePath,
+            fileContent, 
+            (err) => {
+                if (err) {
+                    console.error(err);
+                } else {
+                    console.log('写入成功')
+                }
+        });
+    }
+
+    handleDownloadEnvironmentSelect = (filePath, item) => {
+        const {id, variable = [], name} = item
+        let fileJson = {
+            id: id,
+            values: variable.map(v => {
+                return {
+                    key: v.name, 
+                    value: v.initialValue || '', 
+                    enabled: v.disabled ? false : true
+                }
+            }),
+            name: name + ".postman_environment.json",
+            "_postman_variable_scope": "environment",
+            "_postman_exported_at": "2021-11-08T07:40:26.168Z",
+            "_postman_exported_using": "Postman/7.3.6"
+        }
+        this.writeFileSync(filePath, JSON.stringify(fileJson, "", "\t"))
+    }
+
+    handleDownloadGlobalSelect = (filePath) => {
+        const {globalVariableChange,} = this.state;
+        
+        let fileJson = {
+            id: '234saf',
+            values: [
+                {key: '234', value: 'sdf', enabled: true}
+            ],
+            name: "测试私有个人工作空间 globals",
+            "_postman_variable_scope": "globals",
+            "_postman_exported_at": "2021-11-08T07:40:26.168Z",
+            "_postman_exported_using": "Postman/7.3.6"
+        }
+        this.writeFileSync(filePath, JSON.stringify(fileJson, "", "\t"))
+
+        if (globalVariableChange) {
+            this.handleSaveClick()
+        }
+    }
+
+    handleImportSelect = (selectFiles) => {
+        if (selectFiles && selectFiles.length > 0) {
+            
+        }
+    }
+
     render() {
      
         const {workspaceId, collectionId, folderId, visible} = this.props;
-        const { environments, scene, editValues} = this.state;
+        const { environments, scene, editValues, variable, globalVariableChange} = this.state;
+
+        let variableAndTips = (
+            <>
+                <div style={{maxHeight: 350, overflow: 'auto'}}>
+                    <VariablesTable 
+                        value={variable}
+                        onChange={this.handleVariableChange}
+                    />
+                </div>
+                                
+                <Alert
+                    style={{position: 'absolute', bottom: 70, left: 20, right: 20}}
+                    description={VARIABLE_VALUE_TIPS}
+                    type="info"
+                    showIcon
+                    closable
+                    onClose={this.handleVariableValuesTipClose}
+                />
+            </>
+        )
         return (
             <Modal 
                 title="MANAGE ENVIRONMENTS" 
@@ -141,7 +239,14 @@ class EnvironmentModal extends React.Component {
                         }
                         {
                             scene === 'global' && (
-                                <Button type="text" className="postman-button-class" onClick={this.handleCancelClick}>Download as JSON</Button>
+                                <CommonSelectFile 
+                                    label={(globalVariableChange ? "Save and " : "") + "Download as JSON"}
+                                    mode="save"
+                                    title="Select path to save file"
+                                    defaultPath="测试私有个人工作空间.postman_globals.json"
+                                    onSelect={this.handleDownloadGlobalSelect}
+                                    buttonProps={{type: 'text', className: 'postman-button-class'}}
+                                />
                             )
                         }
                         {
@@ -173,6 +278,7 @@ class EnvironmentModal extends React.Component {
                 )}
                 width={800}
                 visible={visible} 
+                destroyOnClose
                 onOk={this.handleOk} 
                 onCancel={this.handleModalCancel}>
                 {
@@ -182,11 +288,26 @@ class EnvironmentModal extends React.Component {
 
                             <Paragraph>Select environment files from your computer</Paragraph>
                             
-                            <Upload >
-                                <Button>Select File</Button>
-                            </Upload>
+                            <CommonSelectFile 
+                                multiple
+                                label="Select File"
+                                onSelect={this.handleImportSelect}
+                                buttonProps={{type: 'text', className: 'postman-button-class'}}
+                            />
 
                         </div>
+                    )
+                }
+
+                {
+                    scene === 'global' && (
+                        <Space direction="vertical" size="large">
+                            {GLOBALS_TIPS}
+                            <Space direction="vertical">
+                                <Text strong>Globals</Text>
+                                {variableAndTips}
+                            </Space>
+                        </Space>
                     )
                 }
                 
@@ -247,11 +368,20 @@ class EnvironmentModal extends React.Component {
                                                             tooltipProps={{title: 'Duplicate Environment'}}
                                                             buttonProps={{icon: DUPLICATE_ICON, type: 'text', className: 'postman-button-class'}}
                                                         />
-                                                        <TooltipButton 
-                                                            onClick={() => this.handleDownloadClick(item)}
+
+                                                        <CommonSelectFile 
+                                                            mode="save"
+                                                            title="Select path to save file"
+                                                            defaultPath={item.name + ".postman_environment.json"}
+                                                            onSelect={(filePath) => this.handleDownloadEnvironmentSelect(filePath, item)}
                                                             tooltipProps={{title: 'Download Environment'}}
                                                             buttonProps={{icon: EXPORT_ICON, type: 'text', className: 'postman-button-class'}}
                                                         />
+                                                        {/* <TooltipButton 
+                                                            onClick={() => this.handleDownloadClick(item)}
+                                                            tooltipProps={{title: 'Download Environment'}}
+                                                            buttonProps={{icon: EXPORT_ICON, type: 'text', className: 'postman-button-class'}}
+                                                        /> */}
                                                         <DropdownTooltip 
                                                             trigger="click"
                                                             overlayMenu={{
@@ -310,15 +440,8 @@ class EnvironmentModal extends React.Component {
                             
                             </Form>
 
-                            <VariablesTable />
-                            <Alert
-                                style={{position: 'absolute', bottom: 70, left: 20, right: 20}}
-                                description={VARIABLE_VALUE_TIPS}
-                                type="info"
-                                showIcon
-                                closable
-                                onClose={this.handleVariableValuesTipClose}
-                            />
+                            {variableAndTips}
+                            
                         </>
                     )
                 }

@@ -238,6 +238,9 @@ class NewButtonModal extends React.Component {
                                 label="New"
                                 title={CREATE_NEW}
                                 icon={SQUARE_PLUS_ICON}
+                                tooltipProps={{
+                                    
+                                }}
                                 modalContent={modalContent}
                                 modalProps={{
                                     destroyOnClose: true,

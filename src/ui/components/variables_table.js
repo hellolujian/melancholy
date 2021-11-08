@@ -62,56 +62,59 @@ class VariablesTable extends React.Component {
 
     render() {
 
-        const {value} = this.props;
+        let columns = [
+            {
+                title: 'VARIABLE',
+                dataIndex: 'name',
+                // width: '22%',
+                editable: true,
+                className: 'drag-visible',
+                placeholder: 'Add a new variable'
+            },
+            {
+                name: 'Initial Value',
+                title: (
+                    <>
+                        INITIAL VALUE 
+                        <TooltipButton 
+                            type="text" 
+                            size="small"
+                            icon={CIRCLE_INFO_ICON} 
+                            title={INITIAL_VALUE_TIPS}
+                        />
+                    </>
+                ),
+                dataIndex: 'initialValue',
+                // width: '20%',
+                editable: true,
+                className: 'drag-visible',
+            },
+            {
+                name: 'Current Value',
+                title: (
+                    <>
+                        CURRENT VALUE
+                        <TooltipButton 
+                            type="text" 
+                            size="small"
+                            icon={CIRCLE_INFO_ICON} 
+                            title={CURRENT_VALUE_TIPS}
+                        />
+                    </>
+                ),
+                dataIndex: 'currentValue',
+                width: '50%',
+                editable: true,
+                className: 'drag-visible',
+            }
+        ]
+        const {value, editable = true, draggable = true,} = this.props;
         return (
             <EditableTable 
                 rowKey='id'
-                columns={[
-                    {
-                        title: 'VARIABLE',
-                        dataIndex: 'name',
-                        // width: '22%',
-                        editable: true,
-                        className: 'drag-visible',
-                        placeholder: 'Add a new variable'
-                    },
-                    {
-                        name: 'Initial Value',
-                        title: (
-                            <>
-                                INITIAL VALUE 
-                                <TooltipButton 
-                                    type="text" 
-                                    size="small"
-                                    icon={CIRCLE_INFO_ICON} 
-                                    title={INITIAL_VALUE_TIPS}
-                                />
-                            </>
-                        ),
-                        dataIndex: 'initialValue',
-                        // width: '20%',
-                        editable: true,
-                        className: 'drag-visible',
-                    },
-                    {
-                        name: 'Current Value',
-                        title: (
-                            <>
-                                CURRENT VALUE
-                                <TooltipButton 
-                                    type="text" 
-                                    size="small"
-                                    icon={CIRCLE_INFO_ICON} 
-                                    title={CURRENT_VALUE_TIPS}
-                                />
-                            </>
-                        ),
-                        dataIndex: 'currentValue',
-                        width: '50%',
-                        editable: true,
-                        className: 'drag-visible',
-                    }
-                ]} 
+                draggable={draggable}
+                editable={editable} 
+                columns={columns} 
                 operations = {
                     (dataSource) => [
                         (
@@ -133,37 +136,42 @@ class VariablesTable extends React.Component {
                     ]
                 }
                 cellOperations = {
-                    (record, dataSource) => (
-                        <Dropdown overlay={
-                            <Menu onClick={(e) => this.handleCellOperationSel(e, record, dataSource)}>
-                                <Menu.Item key="persist">
-                                    Persist
-                                </Menu.Item>
-                                <Menu.Item key="reset">
-                                    Reset
-                                </Menu.Item>
-                            </Menu>
-                        } 
-                        overlayStyle={{paddingTop: 10, width: 150}}
-                        placement="bottomRight"
-                        trigger="click">
-                            <TooltipButton 
-                                size="small" 
-                                type="text" 
-                                buttonProps={{style: {height: 10}}} 
-                                title="View more actions" 
-                                label={<EllipsisOutlined />} 
-                                onClick={stopClickPropagation} 
-                            />
-                        </Dropdown>
-                    )
+                    (record, dataSource, col, hideColumns, rowIndex) => {
+                        let renderColumns = columns.filter(item => !hideColumns.includes(item.name));
+                        let lastColumn = renderColumns[renderColumns.length - 1];
+                        return col.dataIndex === lastColumn.dataIndex && rowIndex < dataSource.length ? (
+                        
+                            <Dropdown overlay={
+                                <Menu onClick={(e) => this.handleCellOperationSel(e, record, dataSource)}>
+                                    <Menu.Item key="persist">
+                                        Persist
+                                    </Menu.Item>
+                                    <Menu.Item key="reset">
+                                        Reset
+                                    </Menu.Item>
+                                </Menu>
+                            } 
+                            overlayStyle={{paddingTop: 10, width: 150}}
+                            placement="bottomRight"
+                            trigger="click">
+                                <TooltipButton 
+                                    size="small" 
+                                    type="text" 
+                                    buttonProps={{style: {height: 10}}} 
+                                    title="View more actions" 
+                                    label={<EllipsisOutlined />} 
+                                    onClick={stopClickPropagation} 
+                                />
+                            </Dropdown>
+                        ) : []
+                    } 
                 }
                 dataSource={value}
                 tableProps = {{
-                    scroll: {y: 250},
-                    style: {
-                        maxWidth: 750
-                    }
+                    // scroll: {y: 250},
+                    // style: {
+                    //     maxWidth: 750
+                    // }
                 }}
                 onChange={this.handleVariableChange}
                 onCellBlur={this.handleCellBlur}

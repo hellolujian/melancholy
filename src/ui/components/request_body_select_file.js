@@ -2,7 +2,7 @@ import React from 'react';
 import {Tooltip, Button, Typography, Popover} from 'antd';
 
 const {Link} = Typography;
-class SelectFileButton extends React.Component {
+class RequestBodySelectFile extends React.Component {
 
     constructor(props) {
         super(props);
@@ -50,9 +50,9 @@ class SelectFileButton extends React.Component {
     }
 }
 
-export default SelectFileButton;
+export default RequestBodySelectFile;
 
-SelectFileButton.defaultProps = {
+RequestBodySelectFile.defaultProps = {
     onSelect: () => {},
 }
 

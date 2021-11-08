@@ -45,6 +45,10 @@ class ButtonModal extends React.Component {
         if (this.props.hasOwnProperty('modalVisible')) {
             modalVisible = this.props.modalVisible;
         }
+        if (!tooltipProps && title) {
+            tooltipProps={title: title};
+        }
+        
         return (
             <>
             {

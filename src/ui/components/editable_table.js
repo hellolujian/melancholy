@@ -9,7 +9,7 @@ import arrayMove from 'array-move';
 import RequestMethodSelect from './request_method_select'
 import Ellipsis from 'react-ellipsis-component';
 import TextareaAutosize from 'rc-textarea';
-import SelectFileButton from './select_file_button';
+import RequestBodySelectFile from './request_body_select_file';
 
 // import TextareaAutosize from "react-autosize-textarea"
 
@@ -25,7 +25,7 @@ class EditableTable extends React.Component {
     super(props);
   
     this.state = {
-      dataSource: props.dataSource ? [...props.dataSource] : [],
+      dataSource: props.defaultDataSource ? [...props.defaultDataSource] : [],
       currentEditCell: null,     // 当前处于编辑的单元格
       hideColumns: props.columns.filter(item => item.hide).map(item => item.name),    // 表格隐藏列名称
       tableId: UUID()
@@ -270,7 +270,7 @@ class EditableTable extends React.Component {
             let cellId = this.getCellId(index, col.dataIndex);
             let realCellOperations = []
             if (this.isCurrentRowHover(index) && !this.isCurrentRowEdit(index) ) {
-              let parsedCellOperations = cellOperations(record, realDataSource, col);
+              let parsedCellOperations = cellOperations(record, realDataSource, col, hideColumns, index);
               realCellOperations = Array.isArray(parsedCellOperations) ? [...parsedCellOperations] : [parsedCellOperations];
               if (colIndex === renderColumns.length - 1 && index < realDataSource.length) {
                 realCellOperations.unshift(
@@ -294,7 +294,7 @@ class EditableTable extends React.Component {
                 break;
               case 'file': 
                 cellComponent = (
-                  <SelectFileButton 
+                  <RequestBodySelectFile 
                     value={record.src} 
                     multiple
                     onSelect={(selectedFiles) => this.handleFileSelectd(record, selectedFiles, col.dataIndex)} 

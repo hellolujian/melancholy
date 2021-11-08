@@ -54,6 +54,16 @@ const ENVIRONMENT_TIPS = (
         An environment is a set of variables that allow you to switch the context of your requests. Environments can be shared between multiple workspaces. {ENVIRONMENT_LINK_TIPS}
     </Text>
 )
+
+const GLOBALS_LEARN_MORE_TIPS = (
+    <Link href="https://learning.postman.com/docs/sending-requests/variables/">Learn more about globals</Link>
+)
+
+const GLOBALS_TIPS = (
+    <Text>
+        Global variables for a workspace are a set of variables that are always available within the scope of that workspace. They can be viewed and edited by anyone in that workspace. {GLOBALS_LEARN_MORE_TIPS}
+    </Text>
+)
 const ENVIRONMENT_EXT_TIPS = (
     <Text>
         You can declare a variable in an environment and give it a starting value, then use it in a request by putting the variable name within curly-braces.
@@ -153,5 +163,6 @@ export {
     DOCUMENTATION_DESC_TIPS,
     DOCUMENTATION_DESC_MARKDOWN_TIPS,
     DOCUMENTATION_NAME_TIPS,
-    ENVIRONMENT_EXT_TIPS
+    ENVIRONMENT_EXT_TIPS,
+    GLOBALS_TIPS
 }
