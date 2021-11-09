@@ -184,6 +184,178 @@ function createDevTools() {
   installExtension(REDUX_DEVTOOLS);
 }
 
+const getStoreByKey = (key, fileName = "session_store", defaultValue) => {
+  const Store = require('electron-store')
+  const store = new Store({cwd: 'Custom Storage', name: fileName});
+  let value = store.get(key)
+  return !value && defaultValue ? defaultValue : value; 
+}
+
+const setStoreByKey = (key, value, fileName = "session_store") => {
+  const Store = require('electron-store')
+  const store = new Store({cwd: 'Custom Storage', name: fileName});
+  store.set(key, value)
+}
+
+global.STORE_UTIL = {
+  getValue: getStoreByKey,
+  setValue: setStoreByKey,
+}
+
+const NeDB = require('nedb');
+const db = {};
+const initDatabase = (dbName) => {
+  if (!db[dbName]) {
+      db[dbName] = new NeDB({
+          filename: path.join(__dirname, `databases/${dbName}.db`), 
+          autoload: true,
+          timestampData: true,
+      });
+  }
+  return db[dbName]
+}
+
+const query = (dbName, param) => {
+  const collectionDB = initDatabase(dbName);
+
+  return new Promise((resolve, reject) => {
+      collectionDB.find(param.$not ? param : {...param, $not: { deleted: true,  }}, (err, doc) => {
+          if (err) {
+              console.error(err);
+              reject(err);
+          } else {
+              resolve(doc)
+          }
+      });
+    
+  }) 
+}
+
+const findOne = (dbName, query) => {
+  const collectionDB = initDatabase(dbName);
+
+  return new Promise((resolve, reject) => {
+      collectionDB.findOne(query, (err, doc) => {
+          if (err) {
+              console.error(err);
+              reject(err);
+          } else {
+              resolve(doc)
+          }
+      });
+    
+  }) 
+}
+
+const insert = (dbName, doc) => {
+  const collectionDB = initDatabase(dbName);
+  return new Promise((resolve, reject) => {
+      collectionDB.insert(doc, function (err, newDoc) {   // Callback is optional
+          if (err) {
+              console.error(err);
+              reject(err);
+          } else {
+              resolve(newDoc)
+          }
+      });
+  }) 
+}
+
+const update = (dbName, query, doc, options = {}) => {
+  console.log('=======udpate======');
+  console.log('dbname: %s, ', dbName);
+  console.log(query)
+  console.log(doc)
+  const collectionDB = initDatabase(dbName);
+
+  return new Promise((resolve, reject) => {
+      collectionDB.update(query, doc, options, (err, numAffected, affectedDocuments, upsert) => {
+          if (err) {
+              console.error(err);
+              reject(err);
+          } else {
+              resolve(affectedDocuments)
+          }
+      });
+    
+  }) 
+}
+
+const count = (dbName, query) => {
+  const collectionDB = initDatabase(dbName);
+
+  return new Promise((resolve, reject) => {
+      collectionDB.count({...query, $not: { deleted: true }}, (err, count) => {
+          if (err) {
+              console.error(err);
+              reject(err);
+          } else {
+              resolve(count)
+          }
+      });
+    
+  }) 
+}
+
+const remove = (dbName, query, multi = false) => {
+  const collectionDB = initDatabase(dbName);
+
+  return new Promise((resolve, reject) => {
+      collectionDB.remove(query, { multi: multi }, (err, ret) => {
+          if (err) {
+              console.error(err);
+              reject(err);
+          } else {
+              resolve(ret)
+          }
+      });
+    
+  })
+}
+
+const sort = (dbName, query = {}, order = {}) => {
+  const collectionDB = initDatabase(dbName);
+
+  return new Promise((resolve, reject) => {
+      collectionDB.find(query).sort(order).exec(function (err, docs) {
+          if (err) {
+              console.error(err);
+              reject(err);
+          } else {
+              resolve(docs)
+          }
+      });
+    
+  })
+}
+
+global.DATABASE_UTIL = {
+  query: query,
+  findOne: findOne,
+  insert: insert,
+  update: update,
+  remove: remove,
+  count: count,
+  sort: sort,
+}
+
+// 初始化数据，设置工作空间，如果初次使用创建默认的工作空间
+const initData = async () => {
+
+  let lastWorkspaceId = getStoreByKey('workspaceId');
+  if (!lastWorkspaceId) {
+    let defaultWorkspace = await findOne('workspaceMeta', {isDefault: true});
+    if (!defaultWorkspace) {
+      const { v4: uuidv4 } = require("uuid")
+
+      defaultWorkspace = {id: uuidv4(), name: 'My Workspace', isDefault: true}
+      await insert('workspaceMeta', defaultWorkspace);
+      
+    } 
+    setStoreByKey('workspaceId', defaultWorkspace.id);
+  }
+}
+
 function createWindow() {
     console.log(__dirname );
     // const log = require('electron-log');
@@ -240,7 +412,8 @@ global.LOCAL_SHORTCUT_EVENT = LOCAL_SHORTCUT_EVENT
 // Electron 会在初始化后并准备
 // 创建浏览器窗口时，调用这个函数。
 // 部分 API 在 ready 事件触发后才能使用。
-app.on('ready', () => {
+app.on('ready', async () => {
+  await initData()
   require('@electron/remote/main').initialize();
   createWindow();
   isDev && createDevTools();
@@ -250,6 +423,8 @@ app.on('ready', () => {
       webContents.send(LOCAL_SHORTCUT_EVENT, item)
     });
   })
+
+  
 })
 
 // 当全部窗口关闭时退出。

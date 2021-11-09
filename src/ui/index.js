@@ -15,6 +15,7 @@ import ResponseTab from 'ui/components/response_tab'
 import {Rnd} from 'react-rnd';
 import {ADD_ICON} from 'ui/constants/icons'
 import {publishCollectionModalOpen} from '@/utils/event_utils'
+import {getStoreValue} from '@/utils/store_utils'
 import TextareaAutosize from "react-autosize-textarea"
 import 'ui/style/common.css'
 import 'ui/style/layout.css'
@@ -61,6 +62,7 @@ class Home extends React.Component {
     }
 
     componentDidMount() {
+      // alert('来自渲染页面：' + getStoreValue('workspaceId'))
       this.setState({contentWidth: window.innerWidth - this.state.width})
       window.addEventListener('resize', this.handleWindowResize)
     }
