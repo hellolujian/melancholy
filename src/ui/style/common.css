@@ -26,6 +26,14 @@
   display: none;
 }
 
+.visibility-visible {
+  visibility: visible;
+}
+
+.visibility-hidden {
+  visibility: hidden;
+}
+
 .justify-content-space-between {
   display: flex !important;
   justify-content: space-between !important;

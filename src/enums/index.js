@@ -51,5 +51,5 @@ export const getIconByCode = (code = 'get') => {
     return TEXT_ICON(code.toUpperCase(), {width: code.length * 8});
 }
 
-export const AuthSceneType = Enum.define("AuthSceneType", ["REQUEST", "COLLECTION", "FOLDER"])
+export const AuthSceneType = Enum.define("AuthSceneType", ["REQUEST", "COLLECTION", "FOLDER", "WORKSPACE"])
 export const CommonValueType = Enum.define("CommonValueType", ["GLOBALS", ])

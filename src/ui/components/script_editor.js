@@ -93,6 +93,7 @@ export default ScriptEditor;
 
 ScriptEditor.defaultProps = {
     onChange: () => {},
+    onBlur: () => {},
 }
 
 

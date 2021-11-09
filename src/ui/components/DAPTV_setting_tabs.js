@@ -89,8 +89,8 @@ class DAPTVSettingTabs extends React.Component {
 
     render() {
      
-        const {scene, parentId} = this.props;
-        const { value, activeKey } = this.state;
+        const {value, scene, parentId} = this.props;
+        const { activeKey } = this.state;
         const { description, auth, prerequest, test, variable } = value;
         return (
             <Tabs activeKey={activeKey} defaultActiveKey="description" onChange={this.handleTabChange} style={{height: '100%', position: 'relative'}}>

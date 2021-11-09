@@ -79,7 +79,7 @@ class AuthorizationSetting extends React.Component {
 
     render() {
 
-        const {parentArr = [], auth} = this.state;
+        const {parentArr = [], auth = {}} = this.state;
 
         const {parentId, scene, deleted} = this.props;
         const authorizationTypes = [
