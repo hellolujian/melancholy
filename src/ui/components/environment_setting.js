@@ -11,18 +11,17 @@ class EnvironmentSetting extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-           environments: [
-               {id: "0", name: "No Environment"},
-            ...new Array(5).keys()].map((item, index) => {
-            return {
-                id: index + "", name: index + ""
-            }
-        })
+           environments: []
         }
     }
 
+    refreshData = async () => {
+        let environments = await queryEnvironmentMeta();
+        this.setState({ environments: environments });
+    }
+
     componentDidMount() {
-      
+        this.refreshData()
     }
 
     handleEnvironmentModalVisible = (visible) => {
@@ -36,7 +35,7 @@ class EnvironmentSetting extends React.Component {
         return (
             <Space style={{marginLeft: 20}}>
             <Select 
-                defaultValue={0} 
+                // defaultValue={0} 
                 allowClear 
                 showSearch 
                 placeholder="Type to filter"
@@ -67,6 +66,7 @@ class EnvironmentSetting extends React.Component {
 
             <EnvironmentModal 
                 visible={environmentModalVisible} 
+                onSave={this.refreshData}
                 onVisibleChange={this.handleEnvironmentModalVisible}
             />
             </Space>

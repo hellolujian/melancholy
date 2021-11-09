@@ -23,6 +23,7 @@ import {UUID, compareObjectIgnoreEmpty} from '@/utils/global_utils'
 import VariablesTable from './variables_table';
 import ButtonModal from './button_modal'
 import CommonSelectFile from './common_select_file'
+import {queryWorkspaceMetaById, updateWorkspaceMeta} from '@/database/workspace_meta'
 
 import {CommonValueType} from '@/enums'
 import 'ui/style/environment_modal.css'
@@ -44,6 +45,7 @@ class EnvironmentModal extends React.Component {
     refreshData = async (extra) => {
         let environments = await queryEnvironmentMeta();
         this.setState({ environments: environments || [] , ...extra});
+        
     }
 
     componentDidMount = async () => {
@@ -77,6 +79,7 @@ class EnvironmentModal extends React.Component {
             )
         }
         await this.refreshData({scene: 'view'})
+        this.props.onSave()
     }
 
     handleAddClick = () => {
@@ -98,7 +101,8 @@ class EnvironmentModal extends React.Component {
 
     handleSaveClick = async () => {
         const {variable} = this.state;
-        await updateCommonMeta({type: CommonValueType.GLOBALS.name()}, {type: CommonValueType.GLOBALS.name(), value: variable}, {upsert: true})
+        // TODO: 当前全局变量
+        await updateWorkspaceMeta('e924772d-db3e-45b9-bec7-cf37e159c5c8', {$set: {variable: variable}})
         this.setState({scene: 'view', variable: []})
     }
 
@@ -107,8 +111,10 @@ class EnvironmentModal extends React.Component {
     }
 
     handleGlobalClick = async () => {
-        let globalVariable = await queryCommonMetaByType( CommonValueType.GLOBALS.name()) || {}
-        this.setState({scene: 'global', variable: globalVariable.value, globalVariableChange: false})
+        // TODO: 当前的workspace
+        let currentWorkspace = await queryWorkspaceMetaById('e924772d-db3e-45b9-bec7-cf37e159c5c8') || {};
+        let {variable = []} = currentWorkspace;
+        this.setState({scene: 'global', variable: variable, globalVariableChange: false})
     }
 
     handleDuplicateClick = async (item) => {
@@ -119,12 +125,14 @@ class EnvironmentModal extends React.Component {
             variable: variable,
         })
         await this.refreshData();
+        this.props.onSave()
     } 
 
     handleMoreActionClick = async (key, item) => {
         const {id} = item;
         await updateEnvironmentMeta(id, {$set: {deleted: true}})
         await this.refreshData();
+        this.props.onSave()
     }
 
     handleVariableChange = (value) => {
