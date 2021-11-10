@@ -4,12 +4,14 @@ import TooltipButton from 'ui/components/tooltip_button'
 import { UserOutlined, AppstoreFilled , PlusOutlined, CaretDownFilled, } from '@ant-design/icons';
 
 import {stopClickPropagation} from '@/utils/global_utils';
+import {getCurrentWorkspaceId, setStoreValue} from '@/utils/store_utils';
 import RequiredInput from './required_input'
 import RenameInput from './rename_input'
 import WorkspaceModal from './workspace_modal'
 import Ellipsis from 'react-ellipsis-component';
 import {ELLIPSIS_ICON, GOU_ICON} from '@/ui/constants/icons'
 import {queryWorkspaceMeta, updateWorkspaceMeta} from '@/database/workspace_meta'
+import {OptType} from '@/enums'
 import 'ui/style/workspace_card.css'
 const { TabPane } = Tabs;
 class WorkspaceCard extends React.Component {
@@ -18,7 +20,6 @@ class WorkspaceCard extends React.Component {
         super(props);
         this.state = {
             workspaceList: [],
-            workspaceId: 2
         }
     }
 
@@ -27,10 +28,9 @@ class WorkspaceCard extends React.Component {
         this.setState({workspaceList: workspaceList, ...extend});
     }
 
-    componentDidMount() {
-
-        this.refreshData()
-      
+    componentDidMount = async () => {
+        let currentWorkspaceId = await getCurrentWorkspaceId()
+        this.refreshData({currentWorkspaceId: currentWorkspaceId})
     }
 
     deleteWorkspace = async (target) => {
@@ -62,9 +62,13 @@ class WorkspaceCard extends React.Component {
     }
 
     handleSwitchWorkspace = (id) => {
-    
-        console.log(id+ "sdfsdf")
-        this.setState({workspaceId: id})
+        let oldWorkspaceId = this.state.currentWorkspaceId;
+        if (oldWorkspaceId === id) {
+            return;
+        }
+        setStoreValue('workspaceId', id);
+        // this.setState({currentWorkspaceId: id})
+        window.location.reload()
     }
 
     handleModalVisibleChange = (visible) => {
@@ -76,10 +80,20 @@ class WorkspaceCard extends React.Component {
         this.refreshData({editingId: null});
     }
 
+    handleWorkspaceSave = async (data, optType) => {
+        if (OptType.ADD.name() === optType) {
+            this.handleSwitchWorkspace(data.id);
+        } else {
+            await this.refreshData();
+        }
+        
+    }
+
     render() {
      
         
-        const {workspaceList, editingId, modalVisible, workspaceId, workspaceInfo} = this.state;
+        const {workspaceList, editingId, modalVisible, currentWorkspaceId, workspaceInfo} = this.state;
+        let currentWorkspace = workspaceList.find(workspace => workspace.id === currentWorkspaceId) || {}
         return (
             <>
             
@@ -115,7 +129,7 @@ class WorkspaceCard extends React.Component {
 
                                         <Row align="middle" gutter={[6]} style={{flexFlow: 'row nowrap'}} className="full-width">
                                 
-                                            <Col flex="none" className={workspaceId === item.id ? "visibility-visible" : "visibility-hidden"}>
+                                            <Col flex="none" className={currentWorkspaceId === item.id ? "visibility-visible" : "visibility-hidden"}>
                                                 {GOU_ICON}
                                             </Col>
                                             <Col flex="auto">
@@ -138,7 +152,7 @@ class WorkspaceCard extends React.Component {
                                                     <Menu onClick={({key, domEvent}) => this.handleWorkspaceItemMenuClick(key, item, domEvent)}>
                                                         {
                                                             this.menus.map(menu => (
-                                                                <Menu.Item key={menu.key}>
+                                                                <Menu.Item key={menu.key} disabled={item.isDefault && menu.key === 'delete'}>
                                                                     {menu.label}
                                                                 </Menu.Item>
                                                             ))
@@ -171,7 +185,9 @@ class WorkspaceCard extends React.Component {
                     </Tabs>
                 )}
             >
-                <Button type="text" style={{color: 'white'}} icon={<AppstoreFilled />}>My Workspace <CaretDownFilled /></Button>
+                <Button type="text" style={{color: 'white'}} icon={<AppstoreFilled />}>
+                    {currentWorkspace.name} <CaretDownFilled />
+                </Button>
             </Popover>
 
             {
@@ -179,7 +195,7 @@ class WorkspaceCard extends React.Component {
                     <WorkspaceModal 
                         visible={modalVisible} 
                         initialValues={workspaceInfo}
-                        onSave={this.refreshData}
+                        onSave={this.handleWorkspaceSave}
                         onVisibleChange={this.handleModalVisibleChange} 
                     />
                 )

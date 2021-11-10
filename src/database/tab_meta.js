@@ -1,5 +1,6 @@
 
 import {query, update, insert, findOne, remove, sort} from '@/database/database'
+import {currentWorkspaceIdQuery} from '@/utils/store_utils'
 
 const TAB_META = 'tabMeta';
 
@@ -8,7 +9,8 @@ export const queryTabMetaById = async (id) => {
 }
 
 export const insertTabMeta = async (doc) => {
-    return await insert(TAB_META, doc)
+    let workspaceIdQuery = await currentWorkspaceIdQuery();
+    return await insert(TAB_META, {...workspaceIdQuery, ...doc})
 }
 
 export const updateTabMeta = (id, doc) => {
@@ -19,8 +21,9 @@ export const multiUpdateTabMeta = async (param, doc) => {
     return await update(TAB_META, param, doc, {multi: true})
 }
 
-export const queryTabMeta = (param = {}) => {
-    return query(TAB_META, param);
+export const queryTabMeta = async (param = {}) => {
+    let workspaceIdQuery = await currentWorkspaceIdQuery();
+    return query(TAB_META, {...workspaceIdQuery, ...param});
 }
 
 export const removeTabMetaById = (id) => {
@@ -31,6 +34,7 @@ export const multiRemove = (query) => {
     return remove(TAB_META, query, true)
 }
 
-export const querySortedTab = (param, order) => {
-    return sort(TAB_META, param, order)
+export const querySortedTab = async (param, order) => {
+    let workspaceIdQuery = await currentWorkspaceIdQuery();
+    return sort(TAB_META, {...workspaceIdQuery, ...param}, order)
 }

@@ -1,6 +1,8 @@
 
 import {query, update, insert, findOne} from '@/database/database'
 
+import {currentWorkspaceIdQuery} from '@/utils/store_utils'
+
 const COLLECTION_META = 'collectionMeta';
 
 export const queryCollectionMetaById = async (id) => {
@@ -8,7 +10,9 @@ export const queryCollectionMetaById = async (id) => {
 }
 
 export const insertCollectionMeta = async (doc) => {
-    return await insert(COLLECTION_META, doc)
+    
+    let workspaceIdQuery = await currentWorkspaceIdQuery();
+    return await insert(COLLECTION_META, {...workspaceIdQuery, ...doc})
 }
 
 export const updateCollectionMeta = (id, doc) => {

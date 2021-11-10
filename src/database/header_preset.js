@@ -1,5 +1,6 @@
 
 import {update, insert, findOne, query} from '@/database/database'
+import {currentWorkspaceIdQuery} from '@/utils/store_utils'
 
 const HEADER_PRESET = 'headerPreset';
 
@@ -8,7 +9,8 @@ export const queryHeaderPresetById = async (id) => {
 }
 
 export const insertHeaderPreset = async (doc) => {
-    return await insert(HEADER_PRESET, doc)
+    let workspaceIdQuery = await currentWorkspaceIdQuery();
+    return await insert(HEADER_PRESET, {...workspaceIdQuery, ...doc})
 }
 
 export const updateHeaderPreset = (id, doc) => {
@@ -20,5 +22,6 @@ export const multiUpdateHeaderPreset = async (param, doc) => {
 }
 
 export const queryHeaderPreset = async (param = {}) => {
-    return await query(HEADER_PRESET, param);
+    let workspaceIdQuery = await currentWorkspaceIdQuery();
+    return await query(HEADER_PRESET, {...workspaceIdQuery, ...param});
 }

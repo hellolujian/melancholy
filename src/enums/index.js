@@ -53,3 +53,5 @@ export const getIconByCode = (code = 'get') => {
 
 export const AuthSceneType = Enum.define("AuthSceneType", ["REQUEST", "COLLECTION", "FOLDER", "WORKSPACE"])
 export const CommonValueType = Enum.define("CommonValueType", ["GLOBALS", ])
+
+export const OptType = Enum.define("OptType", ["ADD", "DEL", "UPDATE"])

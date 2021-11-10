@@ -1,5 +1,6 @@
 
 import {update, insert, findOne, query, count} from '@/database/database'
+import {currentWorkspaceIdQuery} from '@/utils/store_utils'
 
 const REQUEST_META = 'requestMeta';
 
@@ -8,7 +9,8 @@ export const queryRequestMetaById = async (id) => {
 }
 
 export const insertRequestMeta = async (doc) => {
-    return await insert(REQUEST_META, doc)
+    let workspaceIdQuery = await currentWorkspaceIdQuery();
+    return await insert(REQUEST_META, {...workspaceIdQuery, ...doc})
 }
 
 export const updateRequestMeta = (id, doc) => {

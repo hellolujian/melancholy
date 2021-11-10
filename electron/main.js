@@ -340,21 +340,26 @@ global.DATABASE_UTIL = {
 }
 
 // 初始化数据，设置工作空间，如果初次使用创建默认的工作空间
-const initData = async () => {
+const initWorkspace = async () => {
 
   let lastWorkspaceId = getStoreByKey('workspaceId');
-  if (!lastWorkspaceId) {
-    let defaultWorkspace = await findOne('workspaceMeta', {isDefault: true});
-    if (!defaultWorkspace) {
-      const { v4: uuidv4 } = require("uuid")
-
-      defaultWorkspace = {id: uuidv4(), name: 'My Workspace', isDefault: true}
-      await insert('workspaceMeta', defaultWorkspace);
-      
-    } 
-    setStoreByKey('workspaceId', defaultWorkspace.id);
+  if (lastWorkspaceId) {
+    let targetWorkspace = await findOne('workspaceMeta', {id: lastWorkspaceId});
+    if (targetWorkspace) {
+      return targetWorkspace;
+    }
   }
+  let defaultWorkspace = await findOne('workspaceMeta', {isDefault: true});
+  if (!defaultWorkspace) {
+    const { v4: uuidv4 } = require("uuid")
+    defaultWorkspace = {id: uuidv4(), name: 'My Workspace', isDefault: true}
+    await insert('workspaceMeta', defaultWorkspace);
+  } 
+  setStoreByKey('workspaceId', defaultWorkspace.id);
+  return defaultWorkspace;
 }
+
+global.CURRENT_WORKSPACE = initWorkspace
 
 function createWindow() {
     console.log(__dirname );
@@ -413,7 +418,7 @@ global.LOCAL_SHORTCUT_EVENT = LOCAL_SHORTCUT_EVENT
 // 创建浏览器窗口时，调用这个函数。
 // 部分 API 在 ready 事件触发后才能使用。
 app.on('ready', async () => {
-  await initData()
+  await initWorkspace()
   require('@electron/remote/main').initialize();
   createWindow();
   isDev && createDevTools();

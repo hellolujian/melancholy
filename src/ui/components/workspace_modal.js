@@ -6,6 +6,7 @@ import DAPTVSettingTabs from './DAPTV_setting_tabs'
 import {TabIconType, TabType, AuthSceneType} from '@/enums'
 import {insertWorkspaceMeta, updateWorkspaceMeta} from '@/database/workspace_meta'
 import {UUID} from '@/utils/global_utils'
+import {OptType} from '@/enums'
 class WorkspaceModal extends React.Component {
 
     formRef = React.createRef();
@@ -53,7 +54,7 @@ class WorkspaceModal extends React.Component {
             await insertWorkspaceMeta(data)
         }
         this.handleModalCancel();
-        this.props.onSave();
+        this.props.onSave(data, id ? OptType.UPDATE.name() : OptType.ADD.name());
     }
 
     handleDAPTVSettingChange = (value) => {
