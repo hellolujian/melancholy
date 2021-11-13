@@ -4,6 +4,7 @@ import { EyeOutlined, SettingFilled  } from '@ant-design/icons';
 import EnvironmentDetailCard from './environment_detail_card'
 import EnvironmentModal from './environment_modal'
 import {queryEnvironmentMeta} from '@/database/environment_meta'
+import {getCurrentWorkspaceId, getStoreValue, setStoreValue, getCurrentWorkspaceSession, setCurrentWorkspaceSession} from '@/utils/store_utils';
 
 const { Option } = Select;
 class EnvironmentSetting extends React.Component {
@@ -15,22 +16,30 @@ class EnvironmentSetting extends React.Component {
         }
     }
 
-    refreshData = async () => {
+    refreshData = async (extra = {}) => {
         let environments = await queryEnvironmentMeta();
-        this.setState({ environments: environments });
+        this.setState({ environments: environments, ...extra });
+        return environments;
     }
 
-    componentDidMount() {
-        this.refreshData()
+    componentDidMount = async () => {
+        let workspaceSession = await getCurrentWorkspaceSession();
+        this.refreshData({currentEnvironment: workspaceSession.environmentId})
     }
 
     handleEnvironmentModalVisible = (visible) => {
         this.setState({environmentModalVisible: visible});
     }
 
+    handleEnvironmentChange = (value) => {
+        this.setState({currentEnvironment: value});
+        setCurrentWorkspaceSession({environmentId: value});
+    }
+
     render() {
     
-        const {environments, environmentModalVisible} = this.state;
+        const {environments = [], environmentModalVisible, currentEnvironment = ''} = this.state;
+        
        
         return (
             <Space style={{marginLeft: 20}}>
@@ -38,18 +47,19 @@ class EnvironmentSetting extends React.Component {
                 // defaultValue={0} 
                 allowClear 
                 showSearch 
+                value={currentEnvironment}
+                onChange={this.handleEnvironmentChange}
                 placeholder="Type to filter"
                 style={{ width: 200 }}
                 optionFilterProp="label"
                 filterOption={(input, option) => {
-                    console.log(option)
-                    return option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                    return option.value && option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0
                 }
                     
                 }
-                options={environments.map(item => {return {label: item.name, value: item.id}})}
+                options={[{label: 'No Environment', value: ''}, ...environments.map(item => {return {label: item.name, value: item.id}})]}
                 filterSort={(optionA, optionB) =>
-                    optionA.label.toLowerCase().localeCompare(optionB.children.toLowerCase())
+                    optionA.label.toLowerCase().localeCompare(optionB.label.toLowerCase())
                 }
                 >
                     {/* {

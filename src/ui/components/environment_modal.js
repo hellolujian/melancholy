@@ -24,6 +24,7 @@ import VariablesTable from './variables_table';
 import ButtonModal from './button_modal'
 import CommonSelectFile from './common_select_file'
 import {queryWorkspaceMetaById, updateWorkspaceMeta} from '@/database/workspace_meta'
+import {getCurrentWorkspaceId, getCurrentWorkspace} from '@/utils/store_utils';
 
 import {CommonValueType} from '@/enums'
 import 'ui/style/environment_modal.css'
@@ -101,8 +102,8 @@ class EnvironmentModal extends React.Component {
 
     handleSaveClick = async () => {
         const {variable} = this.state;
-        // TODO: 当前全局变量
-        await updateWorkspaceMeta('e924772d-db3e-45b9-bec7-cf37e159c5c8', {$set: {variable: variable}})
+        let currentWorkspaceId = await getCurrentWorkspaceId();
+        await updateWorkspaceMeta(currentWorkspaceId, {$set: {variable: variable}})
         this.setState({scene: 'view', variable: []})
     }
 
@@ -111,8 +112,7 @@ class EnvironmentModal extends React.Component {
     }
 
     handleGlobalClick = async () => {
-        // TODO: 当前的workspace
-        let currentWorkspace = await queryWorkspaceMetaById('e924772d-db3e-45b9-bec7-cf37e159c5c8') || {};
+        let currentWorkspace = await getCurrentWorkspace();
         let {variable = []} = currentWorkspace;
         this.setState({scene: 'global', variable: variable, globalVariableChange: false})
     }

@@ -11,6 +11,11 @@ const setStoreValue = (key, value) => {
     return setValue(key, value)
 }
 
+const getCurrentWorkspace = async () => {
+    let currentWorkspaceInfo = await currentWorkspace();
+    return currentWorkspaceInfo;
+}
+
 const getCurrentWorkspaceId = async () => {
     let currentWorkspaceInfo = await currentWorkspace();
     return currentWorkspaceInfo.id;
@@ -23,6 +28,25 @@ const currentWorkspaceIdQuery = async () => {
     }
 }
 
+const getCurrentWorkspaceSession = async () => {
+    let workspaceSessionArr = getStoreValue('workspaceSession') || [];
+    let currentWorkspaceId = await getCurrentWorkspaceId();
+    let currentWorkspace = workspaceSessionArr.find(workspace => workspace.workspaceId === currentWorkspaceId) || {};
+    return currentWorkspace;
+}
+
+const setCurrentWorkspaceSession = async (updateObj) => {
+
+    let workspaceSessionArr = getStoreValue('workspaceSession') || [];
+    let currentWorkspaceId = await getCurrentWorkspaceId();
+    let currentWorkspace = workspaceSessionArr.find(workspace => workspace.workspaceId === currentWorkspaceId) || {workspaceId: currentWorkspaceId};
+    currentWorkspace = {...currentWorkspace, ...updateObj}
+    let newArr = workspaceSessionArr.filter(workspace => workspace.workspaceId !== currentWorkspaceId);
+    newArr.unshift(currentWorkspace);
+    setStoreValue('workspaceSession', newArr);
+}
+
 export { 
-    getStoreValue, setStoreValue, getCurrentWorkspaceId, currentWorkspaceIdQuery
+    getStoreValue, setStoreValue, getCurrentWorkspaceId, currentWorkspaceIdQuery, 
+    getCurrentWorkspaceSession, setCurrentWorkspaceSession, getCurrentWorkspace
 }

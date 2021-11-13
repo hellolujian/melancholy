@@ -76,9 +76,7 @@ class EditableTable extends React.Component {
 
   // 可编辑单元格聚焦
   handleEditCellInputFocus = (cellId) => {
-    this.setState({currentHoverCell: cellId, currentEditCell: cellId}, () => {
-      // document.getElementById(cellId).style.width = 'calc(100% - 1px) !important'
-    });
+    this.setState({currentHoverCell: cellId, currentEditCell: cellId});
   }
 
   handleEditCellInputBlur = (record, dataIndex, cellId) => {
@@ -147,6 +145,7 @@ class EditableTable extends React.Component {
     }
     this.setState({dataSource: dataSource}, () => {
       document.getElementById(cellId).focus()
+      document.getElementById(cellId).setSelectionRange(value.length, value.length);
     })
     this.props.onChange(dataSource, false);
   }
@@ -303,34 +302,21 @@ class EditableTable extends React.Component {
                 )
                 break;
               default: 
-                cellComponent = this.isCurrentCellEdit(cellId) ? (
-                  <Input.TextArea
-                    className={"cell-textarea cell-textarea-edit"}
-                    style={{zIndex: 9}}
-                    id={cellId} 
-                    value={text}
-                    autoSize={true}
-                    // autoFocus={true}
-                    bordered={false}
-                    placeholder={index === realDataSource.length ? col.placeholder : ''} 
-                    onPressEnter={this.handleSave}
-                    onFocus={() => this.handleEditCellInputFocus(cellId)} 
-                    onBlur={() => this.handleEditCellInputBlur(record, col.dataIndex, cellId)} 
-                    onChange={(e) => this.handleCellInputChange(record, col.dataIndex, e.target.value, cellId)}
-                  />
-                ) : (
-                  <Input.TextArea
-                    className={"cell-textarea cell-textarea-not-edit" + (index < realDataSource.length ? ' text-over-ellipsis' : '')}
-                    style={{zIndex: 1}}
-                    id={cellId} 
-                    value={text}
-                    bordered={false}
-                    autoSize={{minRows: 1, maxRows: 1}}
-                    onFocus={() => this.handleEditCellInputFocus(cellId)} 
-                    rows={1}
-                    placeholder={index === realDataSource.length ? col.placeholder : ''} 
-                  />
-                )
+                let editing = this.isCurrentCellEdit(cellId)
+                cellComponent = <Input.TextArea
+                className={"cell-textarea " + (editing ? "cell-textarea-edit" : "cell-textarea-not-edit" + (index < realDataSource.length ? ' text-over-ellipsis' : ''))}
+                style={{zIndex: editing ? 9 : 1}}
+                id={cellId} 
+                value={text}
+                autoSize={editing ? true : {minRows: 1, maxRows: 1}}
+                // autoFocus={true}
+                bordered={false}
+                placeholder={index === realDataSource.length ? col.placeholder : ''} 
+                onPressEnter={this.handleSave}
+                onFocus={() => this.handleEditCellInputFocus(cellId)} 
+                onBlur={() => this.handleEditCellInputBlur(record, col.dataIndex, cellId)} 
+                onChange={(e) => this.handleCellInputChange(record, col.dataIndex, e.target.value, cellId)}
+              />
                 break
             }
             return (
