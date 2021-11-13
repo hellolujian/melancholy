@@ -1,5 +1,5 @@
 import React from 'react';
-import { Tabs, Typography, Space, Menu, Dropdown, Popover, Modal  } from 'antd';
+import { Tabs, Typography, Space, Menu, Dropdown, Popover, Modal, Empty  } from 'antd';
 import { ExclamationCircleOutlined , CaretRightOutlined, PlusOutlined, CaretDownFilled, PlusSquareFilled,SyncOutlined,
   ReadOutlined, SearchOutlined,EllipsisOutlined,
                     SettingFilled,NotificationFilled , EnvironmentFilled ,FolderViewOutlined ,DatabaseOutlined  , PullRequestOutlined  } from '@ant-design/icons';
@@ -796,20 +796,35 @@ class DraggableTabs extends React.Component {
             }
           </Tabs>
         </DndProvider>
+
+        {
+          tabData.length === 0 ? (
+            <Empty style={{height: 'calc(100% - 35px)'}} className="flex-direction-column vertical-center horizontal-center" 
+              description={
+                <Typography.Title type="secondary" level={5}>
+                  Hit Ctrl + T to open a new request or select a new request from the sidebar
+                </Typography.Title>
+              }
+            />
+          ) : (
+            <div style={{height: 'calc(100% - 35px)',  overflowY: 'scroll', overflowX: 'hidden', paddingBottom: 20}} className="request-tab-content">
+              {
+                requestInfo && (
+                  <RequestTabContent 
+                    value={requestInfo} 
+                    onSave={this.handleRequestTabContentSave}
+                    onSaveClick={this.handleSaveClick}
+                    onChange={this.handleRequestTabContentChange}
+                  />
+                )
+              }
+              {/* <div style={{height: 900}}></div> */}
+            </div>
+            
+          )
+        }
         
-        <div style={{height: 'calc(100% - 35px)',  overflowY: 'scroll', overflowX: 'hidden', paddingBottom: 20}} className="request-tab-content">
-          {
-            requestInfo && (
-              <RequestTabContent 
-                value={requestInfo} 
-                onSave={this.handleRequestTabContentSave}
-                onSaveClick={this.handleSaveClick}
-                onChange={this.handleRequestTabContentChange}
-              />
-            )
-          }
-          <div style={{height: 900}}></div>
-        </div>
+        
         
         
       </>

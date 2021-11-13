@@ -70,7 +70,10 @@ class EnvironmentSetting extends React.Component {
                 
             </Select>
 
-            <EnvironmentDetailCard />
+            <EnvironmentDetailCard 
+                currentEnvironmentId={currentEnvironment}
+                onSave={this.refreshData}
+            />
             
             <Button icon={<SettingFilled  />} onClick={() => this.handleEnvironmentModalVisible(true)} />
 

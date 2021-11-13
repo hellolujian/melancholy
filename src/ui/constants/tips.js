@@ -46,9 +46,19 @@ const TESTS_TIPS = (
 const ENVIRONMENT_TEXT_TIPS = (
     <Text>An environment is a set of variables that allow you to switch the context of your requests.</Text>
 )
-const ENVIRONMENT_LINK_TIPS = (
-    <Link>Learn more about environments</Link>
+
+const GLOBAL_TEXT_TIPS = (
+    <Text>Global variables are a set of variables that are always available in a workspace.</Text>
 )
+
+const ENVIRONMENT_LINK_TIPS = (
+    <Link href="https://learning.postman.com/docs/sending-requests/managing-environments/">Learn more about environments</Link>
+)
+
+const GLOBAL_LINK_TIPS = (
+    <Link href="https://learning.postman.com/docs/sending-requests/variables/">Learn more about globals</Link>
+)
+
 const ENVIRONMENT_TIPS = (
     <Text>
         An environment is a set of variables that allow you to switch the context of your requests. Environments can be shared between multiple workspaces. {ENVIRONMENT_LINK_TIPS}
@@ -72,6 +82,14 @@ const ENVIRONMENT_EXT_TIPS = (
 
 const NO_ENVIRONMENT_VARIABLES_TIPS = (
     <Text strong>No Environment variables</Text>
+)
+
+const NO_ENVIRONMENT_TIPS = (
+    <Text strong>No active variables</Text>
+)
+
+const NO_GLOBAL_VARIABLES_TIPS = (
+    <Text strong>No global variables</Text>
 )
 
 const COOKIE_LEARN_MORE_TIPS = (
@@ -164,5 +182,10 @@ export {
     DOCUMENTATION_DESC_MARKDOWN_TIPS,
     DOCUMENTATION_NAME_TIPS,
     ENVIRONMENT_EXT_TIPS,
-    GLOBALS_TIPS
+    GLOBALS_TIPS,
+    NO_ENVIRONMENT_TIPS,
+    NO_GLOBAL_VARIABLES_TIPS,
+    GLOBAL_TEXT_TIPS,
+    GLOBAL_LINK_TIPS
+
 }

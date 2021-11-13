@@ -3,6 +3,11 @@
   align-items: center;
 }
 
+.flex-direction-column {
+  display: flex;
+  flex-direction: column;
+}
+
 .vertical-end {
   display: flex;
   align-items: flex-end;

@@ -39,7 +39,7 @@ class EnvironmentModal extends React.Component {
         super(props);
         this.state = {
             environments: [],
-            scene: 'view'
+            scene: props.view || 'view'
         }
     }
 
@@ -47,6 +47,13 @@ class EnvironmentModal extends React.Component {
         let environments = await queryEnvironmentMeta();
         this.setState({ environments: environments || [] , ...extra});
         
+    }
+
+    componentWillReceiveProps(nextProps) {
+        const {scene} = nextProps;
+        if (scene) {
+            this.setState({scene: scene});
+        }
     }
 
     componentDidMount = async () => {
@@ -88,7 +95,7 @@ class EnvironmentModal extends React.Component {
         if (scene === 'add') {
             this.formRef.current.submit()  
         } else {
-            this.setState({scene: 'add', editValues: {}})
+            this.setState({scene: 'add', editValues: {}, variable: []})
         }
     }
 
@@ -462,6 +469,7 @@ export default EnvironmentModal;
 
 EnvironmentModal.defaultProps = {
     onVisibleChange: () => {},
+    onSave: () => {},
 }
 
 
