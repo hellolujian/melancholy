@@ -1,5 +1,5 @@
 import React from 'react';
-import {Space, Button, Input, Row, Col, Typography, Collapse } from 'antd';
+import {Space, Button, Input, Row, Col, Typography, Collapse, Empty } from 'antd';
 
 import ButtonModal from './button_modal'
 
@@ -12,82 +12,56 @@ import {
 } from 'ui/constants/tips'
 
 import {stopClickPropagation} from '@/utils/global_utils';
+import {updateDomainMeta, queryDomainMetaById, insertDomainMeta, queryDomainMeta} from '@/database/domain_meta'
 
+import {UUID} from '@/utils/global_utils'
 const { Panel } = Collapse;
 class CookiesModal extends React.Component {
 
     constructor(props) {
         super(props);
         this.state = {
-           domains: [
-               {
-                   id: '1',
-                   name: 'domain1',
-                   cookies: [
-                    {
-                        id: '1-1',
-                        key: 'cookie_1',
-                        value: 'sdfsdfsdf'
-
-                    },
-                    {
-                        id: '1-2',
-                        key: 'cookie_2',
-                        value: 'sdfsdfsdf'
-
-                    },
-                   ]
-               },
-               {
-                   id: '2',
-                   name: 'domain2',
-                   cookies: [
-                    {
-                        id: '2-1',
-                        key: 'cookie_21',
-                        value: 'sdfsdfsdf'
-
-                    },
-                    {
-                        id: '2-2',
-                        key: 'cookie_22',
-                        value: 'sdfsdfsdf'
-
-                    },
-                   ]
-               }
-           ],
+           domains: [],
         }
     }
 
-    componentDidMount() {
-      
+    refreshData = async (extra = {}) => {
+        let domains = await queryDomainMeta();
+        this.setState({domains: domains, ...extra});
     }
 
-    handleAddDomain = () => {
-        const {domains} = this.state;
-        let suffix = domains.length + 1;
-        domains.push({
-            id: suffix + "",
-            name: 'domain_' + suffix,
-            cookies: []
-        })
+    componentDidMount() {
+        this.refreshData();
+    }
 
-        this.setState({domains: domains, activeKey: suffix + ""})
+    handleAddDomain = async () => {
+        const {domainName} = this.state;
+        if (domainName && domainName.trim()) {
+            await insertDomainMeta({
+                id: UUID(),
+                name: domainName
+            })
+            this.refreshData({domainName: ''});
+        }
     }
 
     handleDomainNameChange = (e) => {
-        this.setState({cookieName: e.target.value})
+        this.setState({domainName: e.target.value})
     }
 
-    handleCloseDomain = (e, id) => {
+    handleCloseDomain = async (e, id) => {
         stopClickPropagation(e)
-        const {domains} = this.state;
-        this.setState({domains: domains.filter(domain => domain.id !== id)})
+        await updateDomainMeta(id, {$set: {deleted: true }});
+        this.refreshData()
     }
 
     handleCollapseChange = (key) => {
         this.setState({activeKey: key})
+    }
+
+    handleSaveCookieItem = async (value, domainId) => {
+        await updateDomainMeta(domainId, {$set: {cookies: value}})
+        this.refreshData();
     }
 
     render() {
@@ -95,7 +69,7 @@ class CookiesModal extends React.Component {
         let {domainName, domains, activeKey} = this.state;
         return (
             <ButtonModal  
-                    buttonLabel="Cookies"
+                    label="Cookies"
                     // modalVisible={true}
                     buttonProps={{
                         type: 'link'
@@ -114,7 +88,13 @@ class CookiesModal extends React.Component {
                     modalContent={
                         <>
                             <Row gutter={[16, 16]}>
-                                <Col flex='auto'><Input placeholder="Type a domain name" value={domainName} onChange={this.handleDomainNameChange} /></Col>
+                                <Col flex='auto'>
+                                    <Input 
+                                        placeholder="Type a domain name" 
+                                        value={domainName} 
+                                        onChange={this.handleDomainNameChange} 
+                                    />
+                                </Col>
                                 <Col flex='none'>
                                     <TooltipButton 
                                         label="Add" 
@@ -133,19 +113,32 @@ class CookiesModal extends React.Component {
                                 expandIcon={() => null}
                                 >
                                     {
-                                        domains.map(domain => (
-                                            <Panel header={(
-                                                <Space size="large">
-                                                    <Typography.Text strong>{domain.name}</Typography.Text>
-                                                    <Typography.Text>{domain.cookies.length} cookies</Typography.Text>
-                                                </Space>
-                                                
-                                            )} 
-                                            key={domain.id} 
-                                            extra={<Icon component={() => CLOSE_SVG} onClick={(e) => this.handleCloseDomain(e, domain.id)}/>}>
-                                                <CookieItem cookies={domain.cookies} />
-                                            </Panel>
-                                        ))
+                                        domains.map(domain => {
+                                            let {id, name, cookies = []} = domain;
+                                            return (
+                                                <Panel 
+                                                    header={(
+                                                        <Space size="large">
+                                                            <Typography.Text strong>{name}</Typography.Text>
+                                                            <Typography.Text>
+                                                                {cookies.length} {cookies.length === 1 ? 'cookie' : 'cookies'}
+                                                            </Typography.Text>
+                                                        </Space>
+                                                    )} 
+                                                    key={id} 
+                                                    extra={
+                                                        <Icon 
+                                                            component={() => CLOSE_SVG} 
+                                                            onClick={(e) => this.handleCloseDomain(e, id)}
+                                                        />}>
+                                                    <CookieItem 
+                                                        cookies={cookies} 
+                                                        domainName={name}
+                                                        onSave={(value) => this.handleSaveCookieItem(value, id)}
+                                                    />
+                                                </Panel>
+                                            )
+                                        })
                                     }
                                 
                             </Collapse>

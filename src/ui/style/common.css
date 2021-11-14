@@ -95,8 +95,16 @@
   margin: 10px
 }
 
-.light-gray-clas {
+.light-gray-class {
   color: lightgray
+}
+
+.gray-class {
+  color: red
+}
+
+.background-lightgray-clas {
+  background-color: lightgray
 }
 
 .remove-table-border .ant-table-tbody > tr:last-child > td{

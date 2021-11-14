@@ -17,12 +17,6 @@ class ButtonModal extends React.Component {
     }
 
     componentWillReceiveProps (nextProps) {
-        const { modalVisible: newVisibleValue } = nextProps;
-        const { modalVisible: currentVisibleValue } = this.state;
-        // console.log('newVisibleValue: %s, currentVisibleValue: %s', newVisibleValue, currentVisibleValue);
-        // if (currentVisibleValue !== newVisibleValue) {
-        //     this.setState({modalVisible: newVisibleValue, currentVisibleValue: newVisibleValue})
-        // } 
     }
 
     handleModalVisible = (visible) => {
@@ -73,19 +67,23 @@ class ButtonModal extends React.Component {
                     
                 )
             }
-            <Modal 
-                title="CREATE A NEW COLLECTION" 
-                // centered
-                // bodyStyle={{ height: 600}}
-                okText="Create"
-                // width={800}
-                visible={modalVisible} onOk={this.handleOk} onCancel={this.handleModalCancel}
-                {...modalProps}
-                >
-                
-                {modalContent}
-                
-            </Modal>
+            {
+                modalVisible && (
+                    <Modal 
+                        title="CREATE A NEW COLLECTION" 
+                        // centered
+                        // bodyStyle={{ height: 600}}
+                        okText="Create"
+                        // width={800}
+                        visible={modalVisible} onOk={this.handleOk} onCancel={this.handleModalCancel}
+                        {...modalProps}
+                        >
+                        
+                        {modalContent}
+                        
+                    </Modal>
+                )
+            }
             </>
         )
     }
