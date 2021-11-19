@@ -5,6 +5,7 @@ import Icon from '@ant-design/icons';
 import KeyValueTable from './key_value_table'
 import RequestBodyTab from './request_body_tab'
 import CookieModal from './cookies_modal'
+import CodeModal from './code_modal'
 import RndScriptEditor from './rnd_script_editor'
 import ScriptEditor from './script_editor'
 import AuthorizationSetting from './authorization_setting'
@@ -93,7 +94,7 @@ class RequestSendSetting extends React.Component {
                 tabBarExtraContent={
                     <>
                         <CookieModal />
-                        <Button type="link">Code</Button>
+                        <CodeModal />
                     </>
                 }
             >
