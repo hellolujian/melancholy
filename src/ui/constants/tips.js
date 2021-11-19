@@ -1,6 +1,6 @@
 import {Typography} from 'antd';
 
-const { Text, Link } = Typography;
+const { Text, Link, Paragraph } = Typography;
 
 const VARIABLES_VALUE_URL = 'https://learning.postman.com/docs/sending-requests/variables/#sharing-and-persisting-data';
 
@@ -153,6 +153,12 @@ const DOCUMENTATION_NAME_TIPS = (
     </Text>
 )
 
+const IMPORT_FILE_TIPS = (
+    <Paragraph>
+        Import a Postman Collection, Environment, data dump, curl command, or a RAML / WADL / Open API (1.0/2.0/3.0) / Runscope file.
+    </Paragraph>
+)
+
 export { 
     VARIABLE_TIPS,
     VARIABLE_VALUE_TIPS,
@@ -186,6 +192,7 @@ export {
     NO_ENVIRONMENT_TIPS,
     NO_GLOBAL_VARIABLES_TIPS,
     GLOBAL_TEXT_TIPS,
-    GLOBAL_LINK_TIPS
+    GLOBAL_LINK_TIPS,
+    IMPORT_FILE_TIPS
 
 }

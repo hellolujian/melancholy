@@ -82,3 +82,8 @@
   
   /* position:absolute; */
 }
+
+
+.import-file-dragger-class {
+  height: 250px !important
+}

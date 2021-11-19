@@ -81,8 +81,8 @@ class CodeModal extends React.Component {
     }
 
     componentDidMount() {
-        let supportedCodegens = CodeGen.getLanguageList();
-        console.log(supportedCodegens);
+        // let supportedCodegens = CodeGen.getLanguageList();
+        // console.log(supportedCodegens);
         this.getGenerateCode()
     }
 

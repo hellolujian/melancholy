@@ -65,6 +65,7 @@ class Home extends React.Component {
       // alert('来自渲染页面：' + getStoreValue('workspaceId'))
       this.setState({contentWidth: window.innerWidth - this.state.width})
       window.addEventListener('resize', this.handleWindowResize)
+
     }
 
     componentWillUnmount() {
