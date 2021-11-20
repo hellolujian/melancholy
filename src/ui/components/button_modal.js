@@ -34,8 +34,9 @@ class ButtonModal extends React.Component {
 
     render() {
     
-        let {buttonProps = true, modalProps, modalContent, label = "", tooltipProps, icon, title} = this.props;
-        let {modalVisible} = this.state;
+        let {buttonProps = true, modalProps, modalContent, 
+            label = "", tooltipProps, icon, title} = this.props;
+        let modalVisible = this.state.modalVisible;
         if (this.props.hasOwnProperty('modalVisible')) {
             modalVisible = this.props.modalVisible;
         }

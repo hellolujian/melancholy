@@ -97,7 +97,7 @@ class Home extends React.Component {
       const {tabActiveKey, dynamicWidth} = this.state;
         return (
 
-          <div>
+          <div id="rootPage">
             <LayoutHeader />
             <div class="mainBox">
                 <Rnd  

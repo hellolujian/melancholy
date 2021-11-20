@@ -22,3 +22,7 @@ export const updateCollectionMeta = (id, doc) => {
 export const queryCollectionMetaByParentId = (parentId) => {
     return query(COLLECTION_META, {parentId: parentId});
 }
+
+export const queryCollectionMetaByName = (name) => {
+    return query(COLLECTION_META, {name: name});
+}

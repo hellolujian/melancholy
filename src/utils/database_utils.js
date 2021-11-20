@@ -76,7 +76,7 @@ export const getRequestParentIdArr = async (id) => {
     }
 }
 
-export const sortCollectionData = (collectionData) => {
+export const sortCollectionData = (collectionData = []) => {
     return collectionData.sort((a, b) => {
         if (a.starred) {
             if (!b.starred) {
@@ -85,6 +85,9 @@ export const sortCollectionData = (collectionData) => {
         } else if(b.starred) {
             return 1;
         }
+        // if (!a.name) {
+        //     return -1
+        // }
         return a.name.localeCompare(b.name);
     })
 }
