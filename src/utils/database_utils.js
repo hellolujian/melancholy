@@ -199,6 +199,7 @@ export const getChildrenRequestArr = async (id) => {
  * @param {*} id 
  * @returns 
  */
+// TODO: 写入数据时记录request和folder 的collectionId， 这样好删除
 export const deleteCollection = async (id) => {
     let collectionMetaInfo = await queryCollectionMetaById(id);
     if (!collectionMetaInfo) {
@@ -510,4 +511,20 @@ export const dropNode = async (sourceId, sourceIsLeaf, targetId, targetIsLeaf, p
         console.log(targetRootCollectionInfo);
     }
 
+}
+
+
+export const importCollection = async (collection, collectionMetaList, requestMetaList) => {
+
+    console.log('folderList');
+    console.log(collectionMetaList)
+    console.log('reqlist');
+    console.log(requestMetaList)
+    await insertRequestMeta(requestMetaList);
+    await insertCollectionMeta(collectionMetaList);
+    return await insertCollection({
+        ...collection,
+        requestCount: requestMetaList.length
+    })
+    
 }

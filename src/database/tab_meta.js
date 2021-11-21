@@ -10,7 +10,9 @@ export const queryTabMetaById = async (id) => {
 
 export const insertTabMeta = async (doc) => {
     let workspaceIdQuery = await currentWorkspaceIdQuery();
-    return await insert(TAB_META, {...workspaceIdQuery, ...doc})
+    return await insert(TAB_META, Array.isArray(doc) ? doc.map(item => {
+        return {...workspaceIdQuery, ...item}
+    }) : {...workspaceIdQuery, ...doc})
 }
 
 export const updateTabMeta = (id, doc) => {

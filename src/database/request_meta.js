@@ -10,7 +10,9 @@ export const queryRequestMetaById = async (id) => {
 
 export const insertRequestMeta = async (doc) => {
     let workspaceIdQuery = await currentWorkspaceIdQuery();
-    return await insert(REQUEST_META, {...workspaceIdQuery, ...doc})
+    return await insert(REQUEST_META, Array.isArray(doc) ? doc.map(item => {
+        return {...workspaceIdQuery, ...item}
+    }) : {...workspaceIdQuery, ...doc})
 }
 
 export const updateRequestMeta = (id, doc) => {

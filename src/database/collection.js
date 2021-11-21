@@ -16,7 +16,9 @@ export const queryCollection = async (param = {}) => {
 
 export const insertCollection = async (doc) => {
     let workspaceIdQuery = await currentWorkspaceIdQuery();
-    return insert(COLLECTION, {...workspaceIdQuery, ...doc, })
+    return insert(COLLECTION, Array.isArray(doc) ? doc.map(item => {
+        return {...workspaceIdQuery, ...item}
+    }) : {...workspaceIdQuery, ...doc})
 }
 
 export const updateCollection = (id, doc) => {

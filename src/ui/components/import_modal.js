@@ -5,7 +5,7 @@ import TooltipButton from './tooltip_button'
 import PostmanButton from './postman_button'
 import ButtonModal from './button_modal'
 import ImportFileConfirm from './import_file_confirm'
-import {newCollection, saveCollection} from '@/utils/database_utils'
+import {deleteCollection, saveCollection, importCollection} from '@/utils/database_utils'
 
 import {queryCollectionMetaById, queryCollectionMetaByName} from '@/database/collection_meta'
 
@@ -18,7 +18,9 @@ import {
     ENVIRONMENT_EXT_TIPS,
     GLOBALS_TIPS
 } from 'ui/constants/tips'
+import PostmanSDK from 'postman-collection'
 
+const {Item, ItemGroup} = PostmanSDK;
 const { Dragger } = Upload;
 const { TabPane } = Tabs;
 class ImportModal extends React.Component {
@@ -39,6 +41,65 @@ class ImportModal extends React.Component {
         });
     }
 
+
+    getRequestScript = (events, eventName) => {
+        let targetEvents = events.listenersOwn(eventName),
+        targetEvent = targetEvents.length > 0 ? targetEvents[0] : {};
+        return targetEvent.script ? targetEvent.script.toSource() : ''
+    }
+
+    getCollectionObj = (sourceCollection, requestList, collectionList, parentId) => {
+       
+        const {name, auth, description, events, variables, items} = sourceCollection;
+        let collectionMetaData = {
+            id: UUID(),
+            parentId: parentId,
+            name: name,
+            description: description ? description.toString() : '',
+            auth: auth ? auth.toJSON() : undefined,
+            prerequest: this.getRequestScript(events, 'prerequest'),
+            test: this.getRequestScript(events, 'test'),
+            variable: variables ? variables.map(variable => variable.toJSON()) : undefined
+        }
+        collectionList.push(collectionMetaData);
+        let collectionObj = {
+            id: collectionMetaData.id,
+            name: name,
+            items: []
+        };
+        items.each(o => {
+            console.log(o);
+            console.log(ItemGroup.isItemGroup(o));
+            if (ItemGroup.isItemGroup(o)) {
+                let collectionChild = this.getCollectionObj(o, requestList, collectionList, collectionMetaData.id)
+                collectionObj.items.push(collectionChild);
+            } else if (Item.isItem(o)) {
+                const {name, request, responses, events} = o;
+                const {auth, body, description, headers, method, url} = request;
+                let requestMetaData = {
+                    id: UUID(),
+                    parentId: collectionMetaData.id,
+                    name: name,
+                    url: url.toString(),
+                    method: method,
+                    body: body,
+                    header: headers.map(h => h.toJSON()),
+                    description: description ? description.toString() : '',
+                    auth: auth ? auth.toJSON() : undefined,
+                    // param: param,
+                    prerequest: this.getRequestScript(events, 'prerequest'),
+                    test: this.getRequestScript(events, 'test'),
+                }
+                requestList.push(requestMetaData);
+                collectionObj.items.push({
+                    id: requestMetaData.id,
+                    name: name
+                });
+            } 
+        })
+        return collectionObj;
+    }
+
     componentDidMount() {
         // this.importNotification('newData.name')
         // var VariableScope = require('postman-collection').VariableScope;
@@ -48,23 +109,34 @@ class ImportModal extends React.Component {
         // console.log(env);
 
         var Collection = require('postman-collection').Collection,
-    ItemGroup = require('postman-collection').ItemGroup,
-    myCollection;
+        ItemGroup = require('postman-collection').ItemGroup,
+        myCollection;
 
-myCollection = new Collection(); // create an empty collection
-myCollection.items.add(new ItemGroup({ // add a folder called "blank folder"
-    "name": "This is a blank folder"
-}));
+        let requestList = [], collectionList = [];
+        let fs = window.require('fs');
+        // C:\\Users\\lujian01\\Desktop\\预告同意.postman_collection.json
+        myCollection = new Collection(JSON.parse(fs.readFileSync('C:\\Users\\lujian01\\Desktop\\1体育图.postman_collection.json').toString())); // create an empty collection
+        
 
-
-console.log('isitemgroup');
-console.log(ItemGroup.isItemGroup(new ItemGroup({ // add a folder called "blank folder"
-    "name": "This is a blank folder"
-})));
+        console.log('count: %s', this.getCollectionObj(myCollection, requestList, collectionList));
+        console.log('reqlist')
+        console.log(requestList)
+        console.log('folderlist');
+        console.log(collectionList)
+        console.log(myCollection.variables.map(variable => variable.toJSON()));
     }
 
     handleTabKeyChange = (activeTabKey) => {
         this.setState({activeTabKey: activeTabKey})
+    }
+
+    handleAddCollection = async (myCollection) => {
+        let requestList = [], collectionList = [];
+        let collectionObj = this.getCollectionObj(myCollection, requestList, collectionList)
+        let collectionMetaData = collectionList[0];
+        await importCollection(collectionObj, collectionList, requestList)
+        publishCollectionSave(collectionMetaData)
+        this.importNotification(collectionMetaData.name)
     }
 
     handleImportFileChange = async (chooseFileInfo) => {
@@ -79,8 +151,8 @@ console.log(ItemGroup.isItemGroup(new ItemGroup({ // add a folder called "blank 
         let targetCollectionJson = JSON.parse(fs.readFileSync(targetFile.originFileObj.path).toString());
         let Collection = require('postman-collection').Collection;
         let myCollection = new Collection(targetCollectionJson);
-        let collectionObj = myCollection.toJSON();
-        console.log(collectionObj);
+        // let collectionObj = myCollection.toJSON();
+        // console.log(collectionObj);
 
         console.log( myCollection.items);
         let ItemGroup = require('postman-collection').ItemGroup;
@@ -90,32 +162,14 @@ console.log(ItemGroup.isItemGroup(new ItemGroup({ // add a folder called "blank 
             return o;
         })
 
-        const {auth, event = [], info, item, variable = []} = collectionObj;
-        const {description = {}, name,} = info;
-        let collectionPrerequest = event.find(item => item.listen === 'prerequest') || {};
-        const {script: prerequestScript = {}} = collectionPrerequest;
-        let collectionTest = event.find(item => item.listen === 'test') || {}
-        const {script: testScript = {}} = collectionTest;
-        let data = {
-            id: UUID(),
-            name: name || "",
-            description: typeof description === 'string' ? description : description.content,
-            auth: auth,
-            test: testScript.exec ? testScript.exec.join('\n') : '',
-            prerequest: prerequestScript.exec ? prerequestScript.exec.join('\n') : '',
-            variable: variable.map(item => {
-                return {...item, id: UUID()}
-            }),
-        }
+        const {name} = myCollection;
+        if (!name) return;
 
-        
         let existCollectionInfo = await queryCollectionMetaByName(name)
         if (existCollectionInfo.length > 0) {
-            this.importFileConfirmRef.show({...data, id: existCollectionInfo[0].id})
+            this.importFileConfirmRef.show(myCollection)
         } else {
-            await newCollection(data)
-            publishCollectionSave(data)
-            this.importNotification(data.name)
+            await this.handleAddCollection(myCollection)
         }
 
         this.setState({modalVisible: false})
@@ -133,17 +187,18 @@ console.log(ItemGroup.isItemGroup(new ItemGroup({ // add a folder called "blank 
         this.importFileConfirmRef = ref;
     }
 
-    handleConfirmReplace = async (importData) => {
-        await saveCollection(importData.id, importData)
-        publishCollectionSave(importData)
-        this.importNotification(importData.name)
+    handleConfirmReplace = async (myCollection) => {
+        let existCollectionInfo = await queryCollectionMetaByName(myCollection.name)
+        if (existCollectionInfo.length === 0) {
+            return;
+        }
+        await deleteCollection(existCollectionInfo[0].id)
+        await this.handleAddCollection(myCollection)
     }
 
-    handleConfirmCopy = async (importData) => {
-        let newData = {...importData, name: importData.name + " Copy", id: UUID()}
-        await newCollection(newData)
-        this.importNotification(newData.name)
-        publishCollectionSave(newData)
+    handleConfirmCopy = async (myCollection) => {
+        myCollection.name = myCollection.name + " Copy";
+        this.handleAddCollection(myCollection);
     }
 
     render() {

@@ -10,7 +10,9 @@ export const queryEnvironmentMetaById = async (id) => {
 
 export const insertEnvironmentMeta = async (doc) => {
     let workspaceIdQuery = await currentWorkspaceIdQuery();
-    return await insert(ENVIRONMENT_META, {...workspaceIdQuery, ...doc})
+    return await insert(ENVIRONMENT_META, Array.isArray(doc) ? doc.map(item => {
+        return {...workspaceIdQuery, ...item}
+    }) : {...workspaceIdQuery, ...doc})
 }
 
 export const updateEnvironmentMeta = (id, doc) => {

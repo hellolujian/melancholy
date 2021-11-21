@@ -10,7 +10,9 @@ export const queryHeaderPresetById = async (id) => {
 
 export const insertHeaderPreset = async (doc) => {
     let workspaceIdQuery = await currentWorkspaceIdQuery();
-    return await insert(HEADER_PRESET, {...workspaceIdQuery, ...doc})
+    return await insert(HEADER_PRESET, Array.isArray(doc) ? doc.map(item => {
+        return {...workspaceIdQuery, ...item}
+    }) : {...workspaceIdQuery, ...doc})
 }
 
 export const updateHeaderPreset = (id, doc) => {
