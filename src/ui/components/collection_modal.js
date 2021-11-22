@@ -26,22 +26,16 @@ class CollectionModal extends React.Component {
     }
 
     getCollectionInfo = async (key, data = {}) => {
-        const {collectionId, parentId, extend} = data;
-        console.log('============data');
-        console.log(data);
-        let updateObj = {visible: true, extend: extend};
+        const {collectionId, scene, extend} = data;
+        let updateObj = {visible: true, extend: extend, scene: scene, collectionId: collectionId};
         if (collectionId) {
-            updateObj.collectionId = collectionId;
-            updateObj.collectionSettings = await queryCollectionMetaById(collectionId);
-        } else if (parentId) {
-            updateObj.parentId = parentId;
-            let parentInfo = await queryCollectionMetaById(parentId);
-            if (parentInfo) {
-                updateObj.parentName = parentInfo.name;
+            let targetCollectionMeta = await queryCollectionMetaById(collectionId)
+            if (scene === 'edit') {
+                updateObj.collectionSettings = targetCollectionMeta;
+            } else {
+                updateObj.parentName = targetCollectionMeta ? targetCollectionMeta.name : '';
             }
-        } 
-
-        console.log(updateObj);
+        }
         this.setState(updateObj);
     }
 
@@ -50,7 +44,7 @@ class CollectionModal extends React.Component {
     }
 
     handleModalCancel = () => {
-        this.setState({visible: false, collectionSettings: {}, collectionId: null, parentId: null})
+        this.setState({visible: false, collectionSettings: {}, collectionId: null})
         // this.props.onVisibleChange(false);
     }
 
@@ -60,10 +54,10 @@ class CollectionModal extends React.Component {
 
     handleFormFinish = async (values) => {
         
-        const {collectionSettings, collectionId, parentId} = this.state;
-        const {id = UUID(), description, auth, test, prerequest, variable} = collectionSettings;
+        const {collectionSettings, collectionId, scene} = this.state;
+        const {description, auth, test, prerequest, variable} = collectionSettings;
         let data = {
-            id: id,
+            id: UUID(),
             name: values.name,
             description: description,
             auth: auth,
@@ -72,9 +66,14 @@ class CollectionModal extends React.Component {
             variable: variable,
         }
         if (collectionId) {
-            await saveCollection(id, data)
+            if (scene === 'edit') {
+                data.id = collectionId;
+                await saveCollection(collectionId, data)
+            } else {
+                await newCollection(data, collectionId)
+            }
         } else {
-            await newCollection(data, parentId)
+            await newCollection(data)
         }
        
         publishCollectionSave(data)
@@ -95,10 +94,11 @@ class CollectionModal extends React.Component {
 
     render() {
      
-        const {collectionSettings, visible, collectionId, parentId, parentName, extend = {}} = this.state;
+        const {collectionSettings = {}, visible, collectionId, extend = {}, scene, parentName} = this.state;
+        const {parentId} = collectionSettings;
         return (
             <Modal 
-                title={parentId ? (collectionId ? 'EDIT FOLDER' : `ADD FOLDER TO ${parentName}`) : (collectionId ? 'EDIT COLLECTION' : "CREATE A NEW COLLECTION")}
+                title={collectionId ? (scene === 'edit' ? (parentId ? 'EDIT FOLDER' : "EDIT COLLECTION") :  `ADD FOLDER TO ${parentName}`) : "CREATE A NEW COLLECTION" }
                 // centered
                 destroyOnClose
                 bodyStyle={{ height: 600}}

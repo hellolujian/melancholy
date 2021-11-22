@@ -74,7 +74,7 @@ class AuthorizationSetting extends React.Component {
     }
 
     handleOpenCollectionModal =  () => {
-        publishCollectionModalOpen({collectionId: this.props.parentId, extend: {activeKey: 'authorization'}})
+        publishCollectionModalOpen({collectionId: this.props.parentId, scene: 'edit', extend: {activeKey: 'authorization'}})
     }
 
     render() {
