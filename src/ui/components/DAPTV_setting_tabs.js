@@ -17,6 +17,11 @@ import {
     TESTS_TIPS
 } from 'ui/constants/tips'
 
+import {
+    GREEN_DOT_ICON
+} from 'ui/constants/icons'
+import {TabIconType, TabType, AuthSceneType} from '@/enums'
+
 import DescriptionEditor from './description_editor'
 import AuthorizationSetting from './authorization_setting'
 
@@ -92,6 +97,18 @@ class DAPTVSettingTabs extends React.Component {
         const {value, scene, parentId} = this.props;
         const { activeKey } = this.state;
         const { description, auth, prerequest, test, variable } = value;
+        let authDot = false;
+        if (AuthSceneType.COLLECTION.name() === scene) {
+            if (parentId) {
+                if (auth && auth.type && auth.type !== 'inherit') {
+                    authDot = true;
+                }
+            } else {
+                if (auth && auth.type && auth.type !== 'noauth') {
+                    authDot = true;
+                }
+            }
+        }
         return (
             <Tabs activeKey={activeKey} defaultActiveKey="description" onChange={this.handleTabChange} style={{height: '100%', position: 'relative'}}>
                 <TabPane tab="Description" key="description">
@@ -106,7 +123,13 @@ class DAPTVSettingTabs extends React.Component {
                         />
                     </Space>
                 </TabPane>
-                <TabPane tab="Authorization" key="authorization">
+                <TabPane 
+                    tab={
+                        <div className="vertical-end">
+                            Authorization {authDot && GREEN_DOT_ICON}
+                        </div>
+                    } 
+                    key="authorization">
                     {AUTHORIZATION_TIPS}
                     <AuthorizationSetting 
                         value={auth}
@@ -115,7 +138,11 @@ class DAPTVSettingTabs extends React.Component {
                         onChange={this.handleAuthChange}
                     />
                 </TabPane>
-                <TabPane tab="Pre-request Scripts" key="prerequestscripts">
+                <TabPane tab={
+                    <div className="vertical-end">
+                        Pre-request Scripts {prerequest && GREEN_DOT_ICON}
+                    </div>
+                } key="prerequestscripts">
                     <Space direction="vertical" className="full-width">
                         {PRE_REQUEST_SCRIPTS_TIPS}
                         <ScriptEditor 
@@ -125,7 +152,11 @@ class DAPTVSettingTabs extends React.Component {
                         />
                     </Space>
                 </TabPane>
-                <TabPane tab="Tests" key="tests">
+                <TabPane tab={ 
+                    <div className="vertical-end">
+                        Tests {test && GREEN_DOT_ICON}
+                    </div>
+                } key="tests">
                     <Space direction="vertical" className="full-width">
                         {TESTS_TIPS}
                         <ScriptEditor 
@@ -135,7 +166,11 @@ class DAPTVSettingTabs extends React.Component {
                         />
                     </Space>
                 </TabPane>
-                <TabPane tab="Variables" key="variables">
+                <TabPane tab={
+                    <div className="vertical-end">
+                        Variables {variable && variable.length > 0 && GREEN_DOT_ICON}
+                    </div>
+                } key="variables">
                     <Space direction="vertical">
                         {VARIABLE_TIPS}
                         <VariablesTable     

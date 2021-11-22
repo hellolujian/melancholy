@@ -59,7 +59,10 @@ class ImportModal extends React.Component {
             auth: auth ? auth.toJSON() : undefined,
             prerequest: this.getRequestScript(events, 'prerequest'),
             test: this.getRequestScript(events, 'test'),
-            variable: variables ? variables.map(variable => variable.toJSON()) : undefined
+            variable: variables ? variables.map(variable => {
+                let {key, value, disabled} = variable.toJSON();
+                return {id: UUID(), key: key, initialValue: value, currentValue: value, disabled: disabled}
+            }) : undefined
         }
         collectionList.push(collectionMetaData);
         let collectionObj = {
@@ -83,7 +86,16 @@ class ImportModal extends React.Component {
                     url: url.toString(),
                     method: method,
                     body: body,
-                    header: headers.map(h => h.toJSON()),
+                    header: headers.map(h => {
+                        let {key, value, description: headerDesc, disabled} = h;
+                        return {
+                            id: UUID(),
+                            key: key,
+                            value: value,
+                            disabled: disabled,
+                            description: headerDesc ? headerDesc.toString() : '',
+                        }
+                    }),
                     description: description ? description.toString() : '',
                     auth: auth ? auth.toJSON() : undefined,
                     // param: param,

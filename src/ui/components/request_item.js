@@ -64,7 +64,7 @@ class RequestItem extends React.Component {
     menuItems = [
         { name: 'open', label: 'Open in New Tab', icon: OPEN_NEW_ICON, event: () => publishNewTabOpen(this.props.item)},
         { name: 'rename', label: 'Rename', icon: RENAME_ICON, event: this.showCollectionNameInput},
-        { name: 'edit', label: 'Edit', icon: EDIT_ICON, event: () => publishRequestModalOpen({requestId: this.state.item.id})},
+        { name: 'edit', label: 'Edit', icon: EDIT_ICON, event: () => publishRequestModalOpen({requestId: this.props.item.id})},
         { name: 'duplicate', label: 'Duplicate', icon: DUPLICATE_ICON, event: this.duplicateRequest },
         { name: 'delete', label: 'Delete', icon: DELETE_ICON, event: this.deleteRequest },
     ]

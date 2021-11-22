@@ -27,6 +27,8 @@ class CollectionModal extends React.Component {
 
     getCollectionInfo = async (key, data = {}) => {
         const {collectionId, parentId, extend} = data;
+        console.log('============data');
+        console.log(data);
         let updateObj = {visible: true, extend: extend};
         if (collectionId) {
             updateObj.collectionId = collectionId;
@@ -38,6 +40,8 @@ class CollectionModal extends React.Component {
                 updateObj.parentName = parentInfo.name;
             }
         } 
+
+        console.log(updateObj);
         this.setState(updateObj);
     }
 

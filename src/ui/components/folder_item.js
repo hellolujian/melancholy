@@ -58,7 +58,7 @@ class RequestItem extends React.Component {
     // 菜单配置
     menuItems = [
         { name: 'rename', label: 'Rename', icon: RENAME_ICON, event: this.showCollectionNameInput},
-        { name: 'edit', label: 'Edit', icon: EDIT_ICON, event: () => publishCollectionModalOpen({collectionId: this.props.item.id})},
+        { name: 'edit', label: 'Edit', icon: EDIT_ICON, event: () => publishCollectionModalOpen({collectionId: this.props.item.id, parentId: this.props.item.parentId})},
         { name: 'add_request', label: 'Add Request', icon: ADD_REQUEST_ICON, event: () => publishRequestModalOpen({parentId: this.props.item.id})},
         { name: 'add_folder', label: 'Add Folder', icon: ADD_FOLDER_ICON, event: () => publishCollectionModalOpen({parentId: this.props.item.id})},
         { name: 'duplicate', label: 'Duplicate', icon: DUPLICATE_ICON, event: this.duplicateCollection },

@@ -134,7 +134,7 @@ class CollectionTree extends React.Component {
     }
 
     // 递归遍历collection下的folder
-    traverseCollectionItems = (list) => {
+    traverseCollectionItems = (list, parentId) => {
         return list.map(node => {
             let treeItem = {
                 key: node.id,
@@ -143,7 +143,7 @@ class CollectionTree extends React.Component {
             if (node.items) {
                 treeItem.title = (
                     <FolderItem 
-                        item={node} 
+                        item={{...node, parentId: parentId}} 
                         onDelete={() => this.handleFolderDelete(node)}
                         onDuplicate={() => this.handleCollectionDuplicate(node.id)}
                         onRename={(value) => this.handleCollectionRename(node.id, value)}
@@ -151,7 +151,7 @@ class CollectionTree extends React.Component {
                 );
                 
                 if (node.items.length > 0) {
-                    treeItem.children = this.traverseCollectionItems(node.items);
+                    treeItem.children = this.traverseCollectionItems(node.items, node.id);
                 } else {
                     treeItem.children = [this.getEmptyNode(node, true)]
                 }
@@ -353,7 +353,7 @@ class CollectionTree extends React.Component {
                 ),
                 children: !item.items || item.items.length === 0 ? [
                     this.getEmptyNode(item)
-                ] : this.traverseCollectionItems(item.items, [item.id])
+                ] : this.traverseCollectionItems(item.items, item.id)
             }
         })
         

@@ -65,7 +65,7 @@ class VariablesTable extends React.Component {
         let columns = [
             {
                 title: 'VARIABLE',
-                dataIndex: 'name',
+                dataIndex: 'key',
                 // width: '22%',
                 editable: true,
                 className: 'drag-visible',
