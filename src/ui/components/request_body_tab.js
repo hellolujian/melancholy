@@ -4,6 +4,9 @@ import { EyeOutlined, CaretDownOutlined  } from '@ant-design/icons';
 import KeyValueTable from './key_value_table'
 import JsonEditor from './json_editor'
 import RequestBodySelectFile from './request_body_select_file';
+import {
+    GREEN_DOT_ICON
+} from 'ui/constants/icons'
 import 'ui/style/request_body_tab.css'
 
 const {Option} = Select;

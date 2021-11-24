@@ -10,6 +10,10 @@ import RndScriptEditor from './rnd_script_editor'
 import ScriptEditor from './script_editor'
 import AuthorizationSetting from './authorization_setting'
 import RequestHeaderSetting from './request_headers_setting'
+import {
+    GREEN_DOT_SVG,
+    // GREEN_DOT_ICON
+} from 'ui/constants/icons'
 import {AuthSceneType} from '@/enums'
 import 'ui/style/request_send_setting.css'
 const { TabPane } = Tabs;
@@ -107,7 +111,13 @@ class RequestSendSetting extends React.Component {
                         onChange={this.handleParamsChange}
                     />
                 </TabPane>
-                <TabPane tab="Authorization" key="authorization">
+                <TabPane 
+                    key="authorization"
+                    tab={
+                        <div className="vertical-end">
+                            Authorization {(auth && auth.type && !['noauth', 'inherit'].includes(auth.type)) && GREEN_DOT_SVG}
+                        </div>
+                    } >
                     <AuthorizationSetting 
                         value={auth}
                         deleted={deleted}
@@ -117,15 +127,35 @@ class RequestSendSetting extends React.Component {
                     />
                     
                 </TabPane>
-                <TabPane tab="Headers" key="headers">
+                <TabPane 
+                    tab={
+                        <Space>
+                            Headers 
+                            {header && header.length > 0 && <span style={{color: '#26b47f'}}>({header.length})</span>}
+                        </Space>
+                    } 
+                    key="headers">
                     <RequestHeaderSetting 
                         value={header}
                         onSave={this.handleHeadersSave}
                         onChange={this.handleHeadersChange}
                     />
                 </TabPane>
-                <TabPane tab="Body" key="body" />
-                <TabPane tab="Pre-request Script" key="prerequestscripts">
+                <TabPane 
+                    key="body" 
+                    tab={
+                        <div className="vertical-end">
+                            Body {body && body.mode && body[body.mode] && GREEN_DOT_SVG}
+                        </div>
+                    } 
+                />
+                <TabPane 
+                    key="prerequestscripts"
+                    tab={
+                        <div className="vertical-end">
+                            Pre-request Script {prerequest && GREEN_DOT_SVG}
+                        </div>
+                    }>
                     <RndScriptEditor 
                         value={prerequest}
                         defaultValue={prerequest}
@@ -133,7 +163,13 @@ class RequestSendSetting extends React.Component {
                         onSave={this.handlePreRequestScriptSave}
                     />
                 </TabPane>
-                <TabPane tab="Tests" key="tests">
+                <TabPane 
+                    key="tests"
+                    tab={
+                        <div className="vertical-end">
+                            Tests {test && GREEN_DOT_SVG}
+                        </div>
+                    } >
                     <RndScriptEditor 
                         scriptType='tests' 
                         value={test}

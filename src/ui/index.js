@@ -21,6 +21,10 @@ import 'ui/style/common.css'
 import 'ui/style/layout.css'
 import 'ui/style/global.css'
 
+import PostmanSDK from 'postman-collection'
+
+const {PropertyList, QueryParam, Url} = PostmanSDK;
+
 const { TabPane } = Tabs;
 const { SubMenu } = Menu;
 const { Header, Content, Sider, Footer } = Layout;
@@ -62,9 +66,34 @@ class Home extends React.Component {
     }
 
     componentDidMount() {
+      let urlopt = Url.parse("https://localhost:8000/api/getuserInfo?");
+      console.log(urlopt);
+      let postmanUrl = new Url(urlopt);
+      console.log('protocol :%s', postmanUrl.protocol)
+      console.log("host: %s", postmanUrl.getHost())
+      console.log('path: %s', postmanUrl.getPath())
+      console.log('getpathwithquery: %s', postmanUrl.getPathWithQuery())
+      console.log('getQueryString: %s', postmanUrl.getQueryString());
+      console.log(postmanUrl.query);
+      console.log('getRemote:%s', postmanUrl.getRemote());
+      console.log('toString', postmanUrl.toString());
+      console.log('toJson==========');
+      console.log(postmanUrl);
+      postmanUrl.query = new PropertyList();
+      console.log('to_string: %s', postmanUrl.toString());
+
+      console.log('new url');
+      console.log(QueryParam.unparse([{disabled: true, key: 'hello', value: 'world'}, {key: 'name', value: 'lujian'}]));
+      
+      console.log(QueryParam.parse(""));
       // alert('来自渲染页面：' + getStoreValue('workspaceId'))
       this.setState({contentWidth: window.innerWidth - this.state.width})
       window.addEventListener('resize', this.handleWindowResize)
+      
+      // var url=require("url");//引入url模块
+      // var result=url.parse("hello=world&name=lujian",true);
+        
+      //   console.log(result);
 
     }
 
@@ -135,7 +164,7 @@ class Home extends React.Component {
                     </Tabs>
 
                     
-                    <div style={{height: 'calc(100% - 90px)',  overflowY: 'scroll', overflowX: 'hidden', paddingBottom: 20}} >
+                    <div style={{height: 'calc(100% - 105px)',  overflowY: 'scroll', overflowX: 'hidden', paddingBottom: 20}} >
                       {
                         tabActiveKey === 'collections' && (
                           <>

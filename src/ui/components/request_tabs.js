@@ -35,7 +35,7 @@ import {
   saveRequest, syncRequestInCollection
 } from '@/utils/database_utils'
 import {TabIconType, TabType, getIconByCode} from '@/enums'
-import {UUID, compareObjectIgnoreEmpty} from '@/utils/global_utils'
+import {UUID, compareObjectIgnoreEmpty, getSpecificFieldObj} from '@/utils/global_utils'
 import 'ui/style/request_tabs.css'
 
 const { TabPane } = Tabs;
@@ -627,43 +627,24 @@ class DraggableTabs extends React.Component {
     const {requestInfo, activeTabKey, tabData} = this.state;
     this.setState({requestInfo: {...requestInfo, ...value}});
     if (!(value.hasOwnProperty('name') || value.hasOwnProperty('description'))) {
-      let targetKey = Object.keys(value)[0];
       let targetTab = tabData.find(item => item.id === activeTabKey);
       console.log('目标对象===================');
       console.log(targetTab);
-      let {draft} = targetTab;
-      if (draft) {
-        console.log('目标简直：%s', targetKey);
-        draft = {...draft, ...value}
-        if (draft.hasOwnProperty(targetKey)) {
-          let targetValue = value[targetKey];
-          let preRequestInfo = targetTab.refId ? await queryRequestMetaById(targetTab.refId) : {method: 'get'};
-          console.log('=======================prerequestinfo=============');
-          console.log(preRequestInfo);
-          let preValue = preRequestInfo[targetKey]
-          console.log('原先值：============');
-          console.log(preValue);
-          console.log('现在值：=======');
-          console.log(targetValue);
-          console.log('原先值与现在值：%s', compareObjectIgnoreEmpty(targetValue, preValue));
-          if (compareObjectIgnoreEmpty(targetValue, preValue) || ((!targetValue || (Array.isArray(targetValue) && targetValue.length === 0)) && (!preValue || (Array.isArray(preValue) && preValue.length === 0)))) {
-            console.log("sdfffffff===========================")
-            console.log(targetTab)
-            draft = this.removeTargetField(draft, targetKey);
-          }
-          
-        }
-
-        console.log('最后的draft：');
-        console.log(draft);
-        if (Object.keys(draft).length === 0) {
-          targetTab = this.removeTargetField(targetTab, 'draft');
-        } else {
-          targetTab.draft = draft;
-        }
+      let {draft = {}} = targetTab;
+      let newDraft = {...draft, ...value};
+      let preRequestInfo = targetTab.refId ? await queryRequestMetaById(targetTab.refId) : {method: 'get'};
+      let oldDraft = getSpecificFieldObj(preRequestInfo, Object.keys(value))
+      console.log('老的草稿');
+      console.log(oldDraft);
+      console.log('心得草稿');
+      console.log(newDraft);
+      if (compareObjectIgnoreEmpty(newDraft, oldDraft)) {
+        console.log('是否香港等=====');
+        targetTab = this.removeTargetField(targetTab, 'draft')
       } else {
-        targetTab.draft = {...value};
+        targetTab.draft = newDraft;
       }
+     
 
       console.log('最后的targetTab');
       console.log(targetTab);

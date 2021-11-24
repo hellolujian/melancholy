@@ -120,22 +120,22 @@ class ImportModal extends React.Component {
         // console.log('=====================env');
         // console.log(env);
 
-        var Collection = require('postman-collection').Collection,
-        ItemGroup = require('postman-collection').ItemGroup,
-        myCollection;
+        // var Collection = require('postman-collection').Collection,
+        // ItemGroup = require('postman-collection').ItemGroup,
+        // myCollection;
 
-        let requestList = [], collectionList = [];
-        let fs = window.require('fs');
-        // C:\\Users\\lujian01\\Desktop\\预告同意.postman_collection.json
-        myCollection = new Collection(JSON.parse(fs.readFileSync('C:\\Users\\lujian01\\Desktop\\1体育图.postman_collection.json').toString())); // create an empty collection
+        // let requestList = [], collectionList = [];
+        // let fs = window.require('fs');
+        // // C:\\Users\\lujian01\\Desktop\\预告同意.postman_collection.json
+        // myCollection = new Collection(JSON.parse(fs.readFileSync('C:\\Users\\lujian01\\Desktop\\1体育图.postman_collection.json').toString())); // create an empty collection
         
 
-        console.log('count: %s', this.getCollectionObj(myCollection, requestList, collectionList));
-        console.log('reqlist')
-        console.log(requestList)
-        console.log('folderlist');
-        console.log(collectionList)
-        console.log(myCollection.variables.map(variable => variable.toJSON()));
+        // console.log('count: %s', this.getCollectionObj(myCollection, requestList, collectionList));
+        // console.log('reqlist')
+        // console.log(requestList)
+        // console.log('folderlist');
+        // console.log(collectionList)
+        // console.log(myCollection.variables.map(variable => variable.toJSON()));
     }
 
     handleTabKeyChange = (activeTabKey) => {

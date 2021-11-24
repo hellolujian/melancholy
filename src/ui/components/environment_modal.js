@@ -19,7 +19,7 @@ import DropdownTooltip from './dropdown_tooltip'
 import {queryEnvironmentMeta, updateEnvironmentMeta, insertEnvironmentMeta} from '@/database/environment_meta'
 import {queryCommonMeta, updateCommonMeta, queryCommonMetaByType} from '@/database/common_meta'
 
-import {UUID, compareObjectIgnoreEmpty} from '@/utils/global_utils'
+import {UUID} from '@/utils/global_utils'
 import VariablesTable from './variables_table';
 import ButtonModal from './button_modal'
 import CommonSelectFile from './common_select_file'

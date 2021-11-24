@@ -2,6 +2,10 @@ import React from 'react';
 import { Select, Button, Space, Input, Dropdown, Menu, Row, Col } from 'antd';
 import { EyeOutlined, CaretDownOutlined  } from '@ant-design/icons';
 import RequestMethodSelect from './request_method_select'
+
+import {UUID, compareObjectIgnoreEmpty, getSpecificFieldObj} from '@/utils/global_utils'
+import PostmanSDK from 'postman-collection'
+const {Url, QueryParam, PropertyList} = PostmanSDK
 const { Option } = Select;
 class RequestSendBar extends React.Component {
 
@@ -17,7 +21,26 @@ class RequestSendBar extends React.Component {
     }
 
     handleUrlChange = (e) => {
-        this.props.onChange({url: e.target.value})
+        const {param = []} = this.props.value;
+        let disabledParams = param.filter(item => item.disabled);
+        let fullUrl = e.target.value;
+    
+        if (!fullUrl) {
+            this.props.onChange({url: '', param: disabledParams})
+        } else {
+            let urlJson = Url.parse(fullUrl);
+            const postmanUrl = new Url(urlJson);
+            let queryString = postmanUrl.getQueryString();
+            let queryStringArr = [];
+            if (queryString) {
+                queryStringArr = QueryParam.parse(queryString);
+                postmanUrl.query = new PropertyList();
+            }
+            let urlString = postmanUrl.toString();
+            let newParam = [...queryStringArr.map(item => {return {...item, id: UUID()}}), ...disabledParams];
+            
+            this.props.onChange({url: urlString, param: newParam});
+        }
     }
 
     handleMethodChange = (value) => {
@@ -25,7 +48,26 @@ class RequestSendBar extends React.Component {
     }
 
     handleUrlSave = (e) => {
-        this.props.onSave({url: e.target.value})
+        const {param = []} = this.props.value;
+        let disabledParams = param.filter(item => item.disabled);
+        let fullUrl = e.target.value;
+    
+        if (!fullUrl) {
+            this.props.onSave({url: '', param: disabledParams})
+        } else {
+            let urlJson = Url.parse(fullUrl);
+            const postmanUrl = new Url(urlJson);
+            let queryString = postmanUrl.getQueryString();
+            let queryStringArr = [];
+            if (queryString) {
+                queryStringArr = QueryParam.parse(queryString);
+                postmanUrl.query = new PropertyList();
+            }
+            let urlString = postmanUrl.toString();
+            let newParam = [...queryStringArr.map(item => {return {...item, id: UUID()}}), ...disabledParams];
+            
+            this.props.onSave({url: urlString, param: newParam});
+        }
     }
 
     handleSaveClick = (e) => {
@@ -38,7 +80,10 @@ class RequestSendBar extends React.Component {
     
     render() {
         const {value = {}} = this.props;
-        const {url, method = 'get'} = value;
+        const {url = '', method = 'get', param = []} = value;
+        let queryString = QueryParam.unparse(param);
+        console.log('render querystring: ' + queryString);
+        let urlWithQuery = url + (queryString ? ("?" + queryString) : "")
         const methodSelect = (
             <RequestMethodSelect 
                 value={method}
@@ -50,7 +95,7 @@ class RequestSendBar extends React.Component {
                 
                 <Col flex='auto'>
                     <Input 
-                        value={url}
+                        value={urlWithQuery}
                         size="large" 
                         addonBefore={methodSelect} 
                         onChange={this.handleUrlChange} 
