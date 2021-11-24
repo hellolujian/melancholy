@@ -102,7 +102,14 @@ class RequestSendSetting extends React.Component {
                     </>
                 }
             >
-                <TabPane className="request-setting-tab-param-panel" tab="Params" key="params">
+                <TabPane 
+                    className="request-setting-tab-param-panel" 
+                    tab={
+                        <div className="vertical-end">
+                            Params {param && param.length > 0 && GREEN_DOT_SVG}
+                        </div>
+                    } 
+                    key="params">
                     <KeyValueTable 
                         cene="params"
                         value={param}
