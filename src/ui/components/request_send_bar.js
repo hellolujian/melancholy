@@ -20,14 +20,11 @@ class RequestSendBar extends React.Component {
       
     }
 
-    handleUrlChange = (e) => {
+    getUrlObj = (fullUrl) => {
         const {param = []} = this.props.value;
         let disabledParams = param.filter(item => item.disabled);
-        let fullUrl = e.target.value;
-    
-        if (!fullUrl) {
-            this.props.onChange({url: '', param: disabledParams})
-        } else {
+        let obj;    
+        if (fullUrl) {
             let urlJson = Url.parse(fullUrl);
             const postmanUrl = new Url(urlJson);
             let queryString = postmanUrl.getQueryString();
@@ -39,8 +36,16 @@ class RequestSendBar extends React.Component {
             let urlString = postmanUrl.toString();
             let newParam = [...queryStringArr.map(item => {return {...item, id: UUID()}}), ...disabledParams];
             
-            this.props.onChange({url: urlString, param: newParam});
+            obj = {url: urlString, param: newParam};
+        } else {
+            obj = {url: '', param: disabledParams};
         }
+        return obj;
+    }
+
+    handleUrlChange = (e) => {
+        
+        this.props.onChange(this.getUrlObj(e.target.value));
     }
 
     handleMethodChange = (value) => {
@@ -48,26 +53,7 @@ class RequestSendBar extends React.Component {
     }
 
     handleUrlSave = (e) => {
-        const {param = []} = this.props.value;
-        let disabledParams = param.filter(item => item.disabled);
-        let fullUrl = e.target.value;
-    
-        if (!fullUrl) {
-            this.props.onSave({url: '', param: disabledParams})
-        } else {
-            let urlJson = Url.parse(fullUrl);
-            const postmanUrl = new Url(urlJson);
-            let queryString = postmanUrl.getQueryString();
-            let queryStringArr = [];
-            if (queryString) {
-                queryStringArr = QueryParam.parse(queryString);
-                postmanUrl.query = new PropertyList();
-            }
-            let urlString = postmanUrl.toString();
-            let newParam = [...queryStringArr.map(item => {return {...item, id: UUID()}}), ...disabledParams];
-            
-            this.props.onSave({url: urlString, param: newParam});
-        }
+        this.props.onSave(this.getUrlObj(e.target.value));
     }
 
     handleSaveClick = (e) => {
