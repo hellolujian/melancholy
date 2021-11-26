@@ -11,16 +11,16 @@ import Icon from '@ant-design/icons';
 import { 
     ShareAltOutlined , CaretRightOutlined, BranchesOutlined , PullRequestOutlined , 
     FolderAddOutlined ,CloseOutlined, LockFilled , EditFilled, EllipsisOutlined,
-    DownloadOutlined ,FolderFilled , FontColorsOutlined ,DeleteFilled ,
+    DownloadOutlined ,FolderFilled , FontColorsOutlined ,DeleteFilled ,CaretDownOutlined,
     InsertRowLeftOutlined, MonitorOutlined ,CopyOutlined ,PicCenterOutlined    } from '@ant-design/icons';
 import { SHARE_COLLECTION_ICON, MANAGE_ROLES_ICON, RENAME_ICON, EDIT_ICON, CREATE_FORK_ICON, 
     MERGE_CHANGES_ICON, ADD_REQUEST_ICON, ADD_FOLDER_ICON, DUPLICATE_ICON,ELLIPSIS_ICON,
     EXPORT_ICON, MOCK_COLLECTION, MONITOR_COLLECTION_ICON, PUBLISH_DOCS_ICON, 
     REMOVE_FROM_WORKSPACE_ICON, DELETE_ICON, COLLECTION_FOLDER_ICON, GET_REQUEST_ICON, POST_REQUEST_ICON } from '@/ui/constants/icons'
 import TooltipButton from 'ui/components/tooltip_button'
-import CollectionItem from './collection_item'
-import FolderItem from './folder_item'
-import RequestItem from './request_item'
+import CollectionRCItem from './collection_rc_item'
+import FolderRCItem from './folder_rc_item'
+import RequestRCItem from './request_rc_item'
 import PostmanButton from './postman_button'
 import {stopClickPropagation} from '@/utils/global_utils';
 import {
@@ -43,12 +43,18 @@ import {
     loadCollection,
     dropNode
 } from '@/utils/database_utils'
-import 'ui/style/tree.css'
+
+import RCTree from 'rc-tree';
+
+import 'rc-tree/assets/index.css'
+
+import 'ui/style/collection_rc_tree.css'
 
 const { Paragraph, Text, Link } = Typography;
 const { TabPane } = Tabs;
 class CollectionTree extends React.Component {
 
+    rcTreeRef = React.createRef();
     constructor(props) {
         super(props);
         this.state = {
@@ -69,28 +75,23 @@ class CollectionTree extends React.Component {
         subscribeRequestSave(this.refreshData)
         this.refreshData();
     }
-
-    handleExpandKeys = (key, selected) => {
-        const {expandedKeys} = this.state;
-        let newExpandedKeys = expandedKeys.includes(key) ? expandedKeys.filter(item => item !== key) : [...expandedKeys, key];
-        this.setState({expandedKeys: newExpandedKeys});
-    }
-
+    
     handleSelectTreeNode = (selectedKeys, {selected, selectedNodes, node}) => {
-        console.log('选中')
-        this.handleExpandKeys(node.key, selected)
-        if (node.isLeaf) {
-            publishRequestSelected(node.key)
-        }
-        console.log('处理完毕');
-
+    
+        let currentTreeRef = this.rcTreeRef.current;
+        let currentExpandKeys = currentTreeRef.state.expandedKeys;
+    
+        const {key} = node;
+        let isExpanded = currentExpandKeys.find(item => item === key);
+        let newKeys = isExpanded ? currentExpandKeys.filter(o => o !== key) : [...currentExpandKeys, key];
+        console.log(newKeys)
+        currentTreeRef.setExpandedKeys(newKeys);
+    
+        currentTreeRef.setUncontrolledState({selectedKeys: isExpanded ? [] : [key]});
+        // this.setState({expandedKeys: newKeys});
+        
     }
-
-    handleExpandTreeNode = (selectedKeys, {expanded, node}) => {
-        console.log("炸你开");
-        this.handleExpandKeys(node.key, expanded)
-        console.log('处理完毕');
-    }
+  
 
     updateTreeData = (list, key, children) => {
         console.log(key);
@@ -121,9 +122,9 @@ class CollectionTree extends React.Component {
             name: `${name}下的空节点`,
             isLeaf: true,
             isEmptyNode: true,
-            className: 'ant-tree-treenode-empty',
+            className: 'rc-tree-treenode-empty',
             title: (
-                <div className="collection-tree-item-title-empty">
+                <div className="collection-rc-tree-item-title-empty">
                     <Text type="secondary">
                         This {text1} is empty. <Link onClick={this.handleOpenRequestModal}>Add requests</Link> to this {text1} and create {text2} to organize them
                     </Text>
@@ -147,7 +148,7 @@ class CollectionTree extends React.Component {
             }
             if (node.items) {
                 treeItem.title = (
-                    <FolderItem 
+                    <FolderRCItem 
                         item={{...node, parentId: parentId}} 
                         onDelete={() => this.handleFolderDelete(node)}
                         onDuplicate={() => this.handleCollectionDuplicate(node.id)}
@@ -173,7 +174,7 @@ class CollectionTree extends React.Component {
                     //     </div>
                     //     <span>{node.name}</span>
                     // </Space>
-                    <RequestItem 
+                    <RequestRCItem 
                         item={node} 
                         onDelete={() => this.handleRequestDelete(node)}
                         onDuplicate={() => this.handleRequestDuplicate(node.id)}
@@ -337,7 +338,6 @@ class CollectionTree extends React.Component {
     }
 
     render() {
-        console.log('重新渲染');
 
         const {collectionData, collectionDrawerVisibleItem, expandedKeys} = this.state;
         let treeData = collectionData.map(item => {
@@ -346,9 +346,8 @@ class CollectionTree extends React.Component {
                 name: item.name,
                 className: 'collection-tree-collection-item-class',
                 title: (
-                    <CollectionItem 
+                    <CollectionRCItem 
                         item={item} 
-                        collectionDrawerVisible={collectionDrawerVisibleItem === item.id} 
                         onDrawerVisibleChange={this.handleDrawerVisibleChange} 
                         onDelete={() => this.handleCollectionDelete(item.id)}
                         onRemove={() => this.handleCollectionRemove(item.id)}
@@ -364,20 +363,21 @@ class CollectionTree extends React.Component {
         })
         return (
             <>
-                <Tree 
-                    className="collection-tree"
-                    expandedKeys={expandedKeys}
-                    height={this.props.height || (document.body.clientHeight - 240)}
-                    // selectedKeys={selectedKeys}
+                <RCTree
+                    defaultExpandAll={false}
+                    ref={this.rcTreeRef}
+                    // defaultExpandedKeys={defaultExpandedKeys}
+                    // motion={motion}
                     treeData={treeData}
+                    switcherIcon={(obj) => {return obj.isLeaf ? false : (obj.expanded ? <CaretDownOutlined /> : <CaretRightOutlined  />)}}
+                    // height={300}
+                    showIcon={false}
+                    className="collection-rc-tree"
+                    // expandedKeys={expandedKeys}
+                    draggable
+                    // onExpand={this.handleExpandTreeNode}
                     onSelect={this.handleSelectTreeNode}
-                    draggable={this.checkDraggable}
-                    blockNode
-                    onExpand={this.handleExpandTreeNode}
-                    onDragEnter={this.onDragEnter}
-                    onDrop={this.handleDrop}
-                    onDragStart={this.handleDragStart}
-                    allowDrop={this.checkAllowDrop}
+                            
                 />
             </>
             

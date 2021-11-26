@@ -8,6 +8,10 @@
   box-shadow: 0px 4px 4px -4px #5E5E5E;
 }
 
+.left-side-tabs .ant-tabs-nav {
+  margin-bottom: 0px;
+}
+
 .left-side-tabs .ant-tabs-nav-list {
   width: 100%;
   /* justify-content: space-between; */

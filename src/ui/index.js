@@ -9,7 +9,7 @@ import CollectionModal from 'ui/components/collection_modal'
 import TooltipButton from 'ui/components/tooltip_button';
 import RequestTabs from 'ui/components/request_tabs'
 import LayoutHeader from 'ui/components/layout_header'
-import CollectionTree from 'ui/components/collection_tree'
+import CollectionRCTree from 'ui/components/collection_rc_tree'
 import ResponseTab from 'ui/components/response_tab'
 
 import {Rnd} from 'react-rnd';
@@ -62,7 +62,8 @@ class Home extends React.Component {
 
 
     handleWindowResize = (e) => {
-      this.setState({contentWidth: e.target.innerWidth - this.state.width})
+      console.log(document.body.clientHeight);
+      this.setState({contentWidth: e.target.innerWidth - this.state.width, collectionTreeHeight: document.body.clientHeight - 240})
     }
 
     componentDidMount() {
@@ -163,12 +164,9 @@ class Home extends React.Component {
                       <TabPane tab="APIs" key="apis" />
                     </Tabs>
 
-                    
-                    <div style={{height: 'calc(100% - 105px)',  overflowY: 'scroll', overflowX: 'hidden', paddingBottom: 20}} >
-                      {
-                        tabActiveKey === 'collections' && (
-                          <>
-                            <Space className="justify-content-space-between" style={{margin: '8px 0px'}}>
+                    {
+                      tabActiveKey === 'collections' && (
+                        <Space className="justify-content-space-between" style={{margin: '8px 0px'}}>
                               <TooltipButton 
                                 label="New Collection"
                                 onClick={this.handleNewCollectionClick}
@@ -182,8 +180,19 @@ class Home extends React.Component {
                               />
 
                             </Space>
+                      )
+                    }
 
-                            <CollectionTree />
+                    
+                    <div style={{height: 'calc(100% - 140px)',  overflowY: 'auto', overflowX: 'hidden', paddingBottom: 20}} >
+                      {
+                        tabActiveKey === 'collections' && (
+                          <>
+                            
+
+                            <CollectionRCTree 
+                              // height={this.state.collectionTreeHeight} 
+                            />
                           </>
                         )
                       }
