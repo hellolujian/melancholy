@@ -18,7 +18,8 @@ import {
     ENVIRONMENT_EXT_TIPS,
     GLOBALS_TIPS
 } from 'ui/constants/tips'
-import PostmanSDK from 'postman-collection'
+import PostmanSDK from 'postman-collection' 
+import { ToastContainer, toast } from 'react-toastify';
 
 const {Item, ItemGroup} = PostmanSDK;
 const { Dragger } = Upload;
@@ -33,12 +34,15 @@ class ImportModal extends React.Component {
     }
 
     importNotification = (name) => {
-        notification.success({
-            message: `Collection ${name} imported`,
-            placement: 'bottomRight',
-            // duration: 100,
-            // getContainer: () => document.getElementById("rootPage")
-        });
+        // notification.success({
+        //     message: `Collection ${name} imported`,
+        //     placement: 'bottomRight',
+        //     // duration: 100,
+        //     // getContainer: () => document.getElementById("rootPage")
+        // });
+        toast.success(`Collection ${name} imported`, {
+            position: toast.POSITION.BOTTOM_RIGHT,
+        })
     }
 
 

@@ -25,6 +25,8 @@ export const queryCollectionMetaByParentId = (parentId) => {
     return query(COLLECTION_META, {parentId: parentId});
 }
 
-export const queryCollectionMetaByName = (name) => {
-    return query(COLLECTION_META, {name: name});
+export const queryCollectionMetaByName = async (name) => {
+    
+    let workspaceIdQuery = await currentWorkspaceIdQuery();
+    return query(COLLECTION_META, {name: name, ...workspaceIdQuery});
 }

@@ -2,7 +2,7 @@ import React from 'react';
 import { 
     Layout, Menu, 
     Space,Row, Col ,
-    Tabs, Input,Tree, Select
+    Tabs, Input,Tree, Select, Button
 } from 'antd';
 import { PlusOutlined, SearchOutlined,} from '@ant-design/icons';
 import CollectionModal from 'ui/components/collection_modal'
@@ -21,7 +21,10 @@ import 'ui/style/common.css'
 import 'ui/style/layout.css'
 import 'ui/style/global.css'
 
+import 'react-toastify/dist/ReactToastify.css';
 import PostmanSDK from 'postman-collection'
+
+import { ToastContainer, toast } from 'react-toastify';
 
 const {PropertyList, QueryParam, Url} = PostmanSDK;
 
@@ -96,6 +99,7 @@ class Home extends React.Component {
         
       //   console.log(result);
 
+      
     }
 
     componentWillUnmount() {
@@ -128,6 +132,7 @@ class Home extends React.Component {
         return (
 
           <div id="rootPage">
+            <ToastContainer />
             <LayoutHeader />
             <div class="mainBox">
                 <Rnd  
