@@ -150,6 +150,7 @@ class EnvironmentModal extends React.Component {
         this.setState(updateObj);
     }
 
+    // TODO: 封装到util
     writeFileSync = (filePath, fileContent) => {
         const fs = window.require('fs');
         
@@ -258,6 +259,7 @@ class EnvironmentModal extends React.Component {
                                     label={(globalVariableChange ? "Save and " : "") + "Download as JSON"}
                                     mode="save"
                                     title="Select path to save file"
+                                    // TODO:
                                     defaultPath="测试私有个人工作空间.postman_globals.json"
                                     onSelect={this.handleDownloadGlobalSelect}
                                     buttonProps={{type: 'text', className: 'postman-button-class'}}

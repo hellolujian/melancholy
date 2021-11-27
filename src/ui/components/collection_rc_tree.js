@@ -89,6 +89,9 @@ class CollectionTree extends React.Component {
     
         currentTreeRef.setUncontrolledState({selectedKeys: isExpanded ? [] : [key]});
         // this.setState({expandedKeys: newKeys});
+        if (node.isLeaf) {
+            publishRequestSelected(node.key)
+        }
         
     }
   

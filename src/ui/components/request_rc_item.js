@@ -124,7 +124,7 @@ class RequestRCItem extends React.Component {
                 <Dropdown 
                     overlay={menu} 
                     trigger={['contextMenu']}>
-                        <Row align="middle" wrap={false} style={{flexFlow: 'row nowrap', paddingLeft: 4}} className="request-row-class">
+                        <Row align="middle" style={{flexFlow: 'row nowrap', paddingLeft: 4}} className="request-row-class">
                             <Col style={{lineHeight: 0, marginRight: 16}}>
                                 {
                                     getIconByCode(method)

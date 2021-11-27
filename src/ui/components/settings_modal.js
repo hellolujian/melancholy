@@ -11,6 +11,7 @@ import {
 
 import GeneralSettings from './settings/general_settings'
 import ShortcutsSettings from './settings/shortcuts_settings'
+import DataSettings from './settings/data_settings'
 import {IMPORT_TITLE, SYNC_DATA_TITLE, CREATE_NEW, ACCOUNT_TITLE, NOTIFICATIONS_TITLE, SETTINGS_TITLE, RUNNER_TITLE} from '@/ui/constants/titles'
 
 const { Dragger } = Upload;
@@ -75,7 +76,7 @@ class SettingsModal extends React.Component {
                 label: 'Data',
                 value: 'data',
                 content: (
-                    null
+                    <DataSettings />
                 )
             },
             {
@@ -117,12 +118,13 @@ class SettingsModal extends React.Component {
 
         return (
             <ButtonModal 
+            // modalVisible={true}
                 buttonProps={{shape: 'circle', icon: <ToolFilled  />}}
                 tooltipProps={{title: SETTINGS_TITLE}} 
                 modalProps={{title: "SETTINGS", footer: null, width: 800, bodyStyle:{height: 600, overflowY: 'auto' }}} 
                 modalContent={(
 
-                        <Tabs defaultActiveKey="shortcuts" onChange={this.callback}>
+                        <Tabs defaultActiveKey="data" onChange={this.callback}>
                             {
                                 tabs.map(tab => (
                                     <TabPane tab={tab.label} key={tab.value}>

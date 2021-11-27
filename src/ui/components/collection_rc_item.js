@@ -155,9 +155,9 @@ class CollectionRCItem extends React.Component {
                                     
                                 ) : (
                                     <Space align="center">
-                                        <Ellipsis text={name} maxLine={1}  />
-                                        <div className={"vertical-center " + (starred ? '' : 'collection-item-display')} onClick={(e) => this.handleStarClick(e, !starred)}>
-                                            {starred ? COLLECTION_STAR_FILL_SVG : (
+                                        <Ellipsis text={name} maxLine={1} />
+                                        <div style={{marginRight: 10}} className={"vertical-center " + (starred ? '' : 'collection-item-display')} onClick={(e) => this.handleStarClick(e, !starred)}>
+                                            {starred ? <Icon component={() => COLLECTION_STAR_FILL_SVG} /> : (
                                             <>
                                             <Icon className="collection-star-normal" component={() => COLLECTION_STAR_SVG} />
                                             <Icon className="collection-star-hover" component={() => COLLECTION_STAR_HOVER_SVG} />

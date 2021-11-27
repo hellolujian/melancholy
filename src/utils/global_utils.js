@@ -100,6 +100,23 @@ const getSpecificFieldObj = (source = {}, keys = []) => {
     return newObj;
 }
 
+const writeFileSync = (filePath, fileContent) => {
+    const fs = window.require('fs');
+    
+    fs.writeFileSync(  
+        filePath,
+        fileContent, 
+        (err) => {
+            if (err) {
+                console.error(err);
+            } else {
+                console.log('写入成功')
+            }
+    });
+}
+
 export { 
-    stopClickPropagation, UUID, getTextSize, compareObject, compareObjectIgnoreEmpty, getSpecificFieldObj
+    stopClickPropagation, UUID, getTextSize, 
+    compareObject, compareObjectIgnoreEmpty, 
+    getSpecificFieldObj, writeFileSync
 }
