@@ -11,7 +11,7 @@ import CommonSelectFile from '../common_select_file'
 import {queryCollectionMetaById, queryCollectionMetaByName} from '@/database/collection_meta'
 
 import {publishCollectionSave} from '@/utils/event_utils'
-import {UUID, writeFileSync} from '@/utils/global_utils'
+import {UUID, writeJsonFileSync} from '@/utils/global_utils'
 import {IMPORT_TITLE, SYNC_DATA_TITLE, CREATE_NEW, ACCOUNT_TITLE, NOTIFICATIONS_TITLE, SETTINGS_TITLE, RUNNER_TITLE} from '@/ui/constants/titles'
 import {
     IMPORT_FILE_TIPS,
@@ -21,6 +21,9 @@ import {
 } from 'ui/constants/tips'
 import PostmanSDK from 'postman-collection' 
 import { ToastContainer, toast } from 'react-toastify';
+import {
+    loadCollection
+} from '@/utils/database_utils'
 
 const {Item, ItemGroup} = PostmanSDK;
 const { Dragger } = Upload;
@@ -203,14 +206,99 @@ class DataSettings extends React.Component {
 
     }
 
-    handleDownloadClick = (filePath) => {
-        writeFileSync(filePath, "")
+    getEventItem = (code, listen) => {
+        return {
+            listen: listen,
+            script: {
+                id: UUID(),
+                type: 'text/javascript',
+                exec: code.split('\n')
+            }
+        }
     }
 
-    handleImportSelect = (selectFiles) => {
-        if (selectFiles && selectFiles.length > 0) {
-            
+    getEventExportObj = (prerequest, test) => {
+        if (prerequest && test) {
+            let events = [];
+            if (prerequest) {
+                events.push(this.getEventItem(prerequest, 'prerequest'));
+            }
+            if (test) {
+                events.push(this.getEventItem(test, 'test'));
+            }
+            return events;
+        } else {
+            return null;
         }
+    }
+
+    traverseFolderItems = async (folderItems = [], deep = 1) => {
+
+        let flatFolders = [];
+        for (let folderItem of folderItems) {
+            const {id, items} = folderItem;
+            const requestItems = items.filter(item => !item.items);
+            const subFolderItems = items.filter(item => item.items);
+            const folderMetaInfo = await queryCollectionMetaById(id);
+            if (folderMetaInfo) {
+                const {name, description, auth, prerequest, test, parentId} = folderMetaInfo;
+                flatFolders.push({
+                    id: id,
+                    name: name,
+                    description: description,
+                    auth: auth,
+                    events: this.getEventExportObj(prerequest, test),
+                    folder: deep === 1 ? null : parentId,
+                    order: requestItems.map(item => item.id),
+                    folders_order: subFolderItems.map(item => item.id),
+                    folderId: id,
+                })
+                let children = await this.traverseFolderItems(subFolderItems, deep + 1);
+                flatFolders = [...flatFolders, ...children];
+            }
+        }
+        return flatFolders;
+        
+    }
+
+    handleDownloadClick = async(filePath) => {
+        if (!filePath) return;
+        let allCollection = await loadCollection();
+        let collections = [];
+        for (let collection of allCollection) {
+            const {id, items = []} = collection;
+            const requestItems = items.filter(item => !item.items);
+            const folderItems = items.filter(item => item.items);
+            let collectionMeta = await queryCollectionMetaById(id) || {};
+            const {name, description, auth, variable, test, prerequest} = collectionMeta;
+            const folders = await this.traverseFolderItems(folderItems);
+            let collectionItem = {
+                id: id,
+                name: name,
+                description: description,
+                auth: auth,
+                events: this.getEventExportObj(prerequest, test),
+                variables: variable ? variable.map(variableItem => {
+                    const {key, initialValue, disabled} = variableItem;
+                    return {
+                        key: key,
+                        value: initialValue,
+                        disabled: disabled === true
+                    }
+                }) : null,
+                order: requestItems.map(item => item.id),
+                folders_order: folderItems.map(folderItem => folderItem.id),
+                folders: folders.map(folderItem => {return {...folderItem, collectionId: id}}),
+            }
+            console.log(collectionItem);
+            collections.push(collectionItem);
+            // return collectionItem;
+        }
+        let dumpData = {
+            collections: collections
+        }
+        console.log(collections);
+        writeJsonFileSync(filePath, dumpData)
     }
 
     render() {
