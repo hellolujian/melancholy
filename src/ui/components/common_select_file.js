@@ -1,5 +1,6 @@
 import React from 'react';
 import {Tooltip, Button, Typography, Popover} from 'antd';
+import {getValueByVariableType} from '@/utils/global_utils'
 
 const {Link} = Typography;
 class CommonSelectFile extends React.Component {
@@ -14,11 +15,12 @@ class CommonSelectFile extends React.Component {
       
     }
 
-    handleSelectBtnClick = () => {
+    handleSelectBtnClick = async () => {
         const {directory, file, multiple, title, defaultPath, mode = 'select'} = this.props;
+        let realDefaultPath = await getValueByVariableType(defaultPath);
         const openFileSelect = window.require('@electron/remote').getGlobal(mode === 'select' ? 'OPEN_FILES_ELECT_DIALOG' : 'SHOW_SAVE_DIALOG');
-        let selectedFiles = openFileSelect({multiple: multiple, file: file, directory: directory, title: title, defaultPath: defaultPath});
-        this.props.onSelect(selectedFiles || [])
+        let selectedFiles = openFileSelect({multiple: multiple, file: file, directory: directory, title: title, defaultPath: realDefaultPath});
+        this.props.onSelect(!multiple && selectedFiles && selectedFiles.length > 0 ? selectedFiles[0] : selectedFiles);
     }
 
     render() {

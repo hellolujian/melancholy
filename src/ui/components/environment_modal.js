@@ -19,18 +19,22 @@ import DropdownTooltip from './dropdown_tooltip'
 import {queryEnvironmentMeta, updateEnvironmentMeta, insertEnvironmentMeta} from '@/database/environment_meta'
 import {queryCommonMeta, updateCommonMeta, queryCommonMetaByType} from '@/database/common_meta'
 
-import {UUID} from '@/utils/global_utils'
+import {UUID, writeJsonFileSync} from '@/utils/global_utils'
 import VariablesTable from './variables_table';
 import ButtonModal from './button_modal'
 import CommonSelectFile from './common_select_file'
 import {queryWorkspaceMetaById, updateWorkspaceMeta} from '@/database/workspace_meta'
 import {getCurrentWorkspaceId, getCurrentWorkspace} from '@/utils/store_utils';
 
+import PostmanSDK from 'postman-collection'
+import { ToastContainer, toast } from 'react-toastify';
+
 import {CommonValueType} from '@/enums'
 import 'ui/style/environment_modal.css'
 
 const { Link, Text, Paragraph } = Typography;
 const { Option } = Select;
+const {VariableScope} = PostmanSDK;
 class EnvironmentModal extends React.Component {
 
     formRef = React.createRef();
@@ -107,7 +111,7 @@ class EnvironmentModal extends React.Component {
         this.setState({scene: 'view'})
     }
 
-    handleSaveClick = async () => {
+    handleSaveGlobalClick = async () => {
         const {variable} = this.state;
         let currentWorkspaceId = await getCurrentWorkspaceId();
         await updateWorkspaceMeta(currentWorkspaceId, {$set: {variable: variable}})
@@ -150,26 +154,11 @@ class EnvironmentModal extends React.Component {
         this.setState(updateObj);
     }
 
-    // TODO: 封装到util
-    writeFileSync = (filePath, fileContent) => {
-        const fs = window.require('fs');
-        
-        fs.writeFileSync(  
-            filePath,
-            fileContent, 
-            (err) => {
-                if (err) {
-                    console.error(err);
-                } else {
-                    console.log('写入成功')
-                }
-        });
-    }
-
     handleDownloadEnvironmentSelect = (filePath, item) => {
         const {id, variable = [], name} = item
         let fileJson = {
             id: id,
+            name: name,
             values: variable.map(v => {
                 return {
                     key: v.name, 
@@ -177,38 +166,76 @@ class EnvironmentModal extends React.Component {
                     enabled: v.disabled ? false : true
                 }
             }),
-            name: name + ".postman_environment.json",
-            "_postman_variable_scope": "environment",
-            "_postman_exported_at": "2021-11-08T07:40:26.168Z",
-            "_postman_exported_using": "Postman/7.3.6"
+            _postman_variable_scope: "environment",
+            // "_postman_exported_at": "2021-11-08T07:40:26.168Z",
+            // "_postman_exported_using": "Postman/7.3.6"
         }
-        this.writeFileSync(filePath, JSON.stringify(fileJson, "", "\t"))
+        writeJsonFileSync(filePath, fileJson);
+        toast.success(`Your environment was exported successfully.`, {
+            position: toast.POSITION.BOTTOM_RIGHT,
+        })
     }
 
-    handleDownloadGlobalSelect = (filePath) => {
-        const {globalVariableChange,} = this.state;
+    handleDownloadGlobalSelect = async (filePath) => {
+        const {globalVariableChange, variable = []} = this.state;
         
+        const currentWorkspace = await getCurrentWorkspace() || {};
+        const {id, name} = currentWorkspace;
         let fileJson = {
-            id: '234saf',
+            id: id,
+            name: `${name} Globals`,
             values: [
-                {key: '234', value: 'sdf', enabled: true}
+                variable.map(item => {
+                    const {key, initialValue, disabled} = item;
+                    return {
+                        key: key, value: initialValue, enabled: disabled !== false
+                    }
+                })
             ],
-            name: "测试私有个人工作空间 globals",
-            "_postman_variable_scope": "globals",
-            "_postman_exported_at": "2021-11-08T07:40:26.168Z",
-            "_postman_exported_using": "Postman/7.3.6"
+            _postman_variable_scope: "globals",
+            // _postman_exported_at: "2021-11-08T07:40:26.168Z",
+            // "_postman_exported_using": "Postman/7.3.6"
         }
-        this.writeFileSync(filePath, JSON.stringify(fileJson, "", "\t"))
+        writeJsonFileSync(filePath, fileJson)
 
         if (globalVariableChange) {
-            this.handleSaveClick()
+            this.handleSaveGlobalClick()
+        }
+        
+        toast.success(`Your globals were exported successfully.`, {
+            position: toast.POSITION.BOTTOM_RIGHT,
+        })
+    }
+
+    handleImportSelect = async (targetFile) => {
+        console.log(targetFile);
+        if (!targetFile) return;
+        let fs = window.require('fs')
+        let evnJson = JSON.parse(fs.readFileSync(targetFile).toString());
+        const {name, values} = evnJson;
+        if (name && values && Array.isArray(values)) {
+            let envDbObject = {
+                id: UUID(),
+                name: name,
+                variable: values.map(o => {
+                    const {key, value, enabled} = o;
+                    return {
+                        id: UUID(),
+                        key: key,
+                        initialValue: value,
+                        currentValue: value,
+                        disabled: enabled === false
+                    }
+                })
+            };
+            await insertEnvironmentMeta(envDbObject);
+            await this.refreshData({scene: 'view'})
         }
     }
 
-    handleImportSelect = (selectFiles) => {
-        if (selectFiles && selectFiles.length > 0) {
-            
-        }
+    getDownloadGlobalPath = async () => {
+        let currentWorkspace = await getCurrentWorkspace() || {};
+        return `${currentWorkspace.name}.postman_globals.json`;
     }
 
     render() {
@@ -259,8 +286,7 @@ class EnvironmentModal extends React.Component {
                                     label={(globalVariableChange ? "Save and " : "") + "Download as JSON"}
                                     mode="save"
                                     title="Select path to save file"
-                                    // TODO:
-                                    defaultPath="测试私有个人工作空间.postman_globals.json"
+                                    defaultPath={this.getDownloadGlobalPath}
                                     onSelect={this.handleDownloadGlobalSelect}
                                     buttonProps={{type: 'text', className: 'postman-button-class'}}
                                 />
@@ -283,7 +309,7 @@ class EnvironmentModal extends React.Component {
                         }
                         {
                             scene === 'global' && (
-                                <Button type="primary" onClick={this.handleSaveClick}>Save</Button>
+                                <Button type="primary" onClick={this.handleSaveGlobalClick}>Save</Button>
                             )
                         }
                         {
@@ -306,7 +332,6 @@ class EnvironmentModal extends React.Component {
                             <Paragraph>Select environment files from your computer</Paragraph>
                             
                             <CommonSelectFile 
-                                multiple
                                 label="Select File"
                                 onSelect={this.handleImportSelect}
                                 buttonProps={{type: 'text', className: 'postman-button-class'}}

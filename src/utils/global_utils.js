@@ -115,8 +115,17 @@ const writeFileSync = (filePath, fileContent) => {
     });
 }
 
+const writeJsonFileSync = (filePath, fileJson) => {
+    writeFileSync(filePath, JSON.stringify(fileJson, "", "\t"))
+}
+
+let getValueByVariableType = (variable, param, ...rest) => {
+    return typeof(variable) === 'function' ? variable(param, ...rest) : variable
+}
+
 export { 
     stopClickPropagation, UUID, getTextSize, 
     compareObject, compareObjectIgnoreEmpty, 
-    getSpecificFieldObj, writeFileSync
+    getSpecificFieldObj, writeFileSync, getValueByVariableType,
+    writeJsonFileSync
 }

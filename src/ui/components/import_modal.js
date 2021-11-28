@@ -170,14 +170,6 @@ class ImportModal extends React.Component {
         // let collectionObj = myCollection.toJSON();
         // console.log(collectionObj);
 
-        console.log( myCollection.items);
-        let ItemGroup = require('postman-collection').ItemGroup;
-        myCollection.items.each(o => {
-            console.log(o);
-            console.log(ItemGroup.isItemGroup(o));
-            return o;
-        })
-
         const {name} = myCollection;
         if (!name) return;
 
