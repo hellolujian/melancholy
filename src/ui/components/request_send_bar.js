@@ -68,7 +68,6 @@ class RequestSendBar extends React.Component {
         const {value = {}} = this.props;
         const {url = '', method = 'get', param = []} = value;
         let queryString = QueryParam.unparse(param);
-        console.log('render querystring: ' + queryString);
         let urlWithQuery = url + (queryString ? ("?" + queryString) : "")
         const methodSelect = (
             <RequestMethodSelect 

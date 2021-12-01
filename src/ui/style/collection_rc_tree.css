@@ -70,14 +70,13 @@
 }
 .rc-tree-treenode-empty {
   white-space: unset !important;
+  display: flex !important;
 }
 
-.rc-tree-treenode-empty .rc-tree-indent {
-  display: none;
-}
 .rc-tree-treenode-empty .rc-tree-node-content-wrapper {
   height: 100% !important;
   /* margin: 0px 0px 8px 16px !important; */
+  cursor: unset !important;
 }
 
 .collection-tree-collection-item-class:hover {

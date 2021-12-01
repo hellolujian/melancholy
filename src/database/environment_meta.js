@@ -28,6 +28,10 @@ export const queryEnvironmentMeta = async (param = {}) => {
     return query(ENVIRONMENT_META, {...workspaceIdQuery, ...param});
 }
 
+export const queryAllEnvironmentMeta = async (param = {}) => {
+    return query(ENVIRONMENT_META, param);
+}
+
 export const removeEnvironmentMetaById = (id) => {
     return remove(ENVIRONMENT_META, {id: id});
 }

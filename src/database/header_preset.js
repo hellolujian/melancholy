@@ -27,3 +27,7 @@ export const queryHeaderPreset = async (param = {}) => {
     let workspaceIdQuery = await currentWorkspaceIdQuery();
     return await query(HEADER_PRESET, {...workspaceIdQuery, ...param});
 }
+
+export const queryAllHeaderPreset = async (param = {}) => {
+    return await query(HEADER_PRESET, param);
+}

@@ -26,7 +26,7 @@ import PostmanSDK from 'postman-collection'
 
 import { ToastContainer, toast } from 'react-toastify';
 
-const {PropertyList, QueryParam, Url} = PostmanSDK;
+const {PropertyList, QueryParam, Url, RequestAuth} = PostmanSDK;
 
 const { TabPane } = Tabs;
 const { SubMenu } = Menu;
@@ -70,26 +70,26 @@ class Home extends React.Component {
     }
 
     componentDidMount() {
-      let urlopt = Url.parse("https://localhost:8000/api/getuserInfo?");
-      console.log(urlopt);
-      let postmanUrl = new Url(urlopt);
-      console.log('protocol :%s', postmanUrl.protocol)
-      console.log("host: %s", postmanUrl.getHost())
-      console.log('path: %s', postmanUrl.getPath())
-      console.log('getpathwithquery: %s', postmanUrl.getPathWithQuery())
-      console.log('getQueryString: %s', postmanUrl.getQueryString());
-      console.log(postmanUrl.query);
-      console.log('getRemote:%s', postmanUrl.getRemote());
-      console.log('toString', postmanUrl.toString());
-      console.log('toJson==========');
-      console.log(postmanUrl);
-      postmanUrl.query = new PropertyList();
-      console.log('to_string: %s', postmanUrl.toString());
+      // let urlopt = Url.parse("https://localhost:8000/api/getuserInfo?");
+      // console.log(urlopt);
+      // let postmanUrl = new Url(urlopt);
+      // console.log('protocol :%s', postmanUrl.protocol)
+      // console.log("host: %s", postmanUrl.getHost())
+      // console.log('path: %s', postmanUrl.getPath())
+      // console.log('getpathwithquery: %s', postmanUrl.getPathWithQuery())
+      // console.log('getQueryString: %s', postmanUrl.getQueryString());
+      // console.log(postmanUrl.query);
+      // console.log('getRemote:%s', postmanUrl.getRemote());
+      // console.log('toString', postmanUrl.toString());
+      // console.log('toJson==========');
+      // console.log(postmanUrl);
+      // postmanUrl.query = new PropertyList();
+      // console.log('to_string: %s', postmanUrl.toString());
 
-      console.log('new url');
-      console.log(QueryParam.unparse([{disabled: true, key: 'hello', value: 'world'}, {key: 'name', value: 'lujian'}]));
+      // console.log('new url');
+      // console.log(QueryParam.unparse([{disabled: true, key: 'hello', value: 'world'}, {key: 'name', value: 'lujian'}]));
       
-      console.log(QueryParam.parse(""));
+      // console.log(QueryParam.parse(""));
       // alert('来自渲染页面：' + getStoreValue('workspaceId'))
       this.setState({contentWidth: window.innerWidth - this.state.width})
       window.addEventListener('resize', this.handleWindowResize)
@@ -99,6 +99,19 @@ class Home extends React.Component {
         
       //   console.log(result);
 
+      // var auth = new RequestAuth({
+      //   type: 'basic',
+      
+      //   basic: [
+      //     { key: "username", value: "postman" },
+      //     { key: "password", value: "secrets" }
+      //   ]
+      // });
+
+      // console.log(auth);
+      // console.log(auth.toJSON());
+      // console.log(auth.parameters());
+      // console.log(auth.parameters().toObject());
       
     }
 

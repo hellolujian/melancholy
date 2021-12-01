@@ -52,6 +52,7 @@ import 'ui/style/collection_rc_tree.css'
 
 const { Paragraph, Text, Link } = Typography;
 const { TabPane } = Tabs;
+
 class CollectionTree extends React.Component {
 
     rcTreeRef = React.createRef();
@@ -125,6 +126,7 @@ class CollectionTree extends React.Component {
             name: `${name}下的空节点`,
             isLeaf: true,
             isEmptyNode: true,
+            selectable: false,
             className: 'rc-tree-treenode-empty',
             title: (
                 <div className="collection-rc-tree-item-title-empty">
@@ -321,13 +323,9 @@ class CollectionTree extends React.Component {
         await this.refreshData()
     }
 
-    handleDragStart = ({event, node}) => {
-        
-    }
-
     checkDraggable = (node) => {
-        const {collectionData} = this.state;
-        return node.isEmptyNode || collectionData.find(collection => collection.id === node.key) ? false : true;
+        const {isEmptyNode} = node;
+        return isEmptyNode ? false : true;
     }
 
     handleDrop = async (info) => {
@@ -336,8 +334,12 @@ class CollectionTree extends React.Component {
         this.refreshData()
     }
 
-    checkAllowDrop = (dropInfo) =>  {
-        return !dropInfo.isLeaf;
+    handleDragStart = ({event,node}) => {
+        const {isCollection} = node;
+        if (isCollection) {
+            event.preventDefault()
+        }
+        
     }
 
     render() {
@@ -348,6 +350,7 @@ class CollectionTree extends React.Component {
                 key: item.id,
                 name: item.name,
                 className: 'collection-tree-collection-item-class',
+                isCollection: true,
                 title: (
                     <CollectionRCItem 
                         item={item} 
@@ -377,9 +380,11 @@ class CollectionTree extends React.Component {
                     showIcon={false}
                     className="collection-rc-tree"
                     // expandedKeys={expandedKeys}
-                    draggable
+                    draggable={this.checkDraggable}
                     // onExpand={this.handleExpandTreeNode}
                     onSelect={this.handleSelectTreeNode}
+                    onDrop={this.handleDrop}
+                    onDragStart={this.handleDragStart}
                             
                 />
             </>

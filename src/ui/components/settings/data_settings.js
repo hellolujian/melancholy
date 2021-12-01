@@ -9,9 +9,13 @@ import {deleteCollection, saveCollection, importCollection} from '@/utils/databa
 
 import CommonSelectFile from '../common_select_file'
 import {queryCollectionMetaById, queryCollectionMetaByName} from '@/database/collection_meta'
+import {queryRequestMetaById} from '@/database/request_meta'
+import {queryAllEnvironmentMeta, queryEnvironmentMeta} from '@/database/environment_meta'
+import {queryAllHeaderPreset} from '@/database/header_preset'
 
 import {publishCollectionSave} from '@/utils/event_utils'
-import {UUID, writeJsonFileSync} from '@/utils/global_utils'
+import {UUID, writeJsonFileSync, getJsonFromFile} from '@/utils/global_utils'
+import {getFullUrl, getExportKeyValueArr, getEventExportObj, getVariableExportArr} from '@/utils/common_utils'
 import {IMPORT_TITLE, SYNC_DATA_TITLE, CREATE_NEW, ACCOUNT_TITLE, NOTIFICATIONS_TITLE, SETTINGS_TITLE, RUNNER_TITLE} from '@/ui/constants/titles'
 import {
     IMPORT_FILE_TIPS,
@@ -25,7 +29,9 @@ import {
     loadCollection
 } from '@/utils/database_utils'
 
-const {Item, ItemGroup} = PostmanSDK;
+import {RequestBodyModeType} from '@/enums'
+
+const {Item, ItemGroup, RequestAuth} = PostmanSDK;
 const { Dragger } = Upload;
 const { TabPane } = Tabs;
 const {Paragraph, Text, Title} = Typography;
@@ -206,58 +212,82 @@ class DataSettings extends React.Component {
 
     }
 
-    getEventItem = (code, listen) => {
+    traverseFolderItems = async (collectionItems = [], deep = 1) => {
+
+        let flatFolders = []; 
+        let flatRequests = [];
+        for (let collectionItem of collectionItems) {
+            const {id, items} = collectionItem;
+            if (items) {
+                const requestItems = items.filter(item => !item.items);
+                const subFolderItems = items.filter(item => item.items);
+                const itemMetaInfo = await queryCollectionMetaById(id);
+                if (itemMetaInfo) {
+                    const {name, description, auth, prerequest, test, parentId} = itemMetaInfo;
+                    flatFolders.push({
+                        id: id,
+                        name: name,
+                        description: description,
+                        auth: auth,
+                        events: getEventExportObj(prerequest, test),
+                        folder: deep === 1 ? null : parentId,
+                        order: requestItems.map(item => item.id),
+                        folders_order: subFolderItems.map(item => item.id),
+                        folderId: id,
+                    })
+                    let children = await this.traverseFolderItems(items, deep + 1);
+                    flatFolders = [...flatFolders, ...children.flatFolders];
+                    flatRequests = [...flatRequests, ...children.flatRequests];
+                }
+            } else {
+                const itemMetaInfo = await queryRequestMetaById(id);
+                if (itemMetaInfo) {
+                    const {name, description, auth, prerequest, test, parentId, url, method, body = {}, header, param = []} = itemMetaInfo;
+                    const {mode} = body;
+                    const authType = auth && auth.type ? auth.type : null;
+                    let currentHelper = null, helperAttributes = null;
+                    if (authType && authType !== 'noauth') {
+                        let postmanAuthRequest = new RequestAuth(auth);
+                        helperAttributes = postmanAuthRequest.parameters().toObject()
+                        helperAttributes = {id: authType, ...helperAttributes}
+                    }
+                    const modeData = body[mode];
+                    flatRequests.push({
+                        id: id,
+                        name: name,
+                        url: getFullUrl(itemMetaInfo),
+                        description: description,
+                        data: mode === 'params' ? getExportKeyValueArr(modeData) : null,
+                        dataOptions: null,
+                        dataMode: mode ? mode : null,
+                        headerData: getExportKeyValueArr(header),
+                        method: method.toUpperCase(),
+                        pathVariableData: [],
+                        queryParams: getExportKeyValueArr(param),
+                        auth: auth,
+                        events: getEventExportObj(prerequest, test),
+                        folder: deep === 1 ? null : parentId,
+                        responses_order: [],
+                        protocolProfileBehavior: {
+                            disableBodyPruning: true,
+                        },
+                        currentHelper: currentHelper,
+                        helperAttributes: helperAttributes,
+                        rawModeData: mode === RequestBodyModeType.RAW.code || mode === RequestBodyModeType.BINARY.code ? modeData : null,
+                        headers: header ? header.map(item => {
+                            const {disabled, key, value} = item
+                            return (disabled === false ? "//" : "") + `${key}: ${value};`
+                        }).join("\n") : "",
+                        pathVariables: {}
+                    })
+                }
+            }
+            
+        }
         return {
-            listen: listen,
-            script: {
-                id: UUID(),
-                type: 'text/javascript',
-                exec: code.split('\n')
-            }
-        }
-    }
-
-    getEventExportObj = (prerequest, test) => {
-        if (prerequest && test) {
-            let events = [];
-            if (prerequest) {
-                events.push(this.getEventItem(prerequest, 'prerequest'));
-            }
-            if (test) {
-                events.push(this.getEventItem(test, 'test'));
-            }
-            return events;
-        } else {
-            return null;
-        }
-    }
-
-    traverseFolderItems = async (folderItems = [], deep = 1) => {
-
-        let flatFolders = [];
-        for (let folderItem of folderItems) {
-            const {id, items} = folderItem;
-            const requestItems = items.filter(item => !item.items);
-            const subFolderItems = items.filter(item => item.items);
-            const folderMetaInfo = await queryCollectionMetaById(id);
-            if (folderMetaInfo) {
-                const {name, description, auth, prerequest, test, parentId} = folderMetaInfo;
-                flatFolders.push({
-                    id: id,
-                    name: name,
-                    description: description,
-                    auth: auth,
-                    events: this.getEventExportObj(prerequest, test),
-                    folder: deep === 1 ? null : parentId,
-                    order: requestItems.map(item => item.id),
-                    folders_order: subFolderItems.map(item => item.id),
-                    folderId: id,
-                })
-                let children = await this.traverseFolderItems(subFolderItems, deep + 1);
-                flatFolders = [...flatFolders, ...children];
-            }
-        }
-        return flatFolders;
+            flatFolders: flatFolders, 
+            flatRequests: flatRequests,
+        };
         
     }
 
@@ -271,13 +301,14 @@ class DataSettings extends React.Component {
             const folderItems = items.filter(item => item.items);
             let collectionMeta = await queryCollectionMetaById(id) || {};
             const {name, description, auth, variable, test, prerequest} = collectionMeta;
-            const folders = await this.traverseFolderItems(folderItems);
+            const flatItems = await this.traverseFolderItems(items);
+            const {flatRequests, flatFolders} = flatItems;
             let collectionItem = {
                 id: id,
                 name: name,
                 description: description,
                 auth: auth,
-                events: this.getEventExportObj(prerequest, test),
+                events: getEventExportObj(prerequest, test),
                 variables: variable ? variable.map(variableItem => {
                     const {key, initialValue, disabled} = variableItem;
                     return {
@@ -288,17 +319,44 @@ class DataSettings extends React.Component {
                 }) : null,
                 order: requestItems.map(item => item.id),
                 folders_order: folderItems.map(folderItem => folderItem.id),
-                folders: folders.map(folderItem => {return {...folderItem, collectionId: id}}),
+                folders: flatFolders.map(folderItem => {return {...folderItem, collectionId: id}}),
+                requests: flatRequests.map(requestItem => {return {...requestItem, collectionId: id}})
             }
             console.log(collectionItem);
             collections.push(collectionItem);
             // return collectionItem;
         }
+        const allEnvironmentMeta = await queryAllEnvironmentMeta();
+        const allHeaderPresetMeta = await queryAllHeaderPreset();
         let dumpData = {
-            collections: collections
+            collections: collections,
+            environments: allEnvironmentMeta.map(item => {
+                const {id, name, variable} = item;
+                return {
+                    id: id, 
+                    name: name,
+                    values: getVariableExportArr(variable)
+                }
+            }),
+            headerPresets: allHeaderPresetMeta.map(item => {
+                const {id, name, preset} = item;
+                return {
+                    id: id,
+                    name: name,
+                    headers: getExportKeyValueArr(preset)
+                }
+            }),
+            globals: []
         }
         console.log(collections);
         writeJsonFileSync(filePath, dumpData)
+    }
+
+    handleImportSelect = async (filePath) => {
+        if (!filePath) return;
+        const fileJson = getJsonFromFile(filePath);
+        if (!fileJson) return;
+        const {collections} = fileJson;
     }
 
     render() {

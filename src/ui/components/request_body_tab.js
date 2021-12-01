@@ -7,6 +7,7 @@ import RequestBodySelectFile from './request_body_select_file';
 import {
     GREEN_DOT_ICON
 } from 'ui/constants/icons'
+import {RequestBodyModeType} from '@/enums'
 import 'ui/style/request_body_tab.css'
 
 const {Option} = Select;

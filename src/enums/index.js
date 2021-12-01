@@ -55,3 +55,48 @@ export const AuthSceneType = Enum.define("AuthSceneType", ["REQUEST", "COLLECTIO
 export const CommonValueType = Enum.define("CommonValueType", ["GLOBALS", ])
 
 export const OptType = Enum.define("OptType", ["ADD", "DEL", "UPDATE"])
+
+export const RequestBodyModeType = Enum.define("RequestBodyModeType", {
+    constants: {
+        NONE: {
+            code: 'none',
+            label: 'none',
+            icon: POST_REQUEST_ICON
+        },
+        FORMDATA: {
+            code: 'formdata',
+            label: 'form-data',
+            icon: PUT_REQUEST_ICON
+        },
+        URLENCODED: {
+            code: 'urlencoded',
+            label: 'x-www-form-urlencoded',
+            icon: DEL_REQUEST_ICON
+        },
+        RAW: {
+            code: 'raw',
+            label: 'raw',
+            icon: GET_REQUEST_ICON
+        },
+        BINARY: {
+            code: 'binary',
+            label: 'binary',
+            icon: EXAMPLE_ICON
+        },
+        GRAPHQL: {
+            code: 'graphql',
+            label: 'GraphQL',
+            icon: BOOTCAMP_ICON
+        } 
+    },
+    methods: {
+        
+        // surfaceGravity: function() {
+        //     var G = 6.67300E-11;
+        //     return (G * this.mass) / Math.pow(this.radius, 2);
+        // },
+        // surfaceWeight: function(mass) {
+        //     return mass * this.surfaceGravity();
+        // }
+    }
+});
