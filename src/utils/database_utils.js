@@ -515,11 +515,7 @@ export const dropNode = async (sourceId, sourceIsLeaf, targetId, targetIsLeaf, p
 
 
 export const importCollection = async (collection, collectionMetaList, requestMetaList) => {
-
-    console.log('folderList');
-    console.log(collectionMetaList)
-    console.log('reqlist');
-    console.log(requestMetaList)
+    
     await insertRequestMeta(requestMetaList);
     await insertCollectionMeta(collectionMetaList);
     return await insertCollection({

@@ -26,7 +26,7 @@ import PostmanSDK from 'postman-collection'
 
 import { ToastContainer, toast } from 'react-toastify';
 
-const {PropertyList, QueryParam, Url, RequestAuth} = PostmanSDK;
+const {PropertyList, QueryParam, Url, RequestAuth, VariableScope} = PostmanSDK;
 
 const { TabPane } = Tabs;
 const { SubMenu } = Menu;
@@ -70,9 +70,14 @@ class Home extends React.Component {
     }
 
     componentDidMount() {
-      // let urlopt = Url.parse("https://localhost:8000/api/getuserInfo?");
-      // console.log(urlopt);
-      // let postmanUrl = new Url(urlopt);
+      let urlopt = Url.parse("https://localhost:8000/api/getuserInfo");
+      console.log(urlopt);
+      let postmanUrl = new Url(urlopt);
+      postmanUrl.addQueryParams({disabled: true, key: 'hello', value: 'world', description: 'sdfweertw'})
+      postmanUrl.addQueryParams({key: 'hello11', value: 'world11'})
+      // postmanUrl.query = new PropertyList(() => new QueryParam({key: 'hello', value: 'world'}));
+      // postmanUrl.update({query: new PropertyList(new QueryParam({disabled: true, key: 'hello', value: 'world'}))})
+      // console.log(new QueryParam({ key: 'hello', value: 'world'}));
       // console.log('protocol :%s', postmanUrl.protocol)
       // console.log("host: %s", postmanUrl.getHost())
       // console.log('path: %s', postmanUrl.getPath())
@@ -81,10 +86,11 @@ class Home extends React.Component {
       // console.log(postmanUrl.query);
       // console.log('getRemote:%s', postmanUrl.getRemote());
       // console.log('toString', postmanUrl.toString());
-      // console.log('toJson==========');
-      // console.log(postmanUrl);
+      console.log(postmanUrl);
+      console.log('toJson==========');
+      console.log(postmanUrl.toJSON());
       // postmanUrl.query = new PropertyList();
-      // console.log('to_string: %s', postmanUrl.toString());
+      console.log('to_string: %s', postmanUrl.toString());
 
       // console.log('new url');
       // console.log(QueryParam.unparse([{disabled: true, key: 'hello', value: 'world'}, {key: 'name', value: 'lujian'}]));
@@ -113,6 +119,48 @@ class Home extends React.Component {
       // console.log(auth.parameters());
       // console.log(auth.parameters().toObject());
       
+      let vscope = new VariableScope({
+        "id": "de80b3fe-ce0a-4fe3-84ee-5b8a3bc83ba3",
+        "name": "localhost_qa",
+        "values": [
+          {
+            "key": "api-ocs",
+            "value": "http://qacourseware-ocs.hjapi.com",
+            "enabled": true
+          },
+          {
+            "key": "bi-search",
+            "value": "http://localhost:8081",
+            "enabled": true
+          },
+          {
+            "key": "bi",
+            "value": "http://qaaiportal.hjapi.com",
+            "enabled": false
+          },
+          {
+            "key": "hj-search",
+            "value": "http://localhost:8080",
+            "enabled": true
+          },
+          {
+            "key": "order-query",
+            "value": "http://qa.query-order.soa.yeshj.com",
+            "enabled": false
+          },
+          {
+            "key": "api-open",
+            "value": "localhost:8070",
+            "enabled": true
+          }
+        ],
+        "_postman_variable_scope": "environment",
+        "_postman_exported_at": "2021-12-02T09:45:40.458Z",
+        "_postman_exported_using": "Postman/7.3.6"
+      })
+
+      console.log(vscope);
+      console.log(vscope.toJSON());
     }
 
     componentWillUnmount() {

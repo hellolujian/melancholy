@@ -101,9 +101,10 @@ const getSpecificFieldObj = (source = {}, keys = []) => {
 }
 
 const writeFileSync = (filePath, fileContent) => {
+    if (!filePath) return;
     const fs = window.require('fs');
     
-    fs.writeFileSync(  
+    let result = fs.writeFileSync(  
         filePath,
         fileContent, 
         (err) => {
@@ -113,10 +114,32 @@ const writeFileSync = (filePath, fileContent) => {
                 console.log('写入成功')
             }
     });
+    return result;
 }
 
-const writeJsonFileSync = (filePath, fileJson) => {
-    writeFileSync(filePath, JSON.stringify(fileJson, "", "\t"))
+const writeJsonFileSync = (filePath, fileJson, callback = () => {}) => {
+    writeFileSync(filePath, JSON.stringify(fileJson, "", "\t"), callback);
+}
+
+const getSaveFilePath = (fileProps = {}) => {
+    const openFileSelect = window.require('@electron/remote').getGlobal('SHOW_SAVE_DIALOG');
+    return openFileSelect({title: 'Select path to save file', ...fileProps});
+}
+
+const getSingleSelectFilePath = (fileProps = {}) => {
+    const openFileSelect = window.require('@electron/remote').getGlobal('OPEN_FILES_ELECT_DIALOG');
+    return openFileSelect(fileProps);
+}
+
+const saveJsonFileSync = (fileJson, fileProps = {}, callback) => {
+    const openFileSelect = window.require('@electron/remote').getGlobal('SHOW_SAVE_DIALOG');
+    let selectedFile = openFileSelect({title: 'Select path to save file', ...fileProps});
+    writeJsonFileSync(selectedFile, fileJson, callback)
+}
+
+const getContentFromFilePath = (filePath) => {
+    let fs = window.require('fs');
+    return fs.readFileSync(filePath).toString()
 }
 
 const getJsonFromFile = (filePath) => {
@@ -133,5 +156,6 @@ export {
     stopClickPropagation, UUID, getTextSize, 
     compareObject, compareObjectIgnoreEmpty, 
     getSpecificFieldObj, writeFileSync, getValueByVariableType,
-    writeJsonFileSync,getJsonFromFile
-}
+    writeJsonFileSync, getJsonFromFile, saveJsonFileSync, getSaveFilePath,
+    getContentFromFilePath, getSingleSelectFilePath
+} 

@@ -89,7 +89,6 @@ class ImportModal extends React.Component {
                     name: name,
                     url: url.toString(),
                     method: method,
-                    body: body,
                     header: headers.map(h => {
                         let {key, value, description: headerDesc, disabled} = h;
                         return {
@@ -106,10 +105,14 @@ class ImportModal extends React.Component {
                     prerequest: this.getRequestScript(events, 'prerequest'),
                     test: this.getRequestScript(events, 'test'),
                 }
+                if (body) {
+                    requestMetaData.body = body.toJSON();
+                }
                 requestList.push(requestMetaData);
                 collectionObj.items.push({
                     id: requestMetaData.id,
-                    name: name
+                    name: name,
+                    method: method,
                 });
             } 
         })
@@ -209,6 +212,10 @@ class ImportModal extends React.Component {
         this.handleAddCollection(myCollection);
     }
 
+    handleRawTextChange = (e) => {
+        this.setState({pasteRawText: e.target.value})
+    }
+
     render() {
      
         const {title, color = 'gray', label} = this.props
@@ -236,7 +243,7 @@ class ImportModal extends React.Component {
                     modalContent={(
                         <Space direction="vertical">
                             {IMPORT_FILE_TIPS}
-                            <Tabs size="small" defaultActiveKey="file" value={activeTabKey} onChange={this.handleTabKeyChange}>
+                            <Tabs size="small" defaultActiveKey="raw" value={activeTabKey} onChange={this.handleTabKeyChange}>
                                 <TabPane tab="Import File" key="file">
                                     <Dragger
                                         multiple
@@ -272,7 +279,13 @@ class ImportModal extends React.Component {
                                     <Input placeholder="Enter a URL and press Import" />
                                 </TabPane>
                                 <TabPane tab="Paste Raw Text" key="raw">
-                                    <Input.TextArea rows={12} />
+                                <Input.TextArea rows={12} onChange={this.handleRawTextChange}/>
+                                    {/* <Space size="large" direction="vertical" className="full-width">
+                                        <Input.TextArea rows={12} onChange={this.handleRawTextChange}/>
+                                        <div className="justify-content-flex-end">
+                                            <Button size="large" type="primary">Import</Button>
+                                        </div>
+                                    </Space> */}
                                 </TabPane>
                             </Tabs>
                         </Space>

@@ -1,7 +1,7 @@
 import React from 'react';
 import {Select , Button, Row, Col, Typography, Form, Input, Checkbox, Space} from 'antd';
 import {NO_AUTH_TIPS, HAVE_AUTH_TIPS} from 'ui/constants/tips'
-import {TabIconType, TabType, AuthSceneType} from '@/enums'
+import { TabType, AuthSceneType} from '@/enums'
 
 import {loadCollection, getParentArr, newCollection} from '@/utils/database_utils'
 import {queryRequestMetaById, insertRequestMeta, updateRequestMeta} from '@/database/request_meta'

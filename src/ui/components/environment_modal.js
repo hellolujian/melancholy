@@ -20,11 +20,14 @@ import {queryEnvironmentMeta, updateEnvironmentMeta, insertEnvironmentMeta} from
 import {queryCommonMeta, updateCommonMeta, queryCommonMetaByType} from '@/database/common_meta'
 
 import {UUID, writeJsonFileSync} from '@/utils/global_utils'
+import {importFromFile, importFromFilePath} from '@/utils/business_utils'
+import {getVariableExportArr} from '@/utils/common_utils'
 import VariablesTable from './variables_table';
 import ButtonModal from './button_modal'
 import CommonSelectFile from './common_select_file'
 import {queryWorkspaceMetaById, updateWorkspaceMeta} from '@/database/workspace_meta'
 import {getCurrentWorkspaceId, getCurrentWorkspace} from '@/utils/store_utils';
+import {ImportType, VariableScopeType} from '@/enums'
 
 import PostmanSDK from 'postman-collection'
 import { ToastContainer, toast } from 'react-toastify';
@@ -64,8 +67,6 @@ class EnvironmentModal extends React.Component {
         await this.refreshData();
       
     }
-
-    handleOk = () => {}
 
     handleModalCancel = () => {
         this.props.onVisibleChange(false);
@@ -155,21 +156,14 @@ class EnvironmentModal extends React.Component {
     }
 
     handleDownloadEnvironmentSelect = (filePath, item) => {
-        const {id, variable = [], name} = item
+        const {id, variable, name} = item
         let fileJson = {
             id: id,
             name: name,
-            values: variable.map(v => {
-                return {
-                    key: v.name, 
-                    value: v.initialValue || '', 
-                    enabled: v.disabled ? false : true
-                }
-            }),
-            _postman_variable_scope: "environment",
-            // "_postman_exported_at": "2021-11-08T07:40:26.168Z",
-            // "_postman_exported_using": "Postman/7.3.6"
+            values: getVariableExportArr(variable),
+            _postman_variable_scope: VariableScopeType.ENVIRONMENT.code
         }
+        console.log(fileJson);
         writeJsonFileSync(filePath, fileJson);
         toast.success(`Your environment was exported successfully.`, {
             position: toast.POSITION.BOTTOM_RIGHT,
@@ -177,25 +171,17 @@ class EnvironmentModal extends React.Component {
     }
 
     handleDownloadGlobalSelect = async (filePath) => {
-        const {globalVariableChange, variable = []} = this.state;
-        
+        const {globalVariableChange, variable} = this.state;
         const currentWorkspace = await getCurrentWorkspace() || {};
         const {id, name} = currentWorkspace;
         let fileJson = {
             id: id,
             name: `${name} Globals`,
-            values: [
-                variable.map(item => {
-                    const {key, initialValue, disabled} = item;
-                    return {
-                        key: key, value: initialValue, enabled: disabled !== false
-                    }
-                })
-            ],
-            _postman_variable_scope: "globals",
-            // _postman_exported_at: "2021-11-08T07:40:26.168Z",
-            // "_postman_exported_using": "Postman/7.3.6"
+            values: getVariableExportArr(variable),
+            _postman_variable_scope: VariableScopeType.GLOBALS.code,
         }
+
+        console.log(fileJson);
         writeJsonFileSync(filePath, fileJson)
 
         if (globalVariableChange) {
@@ -208,29 +194,7 @@ class EnvironmentModal extends React.Component {
     }
 
     handleImportSelect = async (targetFile) => {
-        console.log(targetFile);
-        if (!targetFile) return;
-        let fs = window.require('fs')
-        let evnJson = JSON.parse(fs.readFileSync(targetFile).toString());
-        const {name, values} = evnJson;
-        if (name && values && Array.isArray(values)) {
-            let envDbObject = {
-                id: UUID(),
-                name: name,
-                variable: values.map(o => {
-                    const {key, value, enabled} = o;
-                    return {
-                        id: UUID(),
-                        key: key,
-                        initialValue: value,
-                        currentValue: value,
-                        disabled: enabled === false
-                    }
-                })
-            };
-            await insertEnvironmentMeta(envDbObject);
-            await this.refreshData({scene: 'view'})
-        }
+        importFromFilePath(targetFile, ImportType.ENVIRONMENT.name(), () => this.refreshData({scene: 'view'}))
     }
 
     getDownloadGlobalPath = async () => {

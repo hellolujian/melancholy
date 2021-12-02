@@ -2,7 +2,28 @@ import { DEL_REQUEST_ICON, BOOTCAMP_ICON, EXAMPLE_ICON, POST_REQUEST_ICON, GET_R
 import {TEXT_ICON,} from 'ui/constants/icons'
 const Enum = require('node-enumjs');
 
-export const TabType= Enum.define("TabType", ["REQUEST", "EXAMPLE", "BOOTCAMP"])
+export const TabType = Enum.define("TabType", ["REQUEST", "EXAMPLE", "BOOTCAMP"])
+
+export const ImportType = Enum.define("ImportType", ["COLLECTION", "DUMP", "ENVIRONMENT"])
+
+export const VariableScopeType = Enum.define("RequestBodyModeType", {
+    constants: {
+        ENVIRONMENT: {
+            code: 'environment', 
+            label: 'Environment',
+        },
+        GLOBALS: {
+            code: 'globals',
+            label: 'Globals',
+        }
+    }
+});
+
+
+export const getVariableScopeType = (type) => {
+    let target = VariableScopeType.values().find(item => item.code === type) || VariableScopeType.ENVIRONMENT;
+    return target.label
+}
 
 export const TabIconType = Enum.define("TabIconType", {
     constants: {
@@ -30,21 +51,11 @@ export const TabIconType = Enum.define("TabIconType", {
             code: 'bootcamp',
             icon: BOOTCAMP_ICON
         } 
-    },
-    methods: {
-        
-        // surfaceGravity: function() {
-        //     var G = 6.67300E-11;
-        //     return (G * this.mass) / Math.pow(this.radius, 2);
-        // },
-        // surfaceWeight: function(mass) {
-        //     return mass * this.surfaceGravity();
-        // }
     }
 });
 
 export const getIconByCode = (code = 'get') => {
-    let target = TabIconType.values().find(item => item.code === code);
+    let target = TabIconType.values().find(item => item.code === code || item.code.toUpperCase() === code);
     if (target) {
         return target.icon;
     }

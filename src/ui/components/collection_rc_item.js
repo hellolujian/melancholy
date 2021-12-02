@@ -71,6 +71,11 @@ class CollectionRCItem extends React.Component {
         this.props.onDuplicate();
     }
 
+    handleExport = () => {
+        this.props.onExport();
+        
+    }
+
     // 菜单配置
     menuItems = [
         { name: 'share_collection', label: 'Share Collection', icon: SHARE_COLLECTION_ICON,  },
@@ -82,7 +87,7 @@ class CollectionRCItem extends React.Component {
         { name: 'add_request', label: 'Add Request', icon: ADD_REQUEST_ICON, event: () => publishRequestModalOpen({parentId: this.props.item.id})},
         { name: 'add_folder', label: 'Add Folder', icon: ADD_FOLDER_ICON, event: () => publishCollectionModalOpen({collectionId: this.props.item.id, scene: 'add'})},
         { name: 'duplicate', label: 'Duplicate', icon: DUPLICATE_ICON, event: this.duplicateCollection },
-        { name: 'export', label: 'Export', icon: EXPORT_ICON, },
+        { name: 'export', label: 'Export', icon: EXPORT_ICON, event: this.handleExport},
         { name: 'monitor_collection', label: 'Monitor Collection', icon: MONITOR_COLLECTION_ICON, },
         { name: 'mock_collection', label: 'Mock Collection', icon: MOCK_COLLECTION, },
         { name: 'publish_docs', label: 'Publish Docs', icon: PUBLISH_DOCS_ICON, },

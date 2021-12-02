@@ -22,7 +22,8 @@ import CollectionRCItem from './collection_rc_item'
 import FolderRCItem from './folder_rc_item'
 import RequestRCItem from './request_rc_item'
 import PostmanButton from './postman_button'
-import {stopClickPropagation} from '@/utils/global_utils';
+import {stopClickPropagation, UUID, writeJsonFileSync, getJsonFromFile, saveJsonFileSync} from '@/utils/global_utils';
+import {getUrlString, getPostmanUrl, getEventExportObj, getVariableExportDisabledArr} from '@/utils/common_utils'
 import {
     publishRequestModalOpen, 
     subscribeRequestSave, 
@@ -46,6 +47,8 @@ import {
 
 import RCTree from 'rc-tree';
 
+import {queryCollectionMetaById, queryCollectionMetaByParentId} from '@/database/collection_meta'
+import {queryRequestMetaByParentId} from '@/database/request_meta'
 import 'rc-tree/assets/index.css'
 
 import 'ui/style/collection_rc_tree.css'
@@ -323,6 +326,74 @@ class CollectionTree extends React.Component {
         await this.refreshData()
     }
 
+    recursiveGetItem = async (parentId, deep = 1) => {
+        const requestChildren = await queryRequestMetaByParentId(parentId);
+        const folderChildren = await queryCollectionMetaByParentId(parentId);
+        const childrenItems = [];
+        for (let folder of folderChildren) {
+            const {name, description, auth, prerequest, test, id} = folder;
+            let folderExportItemObj = {
+                name: name,
+                description: description,
+                auth: auth,
+                events: getEventExportObj(prerequest, test),
+                item: await this.recursiveGetItem(id, deep + 1)
+            };
+            if (deep > 1) {
+                folderExportItemObj._postman_isSubFolder = true
+            }
+            childrenItems.push(folderExportItemObj)
+        }
+
+        requestChildren.forEach(item => {
+            const {auth, body, description, header, method, url = '', name, param, prerequest, test} = item;
+            let postmanUrl = getPostmanUrl(url, param);
+            let postmanUrlJson = postmanUrl.toJSON();
+            delete postmanUrlJson.variable;
+            let requestField = {
+                auth: auth,
+                method: method.toUpperCase(),
+                header: getVariableExportDisabledArr(header),
+                body: body,
+                description: description,
+                url: {
+                    raw: postmanUrl.toString(),
+                    ...postmanUrlJson
+                }
+            }
+            const requestItemObj = {
+                name: name,
+                event: getEventExportObj(prerequest, test),
+                request: requestField,
+                response: []
+            }
+            childrenItems.push(requestItemObj)
+        })
+        return childrenItems;
+    }
+
+    // TODO: 还有response
+    handleCollectionExport = async (id) => {
+        const collectionMeta = await queryCollectionMetaById(id);
+        if (!collectionMeta) return;
+        
+        const {name, description, auth, variable, test, prerequest} = collectionMeta;
+        let exportObj = {
+            info: {
+                id: id,
+                _postman_id: id,
+                name: name,
+                descriptions: description,
+                schema: "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+            },
+            item: await this.recursiveGetItem(id)
+        };
+        if (auth) exportObj.auth = auth;
+        if (variable && variable.length  > 0) exportObj.variable = getVariableExportDisabledArr(variable);
+        if (test || prerequest) exportObj.event = getEventExportObj(prerequest, test);
+        saveJsonFileSync(exportObj, {defaultPath: `${name}.postman_collection.json`}); 
+    }
+
     checkDraggable = (node) => {
         const {isEmptyNode} = node;
         return isEmptyNode ? false : true;
@@ -360,6 +431,7 @@ class CollectionTree extends React.Component {
                         onDuplicate={() => this.handleCollectionDuplicate(item.id)}
                         onStar={(starred) => this.handleCollectionStar(item.id, starred)}
                         onRename={(value) => this.handleCollectionRename(item.id, value)}
+                        onExport={() => this.handleCollectionExport(item.id)}
                     />
                 ),
                 children: !item.items || item.items.length === 0 ? [
