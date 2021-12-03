@@ -1,6 +1,8 @@
 import PostmanSDK from 'postman-collection'
 import {UUID, getContentFromFilePath, getSingleSelectFilePath} from './global_utils'
-import {getMelancholyDBVariables, postmanEventToDbScript, postmanListToMelancholyDbArr, getUrlWithoutQueryString} from './common_utils'
+import {getMelancholyDBVariables, postmanEventToDbScript, postmanListToMelancholyDbArr, 
+    getUrlWithoutQueryString, getCopyMelancholyDBVariables
+} from './common_utils'
 import {deleteCollection, saveCollection, importCollection} from '@/utils/database_utils'
 import {queryEnvironmentMeta, updateEnvironmentMeta, insertEnvironmentMeta} from '@/database/environment_meta'
 import {publishCollectionSave} from '@/utils/event_utils'
@@ -129,8 +131,10 @@ export const parseImportContent = async (content, type, callback = () => {}) => 
                 const {name, values, _postman_variable_scope} = fileJson;
                 let variables = getMelancholyDBVariables(values);
                 if (VariableScopeType.GLOBALS.code === _postman_variable_scope) {
-                    let currentWorkspaceId = await getCurrentWorkspaceId();
-                    await updateWorkspaceMeta(currentWorkspaceId, {$set: {variable: variables}});
+                    let currentWorkspace = await getCurrentWorkspace();
+                    const {id: currentWorkspaceId, variable} = currentWorkspace;
+                    const alreadyVariable = getCopyMelancholyDBVariables(variable)
+                    await updateWorkspaceMeta(currentWorkspaceId, {$set: {variable: [...alreadyVariable, ...variables]}});
                     toastContent = `${VariableScopeType.GLOBALS.label} imported`;
                 } else {
                     let envDbObject = {

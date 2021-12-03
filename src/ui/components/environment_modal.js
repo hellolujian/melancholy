@@ -226,6 +226,7 @@ class EnvironmentModal extends React.Component {
             name: `${name} Globals`,
             values: getVariableExportEnabledArr(variable),
             _postman_variable_scope: VariableScopeType.GLOBALS.code,
+            _postman_exported_at: getCurrentTimeISOString()
         }
 
         writeJsonFileSync(filePath, fileJson)
