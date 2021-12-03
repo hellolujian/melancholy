@@ -122,3 +122,12 @@ export const CIRCLE_DOT_ICON = <Icon component={() => <svg t="1628255842854" cla
 export const ADD_ICON =<Icon component={() => <svg t="1628425140300" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2975" width="16" height="16"><path d="M560 464h304a48 48 0 1 1 0 96H560v304a48 48 0 1 1-96 0V560H160a48 48 0 0 1 0-96h304V160a48 48 0 0 1 96 0v304z" fill="#0284FE" p-id="2976"></path></svg>} />
 
 export const CIRCLE_INFO_ICON = <Icon style={{fontSize: 16}} component={() => <svg t="1631856009971" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="7104" width="16" height="16"><path d="M512 80c238.587 0 432 193.413 432 432S750.587 944 512 944 80 750.587 80 512 273.413 80 512 80z m0 352c-22.091 0-40 17.909-40 40v240c0 22.091 17.909 40 40 40s40-17.909 40-40V472c0-22.091-17.909-40-40-40z m0-160c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48z" p-id="7105" fill="#8a8a8a"></path></svg>} />;
+
+export const CARET_DOWN_OUT_SVG = <svg t="1638509127995" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6464" width="16" height="16"><path d="M523.6 667l274-288c9.7-10.2 2.5-27-11.6-27H238c-14.1 0-21.3 16.8-11.6 27l274 288c6.3 6.7 16.9 6.7 23.2 0z" p-id="6465"></path></svg>
+
+export const CARET_RIGHT_OUT_SVG = <svg t="1638502782531" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="11726" width="18" height="18"><path d="M670.592 499.925333a17.066667 17.066667 0 0 1 0 24.149334l-214.784 214.784a17.066667 17.066667 0 0 1-29.141333-12.074667V297.216a17.066667 17.066667 0 0 1 29.141333-12.074667l214.784 214.784z" p-id="11727"></path></svg>
+
+
+export const CARET_DOWN_OUT_ICON = <Icon component={() => CARET_DOWN_OUT_SVG} />
+
+export const CARET_RIGHT_OUT_ICON= <Icon component={() => CARET_RIGHT_OUT_SVG} />

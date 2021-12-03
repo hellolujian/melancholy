@@ -19,13 +19,14 @@ import DropdownTooltip from './dropdown_tooltip'
 import {queryEnvironmentMeta, updateEnvironmentMeta, insertEnvironmentMeta} from '@/database/environment_meta'
 import {queryCommonMeta, updateCommonMeta, queryCommonMetaByType} from '@/database/common_meta'
 
-import {UUID, writeJsonFileSync} from '@/utils/global_utils'
+import {UUID, writeJsonFileSync, getCurrentTimeISOString} from '@/utils/global_utils'
 import {importFromFile, importFromFilePath} from '@/utils/business_utils'
-import {getVariableExportArr} from '@/utils/common_utils'
+import {getVariableExportEnabledArr, getCopyMelancholyDBVariables} from '@/utils/common_utils'
 import VariablesTable from './variables_table';
 import ButtonModal from './button_modal'
 import CommonSelectFile from './common_select_file'
-import {queryWorkspaceMetaById, updateWorkspaceMeta} from '@/database/workspace_meta'
+import EnvironmentShareModal from './environment_share_modal'
+import {queryWorkspaceMetaById, queryWorkspaceMeta, updateWorkspaceMeta} from '@/database/workspace_meta'
 import {getCurrentWorkspaceId, getCurrentWorkspace} from '@/utils/store_utils';
 import {ImportType, VariableScopeType} from '@/enums'
 
@@ -134,7 +135,7 @@ class EnvironmentModal extends React.Component {
         await insertEnvironmentMeta({
             id: UUID(),
             name: name + " Copy",
-            variable: variable,
+            variable: getCopyMelancholyDBVariables(variable),
         })
         await this.refreshData();
         this.props.onSave()
@@ -147,6 +148,8 @@ class EnvironmentModal extends React.Component {
     }
 
     handleMoreActionClick = async (key, item) => {
+
+        // TODO: 这里的删除确认框可以封装个组件
         const {id} = item;
         if (key === 'delete') {
             Modal.confirm({
@@ -204,10 +207,10 @@ class EnvironmentModal extends React.Component {
         let fileJson = {
             id: id,
             name: name,
-            values: getVariableExportArr(variable),
-            _postman_variable_scope: VariableScopeType.ENVIRONMENT.code
+            values: getVariableExportEnabledArr(variable),
+            _postman_variable_scope: VariableScopeType.ENVIRONMENT.code,
+            _postman_exported_at: getCurrentTimeISOString()
         }
-        console.log(fileJson);
         writeJsonFileSync(filePath, fileJson);
         toast.success(`Your environment was exported successfully.`, {
             position: toast.POSITION.BOTTOM_RIGHT,
@@ -221,11 +224,10 @@ class EnvironmentModal extends React.Component {
         let fileJson = {
             id: id,
             name: `${name} Globals`,
-            values: getVariableExportArr(variable),
+            values: getVariableExportEnabledArr(variable),
             _postman_variable_scope: VariableScopeType.GLOBALS.code,
         }
 
-        console.log(fileJson);
         writeJsonFileSync(filePath, fileJson)
 
         if (globalVariableChange) {
@@ -248,8 +250,8 @@ class EnvironmentModal extends React.Component {
 
     render() {
      
-        const {workspaceId, collectionId, folderId, visible} = this.props;
-        const { environments, scene, editValues, variable, globalVariableChange} = this.state;
+        const {visible} = this.props;
+        const { environments, scene, editValues, variable, globalVariableChange, workspaceList = []} = this.state;
 
         let variableAndTips = (
             <>
@@ -391,28 +393,7 @@ class EnvironmentModal extends React.Component {
                                         <List.Item actions={[
                                             (
                                                 <Space>
-                                                    <ButtonModal 
-                                                        label="share"
-                                                        buttonProps={{
-                                                            className: "postman-button-class", type: "text", icon: SHARE_COLLECTION_ICON, 
-                                                        }} 
-                                                        modalProps={{
-                                                            okText: 'Share', cancelText: 'Cancel', title: 'SHARE ENVIRONMENT'
-                                                        }} 
-                                                        modalContent={
-                                                            <>
-                                                                <p>Share in Workspace</p>
-                                                                <Select defaultValue="lucy" style={{ width: '100%' }} onChange={this.handleChange}>
-                                                                    <Option value="jack">Jack</Option>
-                                                                    <Option value="lucy">Lucy</Option>
-                                                                    <Option value="disabled" disabled>
-                                                                        Disabled
-                                                                    </Option>
-                                                                    <Option value="Yiminghe">yiminghe</Option>
-                                                                </Select>
-                                                            </>
-                                                        }
-                                                    />
+                                                    <EnvironmentShareModal environmentId={item.id} />
                                                     <span>
                                                         <TooltipButton 
                                                             onClick={() => this.handleDuplicateClick(item)}

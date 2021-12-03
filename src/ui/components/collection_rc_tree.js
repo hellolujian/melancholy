@@ -16,7 +16,7 @@ import {
 import { SHARE_COLLECTION_ICON, MANAGE_ROLES_ICON, RENAME_ICON, EDIT_ICON, CREATE_FORK_ICON, 
     MERGE_CHANGES_ICON, ADD_REQUEST_ICON, ADD_FOLDER_ICON, DUPLICATE_ICON,ELLIPSIS_ICON,
     EXPORT_ICON, MOCK_COLLECTION, MONITOR_COLLECTION_ICON, PUBLISH_DOCS_ICON, 
-    REMOVE_FROM_WORKSPACE_ICON, DELETE_ICON, COLLECTION_FOLDER_ICON, GET_REQUEST_ICON, POST_REQUEST_ICON } from '@/ui/constants/icons'
+    CaretUpOutlined , CARET_DOWN_OUT_SVG, CARET_RIGHT_OUT_SVG, CARET_RIGHT_OUT_ICON, CARET_DOWN_OUT_ICON } from '@/ui/constants/icons'
 import TooltipButton from 'ui/components/tooltip_button'
 import CollectionRCItem from './collection_rc_item'
 import FolderRCItem from './folder_rc_item'
@@ -447,7 +447,7 @@ class CollectionTree extends React.Component {
                     // defaultExpandedKeys={defaultExpandedKeys}
                     // motion={motion}
                     treeData={treeData}
-                    switcherIcon={(obj) => {return obj.isLeaf ? false : (obj.expanded ? <CaretDownOutlined /> : <CaretRightOutlined  />)}}
+                    switcherIcon={(obj) => {return obj.isLeaf ? false : ( <CaretRightOutlined style={{fontSize: 12}} rotate={obj.expanded ? 90 : 0} /> )}}
                     // height={300}
                     showIcon={false}
                     className="collection-rc-tree"

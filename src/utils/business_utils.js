@@ -1,5 +1,6 @@
 import PostmanSDK from 'postman-collection'
-import {UUID, writeJsonFileSync, getSaveFilePath, getContentFromFilePath, getSingleSelectFilePath} from './global_utils'
+import {UUID, getContentFromFilePath, getSingleSelectFilePath} from './global_utils'
+import {getMelancholyDBVariables, postmanEventToDbScript, postmanListToMelancholyDbArr, getUrlWithoutQueryString} from './common_utils'
 import {deleteCollection, saveCollection, importCollection} from '@/utils/database_utils'
 import {queryEnvironmentMeta, updateEnvironmentMeta, insertEnvironmentMeta} from '@/database/environment_meta'
 import {publishCollectionSave} from '@/utils/event_utils'
@@ -9,43 +10,6 @@ import { ToastContainer, toast } from 'react-toastify';
 import {ImportType, VariableScopeType, getVariableScopeType} from '@/enums'
 const {Url, QueryParam, PropertyList, Collection, ItemGroup, Item} = PostmanSDK
 
-const getRequestScript = (events, eventName) => {
-    let targetEvents = events.listenersOwn(eventName),
-    targetEvent = targetEvents.length > 0 ? targetEvents[0] : {};
-    return targetEvent.script ? targetEvent.script.toSource() : ''
-}
-
-const getMelancholyVariables = (variables) => {
-    return variables.map(o => {
-        const {key, value, enabled} = o;
-        return {
-            id: UUID(),
-            key: key,
-            initialValue: value,
-            currentValue: value,
-            disabled: enabled === false
-        }
-    })
-}
-
-const getKeyValueArrToMelancholy = (keyValueArr = []) => {
-    return keyValueArr.map(h => {
-        let {key, value, description, disabled = false} = h;
-        return {
-            id: UUID(),
-            key: key,
-            value: value,
-            disabled: disabled,
-            description: description ? description.toString() : '',
-        }
-    })
-}
-
-const getUrlWithoutQueryString = (postmanUrl) => {
-    postmanUrl.query = new PropertyList();
-    return postmanUrl.toString();
-}
-
 const getCollectionMeta = (postmanItemGroup, parentId) => {
     const {name, auth, description, events, variables} = postmanItemGroup;
     let collectionMetaData = {
@@ -53,8 +17,8 @@ const getCollectionMeta = (postmanItemGroup, parentId) => {
         parentId: parentId,
         description: description ? description.toString() : '',
         auth: auth ? auth.toJSON() : undefined,
-        prerequest: getRequestScript(events, 'prerequest'),
-        test: getRequestScript(events, 'test')
+        prerequest: postmanEventToDbScript(events, 'prerequest'),
+        test: postmanEventToDbScript(events, 'test')
     }
     if (variables) {
         collectionMetaData.variable = variables.map(variable => {
@@ -74,10 +38,10 @@ const getRequestMeta = (postmanItem, parentId) => {
         name: name,
         url: getUrlWithoutQueryString(url),
         method: method,
-        header: getKeyValueArrToMelancholy(headers),
+        header: postmanListToMelancholyDbArr(headers),
         description: description ? description.toString() : '',
         auth: auth ? auth.toJSON() : undefined,
-        param: getKeyValueArrToMelancholy(queryParam),
+        param: postmanListToMelancholyDbArr(queryParam),
         prerequest: this.getRequestScript(events, 'prerequest'),
         test: this.getRequestScript(events, 'test'),
     }
@@ -163,7 +127,7 @@ export const parseImportContent = async (content, type, callback = () => {}) => 
                 break;
             case ImportType.ENVIRONMENT.name(): 
                 const {name, values, _postman_variable_scope} = fileJson;
-                let variables = getMelancholyVariables(values);
+                let variables = getMelancholyDBVariables(values);
                 if (VariableScopeType.GLOBALS.code === _postman_variable_scope) {
                     let currentWorkspaceId = await getCurrentWorkspaceId();
                     await updateWorkspaceMeta(currentWorkspaceId, {$set: {variable: variables}});

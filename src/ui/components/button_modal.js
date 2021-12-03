@@ -32,6 +32,14 @@ class ButtonModal extends React.Component {
         this.handleModalVisible(false)
     }
 
+    handleModalOk = () => {
+
+        const {onModalOk = () => {}} = this.props;
+        onModalOk();
+        this.handleModalVisible(false)
+
+    }
+
     render() {
     
         let {buttonProps = true, modalProps, modalContent, 
@@ -76,7 +84,9 @@ class ButtonModal extends React.Component {
                         // bodyStyle={{ height: 600}}
                         okText="Create"
                         // width={800}
-                        visible={modalVisible} onOk={this.handleOk} onCancel={this.handleModalCancel}
+                        visible={modalVisible} 
+                        onOk={this.handleModalOk} 
+                        onCancel={this.handleModalCancel}
                         {...modalProps}
                         >
                         

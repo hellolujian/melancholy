@@ -303,20 +303,22 @@ class EditableTable extends React.Component {
                 break;
               default: 
                 let editing = this.isCurrentCellEdit(cellId)
-                cellComponent = <Input.TextArea
-                className={"cell-textarea " + (editing ? "cell-textarea-edit" : "cell-textarea-not-edit" + (index < realDataSource.length ? ' text-over-ellipsis' : ''))}
-                style={{zIndex: editing ? 9 : 1}}
-                id={cellId} 
-                value={text}
-                autoSize={editing ? true : {minRows: 1, maxRows: 1}}
-                // autoFocus={true}
-                bordered={false}
-                placeholder={index === realDataSource.length ? col.placeholder : ''} 
-                onPressEnter={this.handleSave}
-                onFocus={() => this.handleEditCellInputFocus(cellId)} 
-                onBlur={() => this.handleEditCellInputBlur(record, col.dataIndex, cellId)} 
-                onChange={(e) => this.handleCellInputChange(record, col.dataIndex, e.target.value, cellId)}
-              />
+                cellComponent = (
+                  <Input.TextArea
+                    className={"cell-textarea " + (editing ? "cell-textarea-edit" : "cell-textarea-not-edit" + (index < realDataSource.length ? ' text-over-ellipsis' : ''))}
+                    style={{zIndex: editing ? 9 : 1, color: record.disabled ? 'lightgray' : 'unset'}}
+                    id={cellId} 
+                    value={text}
+                    autoSize={editing ? true : {minRows: 1, maxRows: 1}}
+                    // autoFocus={true}
+                    bordered={false}
+                    placeholder={index === realDataSource.length ? col.placeholder : ''} 
+                    onPressEnter={this.handleSave}
+                    onFocus={() => this.handleEditCellInputFocus(cellId)} 
+                    onBlur={() => this.handleEditCellInputBlur(record, col.dataIndex, cellId)} 
+                    onChange={(e) => this.handleCellInputChange(record, col.dataIndex, e.target.value, cellId)}
+                  />
+                )
                 break
             }
             return (
@@ -405,12 +407,12 @@ class EditableTable extends React.Component {
 
     return (
       <Table
-         className="common-editable-table"
+          className="common-editable-table"
          
-         tableLayout="fixed"
+          tableLayout="fixed"
           components={components}
           size="small"
-          rowClassName={() => 'editable-row'}
+          rowClassName={(record) => 'editable-row ' + (record.disabled ? 'gray-class' : '')}
           bordered
           dataSource={editable ? [...realDataSource, {}] : realDataSource}
           columns={this.getRenderColumns()}

@@ -15,7 +15,7 @@ import {queryAllHeaderPreset} from '@/database/header_preset'
 
 import {publishCollectionSave} from '@/utils/event_utils'
 import {UUID, writeJsonFileSync, getJsonFromFile} from '@/utils/global_utils'
-import {getFullUrl, getExportKeyValueArr, getEventExportObj, getVariableExportArr} from '@/utils/common_utils'
+import {getFullUrl, getExportEnabledKeyValueArr, getEventExportObj, getVariableExportEnabledArr} from '@/utils/common_utils'
 import {IMPORT_TITLE, SYNC_DATA_TITLE, CREATE_NEW, ACCOUNT_TITLE, NOTIFICATIONS_TITLE, SETTINGS_TITLE, RUNNER_TITLE} from '@/ui/constants/titles'
 import {
     IMPORT_FILE_TIPS,
@@ -257,13 +257,13 @@ class DataSettings extends React.Component {
                         name: name,
                         url: getFullUrl(itemMetaInfo),
                         description: description,
-                        data: mode === 'params' ? getExportKeyValueArr(modeData) : null,
+                        data: mode === 'params' ? getExportEnabledKeyValueArr(modeData) : null,
                         dataOptions: null,
                         dataMode: mode ? mode : null,
-                        headerData: getExportKeyValueArr(header),
+                        headerData: getExportEnabledKeyValueArr(header),
                         method: method.toUpperCase(),
                         pathVariableData: [],
-                        queryParams: getExportKeyValueArr(param),
+                        queryParams: getExportEnabledKeyValueArr(param),
                         auth: auth,
                         events: getEventExportObj(prerequest, test),
                         folder: deep === 1 ? null : parentId,
@@ -335,7 +335,7 @@ class DataSettings extends React.Component {
                 return {
                     id: id, 
                     name: name,
-                    values: getVariableExportArr(variable)
+                    values: getVariableExportEnabledArr(variable)
                 }
             }),
             headerPresets: allHeaderPresetMeta.map(item => {
@@ -343,7 +343,7 @@ class DataSettings extends React.Component {
                 return {
                     id: id,
                     name: name,
-                    headers: getExportKeyValueArr(preset)
+                    headers: getExportEnabledKeyValueArr(preset)
                 }
             }),
             globals: []

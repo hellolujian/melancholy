@@ -1,3 +1,5 @@
+import moment from "moment";
+
 // 阻止点击事件冒泡
 const stopClickPropagation = (e) => {
     e.stopPropagation();
@@ -148,8 +150,12 @@ const getJsonFromFile = (filePath) => {
     return JSON.parse(fs.readFileSync(filePath).toString());
 }
 
-let getValueByVariableType = (variable, param, ...rest) => {
+const getValueByVariableType = (variable, param, ...rest) => {
     return typeof(variable) === 'function' ? variable(param, ...rest) : variable
+}
+
+const getCurrentTimeISOString = () => {
+    return moment().toISOString();
 }
 
 export { 
@@ -157,5 +163,5 @@ export {
     compareObject, compareObjectIgnoreEmpty, 
     getSpecificFieldObj, writeFileSync, getValueByVariableType,
     writeJsonFileSync, getJsonFromFile, saveJsonFileSync, getSaveFilePath,
-    getContentFromFilePath, getSingleSelectFilePath
+    getContentFromFilePath, getSingleSelectFilePath, getCurrentTimeISOString
 } 
