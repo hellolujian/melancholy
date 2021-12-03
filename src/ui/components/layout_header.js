@@ -27,7 +27,6 @@ import NewButtonModal from './new_button_modal'
 
 import SettingsModal from './settings_modal'
 import WorkspaceCard from './workspace_card'
-import EnvironmentModal from './environment_modal'
 
 import {IMPORT_TITLE, SYNC_DATA_TITLE, CREATE_NEW, ACCOUNT_TITLE, NOTIFICATIONS_TITLE, SETTINGS_TITLE, RUNNER_TITLE} from '@/ui/constants/titles'
 const { Header,} = Layout;

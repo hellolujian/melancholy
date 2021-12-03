@@ -50,9 +50,9 @@ class EnvironmentModal extends React.Component {
         }
     }
 
-    refreshData = async (extra) => {
+    refreshData = async (extra, callback = () => {}) => {
         let environments = await queryEnvironmentMeta();
-        this.setState({ environments: environments || [] , ...extra});
+        this.setState({ environments: environments || [] , ...extra}, callback);
         
     }
 
@@ -140,11 +140,55 @@ class EnvironmentModal extends React.Component {
         this.props.onSave()
     } 
 
-    handleMoreActionClick = async (key, item) => {
-        const {id} = item;
+    handleDeleteEnvironmentMeta = async (id) => {
         await updateEnvironmentMeta(id, {$set: {deleted: true}})
         await this.refreshData();
         this.props.onSave()
+    }
+
+    handleMoreActionClick = async (key, item) => {
+        const {id} = item;
+        if (key === 'delete') {
+            Modal.confirm({
+                title: 'DELETE ENVIRONMENT',
+                icon: null,
+                closable: true,
+                width: 530,
+                content: (
+                    <>
+                        <p>
+                            Are you sure you want to delete this environment from this workspace?
+                        </p>
+                        <p>
+                            Deleting this environment will also delete any monitors, mock servers and integrations using this environment from this workspace.
+                        </p>
+                    </>
+                ),
+                okText: 'Delete',
+                cancelText: 'Cancel',
+                onOk: () => this.handleDeleteEnvironmentMeta(id)
+            });
+        } else if (key === 'remove') {
+            Modal.confirm({
+                title: 'REMOVE ENVIRONMENT',
+                icon: null,
+                closable: true,
+                width: 530,
+                content: (
+                    <>
+                        <p>
+                        Are you sure you want to remove this environment from this workspace?
+                        </p>
+                        <p>
+                        Removing this environment will also remove any monitors, mock servers and integrations using this environment from this workspace.
+                        </p>
+                    </>
+                ),
+                okText: 'Remove',
+                cancelText: 'Cancel',
+                onOk: () => this.handleDeleteEnvironmentMeta(id)
+            });
+        }
     }
 
     handleVariableChange = (value) => {
@@ -297,6 +341,7 @@ class EnvironmentModal extends React.Component {
                             
                             <CommonSelectFile 
                                 label="Select File"
+                                multiple
                                 onSelect={this.handleImportSelect}
                                 buttonProps={{type: 'text', className: 'postman-button-class'}}
                             />

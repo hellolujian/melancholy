@@ -126,16 +126,33 @@ const getCollectionStatistics = (sourcePostmanCollection, parentId) => {
     };
 }
 
+export const checkImportType = (fileJson) => {
+    const {info, item, name, values} = fileJson;
+    if (info && info.name && item) {
+        return ImportType.COLLECTION.name();
+    }
+    if (name && values && Array.isArray(values)) {
+        return ImportType.ENVIRONMENT.name();
+    }
+
+}
+
 export const parseImportContent = async (content, type, callback = () => {}) => {
+    
     let toastContent;
     try {
         let fileJson = JSON.parse(content);
+        let importType = checkImportType(fileJson);
+        if (!importType) {
+            throw new Error("format error");
+        } else if (!type) {
+            type = importType
+        } else if (type !== importType) {
+            throw new Error("format error");
+        }
         switch (type) {
             case ImportType.COLLECTION.name(): 
                 const {info} = fileJson;
-                if (!info || !info.name) {
-                    throw new Error("format error");
-                }
                 let postmanCollection = new Collection(fileJson);
                 let collectionStatistics = getCollectionStatistics(postmanCollection);
                 const {requestMetaList, collectionMetaList, collectionObj} = collectionStatistics;
@@ -146,9 +163,6 @@ export const parseImportContent = async (content, type, callback = () => {}) => 
                 break;
             case ImportType.ENVIRONMENT.name(): 
                 const {name, values, _postman_variable_scope} = fileJson;
-                if (!(name && values && Array.isArray(values))) {
-                    throw new Error("format error");
-                }
                 let variables = getMelancholyVariables(values);
                 if (VariableScopeType.GLOBALS.code === _postman_variable_scope) {
                     let currentWorkspaceId = await getCurrentWorkspaceId();
@@ -166,6 +180,10 @@ export const parseImportContent = async (content, type, callback = () => {}) => 
                 break;
             default: break;
         }
+        toast.success(toastContent, {
+            position: toast.POSITION.BOTTOM_RIGHT,
+        })
+        await callback();
     } catch (err) {
         console.log(err);
         toast.error('Error while importing: format not recognized', {
@@ -174,16 +192,16 @@ export const parseImportContent = async (content, type, callback = () => {}) => 
         return;
     }
     
-    toast.success(toastContent, {
-        position: toast.POSITION.BOTTOM_RIGHT,
-    })
-    callback();
 }
 
 export const importFromFilePath = (filePath, type, callback) => {
     if (!filePath) return;
-    let fileContent = getContentFromFilePath(filePath);
-    parseImportContent(fileContent, type, callback);
+    let filePathArr = Array.isArray(filePath) ? [...filePath] : [filePath];
+    filePathArr.forEach(filePath => {
+        let fileContent = getContentFromFilePath(filePath);
+        parseImportContent(fileContent, type, callback);
+    })
+    
 }
 
 export const importFromFile = (type, callback) => {

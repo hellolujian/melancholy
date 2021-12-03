@@ -50,7 +50,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "install": "npm install && npm install --prefix electron"
+    "install2": "npm install && npm install --prefix electron"
   },
   "eslintConfig": {
     "extends": [
