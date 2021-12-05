@@ -1,7 +1,7 @@
 import React from 'react';
 import { 
     Typography , 
-    Menu, 
+    Menu, Empty,
     Space,Row, Col ,
     Divider , Input,Tree,
     Button, Rate,Tooltip,
@@ -15,7 +15,7 @@ import {
     InsertRowLeftOutlined, MonitorOutlined ,CopyOutlined ,PicCenterOutlined    } from '@ant-design/icons';
 import { SHARE_COLLECTION_ICON, MANAGE_ROLES_ICON, RENAME_ICON, EDIT_ICON, CREATE_FORK_ICON, 
     MERGE_CHANGES_ICON, ADD_REQUEST_ICON, ADD_FOLDER_ICON, DUPLICATE_ICON,ELLIPSIS_ICON,
-    EXPORT_ICON, MOCK_COLLECTION, MONITOR_COLLECTION_ICON, PUBLISH_DOCS_ICON, 
+    EXPORT_ICON, MOCK_COLLECTION, MONITOR_COLLECTION_ICON, PUBLISH_DOCS_ICON, ADD_ICON,
     CaretUpOutlined , CARET_DOWN_OUT_SVG, CARET_RIGHT_OUT_SVG, CARET_RIGHT_OUT_ICON, CARET_DOWN_OUT_ICON } from '@/ui/constants/icons'
 import TooltipButton from 'ui/components/tooltip_button'
 import CollectionRCItem from './collection_rc_item'
@@ -31,6 +31,7 @@ import {
     publishRequestSelected,
     publishRequestSave,
     publishRequestDelete,
+    publishCollectionModalOpen
 } from '@/utils/event_utils'
 
 import {
@@ -82,38 +83,17 @@ class CollectionTree extends React.Component {
     
     handleSelectTreeNode = (selectedKeys, {selected, selectedNodes, node}) => {
     
+        const {key} = node;
         let currentTreeRef = this.rcTreeRef.current;
         let currentExpandKeys = currentTreeRef.state.expandedKeys;
-    
-        const {key} = node;
         let isExpanded = currentExpandKeys.find(item => item === key);
         let newKeys = isExpanded ? currentExpandKeys.filter(o => o !== key) : [...currentExpandKeys, key];
-        console.log(newKeys)
         currentTreeRef.setExpandedKeys(newKeys);
-    
         currentTreeRef.setUncontrolledState({selectedKeys: isExpanded ? [] : [key]});
-        // this.setState({expandedKeys: newKeys});
         if (node.isLeaf) {
             publishRequestSelected(node.key)
         }
         
-    }
-  
-
-    updateTreeData = (list, key, children) => {
-        console.log(key);
-        console.log(list);
-        return list.map((node) => {
-          if (node.key === key) {
-            return { ...node, children };
-          }
-      
-          if (node.children) {
-            return { ...node, children: this.updateTreeData(node.children, key, children) };
-          }
-      
-          return node;
-        });
     }
   
     handleOpenRequestModal = () => {
@@ -150,22 +130,23 @@ class CollectionTree extends React.Component {
     // 递归遍历collection下的folder
     traverseCollectionItems = (list, parentId) => {
         return list.map(node => {
+            const {id, name, items} = node;
             let treeItem = {
-                key: node.id,
-                name: node.name,
+                key: id,
+                name: name,
             }
             if (node.items) {
                 treeItem.title = (
                     <FolderRCItem 
                         item={{...node, parentId: parentId}} 
                         onDelete={() => this.handleFolderDelete(node)}
-                        onDuplicate={() => this.handleCollectionDuplicate(node.id)}
-                        onRename={(value) => this.handleCollectionRename(node.id, value)}
+                        onDuplicate={() => this.handleCollectionDuplicate(id)}
+                        onRename={(value) => this.handleCollectionRename(id, value)}
                     />
                 );
                 
                 if (node.items.length > 0) {
-                    treeItem.children = this.traverseCollectionItems(node.items, node.id);
+                    treeItem.children = this.traverseCollectionItems(items, id);
                 } else {
                     treeItem.children = [this.getEmptyNode(node, true)]
                 }
@@ -174,19 +155,11 @@ class CollectionTree extends React.Component {
             } else {
                 treeItem.isLeaf = true;
                 treeItem.title = (
-                    // <Space align="center" style={{padding: '4px 0px', display: 'flex',alignItems: 'center'}}>
-                    //     <div style={{width: 28, textAlign: 'center', lineHeight: 0}}>
-                    //         {
-                    //             node.method === 'POST' ? POST_REQUEST_ICON : GET_REQUEST_ICON
-                    //         }
-                    //     </div>
-                    //     <span>{node.name}</span>
-                    // </Space>
                     <RequestRCItem 
                         item={node} 
                         onDelete={() => this.handleRequestDelete(node)}
-                        onDuplicate={() => this.handleRequestDuplicate(node.id)}
-                        onRename={(value) => this.handleRequestRename(node.id, value)}
+                        onDuplicate={() => this.handleRequestDuplicate(id)}
+                        onRename={(value) => this.handleRequestRename(id, value)}
                     />
                 )
                 treeItem.className = 'collection-tree-request-item-class'
@@ -200,6 +173,7 @@ class CollectionTree extends React.Component {
         this.setState({collectionDrawerVisibleItem: visibleItem})
     }
 
+    // TODO: 删除request需要广播
     handleDeleteCollection = async (id) => {
         let childrenReqs = await deleteCollection(id);
         childrenReqs.forEach(child => {
@@ -413,9 +387,13 @@ class CollectionTree extends React.Component {
         
     }
 
+    handleNewCollectionClick = () => {
+        publishCollectionModalOpen();
+    }
+
     render() {
 
-        const {collectionData, collectionDrawerVisibleItem, expandedKeys} = this.state;
+        const {collectionData} = this.state;
         let treeData = collectionData.map(item => {
             return {
                 key: item.id,
@@ -439,7 +417,7 @@ class CollectionTree extends React.Component {
                 ] : this.traverseCollectionItems(item.items, item.id)
             }
         })
-        return (
+        return treeData.length > 0 ? (
             <>
                 <RCTree
                     defaultExpandAll={false}
@@ -461,6 +439,29 @@ class CollectionTree extends React.Component {
                 />
             </>
             
+        ) : (
+            <div style={{borderTop: '1px solid lightgray'}}>
+                <Empty 
+                    style={{paddingTop: 20}}
+                    description={
+                        <Space direction="vertical" >
+                            <Typography.Title level={5}>
+                                You don't have any collections
+                            </Typography.Title>
+                            <Typography.Text type="secondary">
+                                Collections let you group related requests, making them easier to access and run. 
+                            </Typography.Text>
+                        </Space>
+                    }
+                >
+                    <Button 
+                        type="link"
+                        icon={ADD_ICON}
+                        onClick={this.handleNewCollectionClick}>
+                        Create a collection
+                    </Button>
+                </Empty>
+            </div>
         )
     }
 }
