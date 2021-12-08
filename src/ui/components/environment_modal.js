@@ -462,7 +462,7 @@ class EnvironmentModal extends React.Component {
                                     name="name"
                                     rules={[{ required: true, message: '' }]}
                                 >
-                                    <Input placeholder="Environment Name" />
+                                    <Input autoFocus placeholder="Environment Name" />
                                 </Form.Item>
 
                                 {/* <Form.Item label="Summary">

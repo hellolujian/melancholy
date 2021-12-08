@@ -5,9 +5,11 @@ import {getMelancholyDBVariables, postmanEventToDbScript, postmanListToMelanchol
 } from './common_utils'
 import {deleteCollection, saveCollection, importCollection} from '@/utils/database_utils'
 import {queryEnvironmentMeta, updateEnvironmentMeta, insertEnvironmentMeta} from '@/database/environment_meta'
-import {publishCollectionSave} from '@/utils/event_utils'
+import {publishCollectionSave, publishImportCollectionModalShow, publishRequestDelete} from '@/utils/event_utils'
 import {getCurrentWorkspaceId, getCurrentWorkspace} from '@/utils/store_utils';
 import {queryWorkspaceMetaById, updateWorkspaceMeta} from '@/database/workspace_meta'
+
+import {queryCollectionMetaById, queryCollectionMetaByName} from '@/database/collection_meta'
 import { ToastContainer, toast } from 'react-toastify';
 import {ImportType, VariableScopeType, getVariableScopeType} from '@/enums'
 const {Url, QueryParam, PropertyList, Collection, ItemGroup, Item} = PostmanSDK
@@ -44,8 +46,8 @@ const getRequestMeta = (postmanItem, parentId) => {
         description: description ? description.toString() : '',
         auth: auth ? auth.toJSON() : undefined,
         param: postmanListToMelancholyDbArr(queryParam),
-        prerequest: this.getRequestScript(events, 'prerequest'),
-        test: this.getRequestScript(events, 'test'),
+        prerequest: postmanEventToDbScript(events, 'prerequest'),
+        test: postmanEventToDbScript(events, 'test'),
     }
     return body ? {...requestMetaData, body: body.toJSON} : requestMetaData
    
@@ -103,6 +105,16 @@ export const checkImportType = (fileJson) => {
 
 }
 
+export const parseCollectionJsonFile = async (fileJson) => {
+    console.log(fileJson);
+    let postmanCollection = new Collection(fileJson);
+    let collectionStatistics = getCollectionStatistics(postmanCollection);
+    const {requestMetaList, collectionMetaList, collectionObj} = collectionStatistics;
+    
+    await importCollection(collectionObj, collectionMetaList, requestMetaList)
+    publishCollectionSave(collectionMetaList[0]);
+}
+
 export const parseImportContent = async (content, type, callback = () => {}) => {
     
     let toastContent;
@@ -119,16 +131,18 @@ export const parseImportContent = async (content, type, callback = () => {}) => 
         switch (type) {
             case ImportType.COLLECTION.name(): 
                 const {info} = fileJson;
-                let postmanCollection = new Collection(fileJson);
-                let collectionStatistics = getCollectionStatistics(postmanCollection);
-                const {requestMetaList, collectionMetaList, collectionObj} = collectionStatistics;
+                const {name: collectionName} = info;
+                let existCollectionInfo = await queryCollectionMetaByName(collectionName)
+                if (existCollectionInfo.length > 0) {
+                    publishImportCollectionModalShow({fileJson: fileJson, existCollectionId: existCollectionInfo[0].id})
+                } else {
+                    await parseCollectionJsonFile(fileJson)
+                    toastContent = `Collection ${collectionName} imported`;
+                }
                 
-                await importCollection(collectionObj, collectionMetaList, requestMetaList)
-                publishCollectionSave(collectionMetaList[0]);
-                toastContent = `Collection ${info.name} imported`;
                 break;
             case ImportType.ENVIRONMENT.name(): 
-                const {name, values, _postman_variable_scope} = fileJson;
+                const {name: environmentName, values, _postman_variable_scope} = fileJson;
                 let variables = getMelancholyDBVariables(values);
                 if (VariableScopeType.GLOBALS.code === _postman_variable_scope) {
                     let currentWorkspace = await getCurrentWorkspace();
@@ -139,19 +153,22 @@ export const parseImportContent = async (content, type, callback = () => {}) => 
                 } else {
                     let envDbObject = {
                         id: UUID(),
-                        name: name,
+                        name: environmentName,
                         variable: variables
                     };
                     await insertEnvironmentMeta(envDbObject);
-                    toastContent = `${VariableScopeType.ENVIRONMENT.label} ${name} imported`
+                    toastContent = `${VariableScopeType.ENVIRONMENT.label} ${environmentName} imported`
                 }
                 break;
             default: break;
         }
-        toast.success(toastContent, {
-            position: toast.POSITION.BOTTOM_RIGHT,
-        })
-        await callback();
+        if (toastContent) {
+            toast.success(toastContent, {
+                position: toast.POSITION.BOTTOM_RIGHT,
+            })
+            await callback();
+        }
+        
     } catch (err) {
         console.log(err);
         toast.error('Error while importing: format not recognized', {
@@ -175,4 +192,11 @@ export const importFromFilePath = (filePath, type, callback) => {
 export const importFromFile = (type, callback) => {
     let filePath = getSingleSelectFilePath();
     importFromFilePath(filePath, type, callback);
+}
+
+export const executeDeleteCollection = async (id) => {
+    let childrenReqs = await deleteCollection(id);
+    childrenReqs.forEach(child => {
+        publishRequestDelete({id: child.id,})
+    })
 }

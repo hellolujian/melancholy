@@ -4,13 +4,14 @@ import {Upload, Tabs , Space, Typography, Button, Input, Modal, notification} fr
 import TooltipButton from './tooltip_button'
 import PostmanButton from './postman_button'
 import ButtonModal from './button_modal'
-import ImportFileConfirm from './import_file_confirm'
+import ImportCollectionConfirm from './import_collection_confirm'
 import {deleteCollection, saveCollection, importCollection} from '@/utils/database_utils'
 
 import {queryCollectionMetaById, queryCollectionMetaByName} from '@/database/collection_meta'
 
 import {publishCollectionSave} from '@/utils/event_utils'
 import {UUID} from '@/utils/global_utils'
+import {parseImportContent, importFromFilePath} from '@/utils/business_utils'
 import {IMPORT_TITLE, SYNC_DATA_TITLE, CREATE_NEW, ACCOUNT_TITLE, NOTIFICATIONS_TITLE, SETTINGS_TITLE, RUNNER_TITLE} from '@/ui/constants/titles'
 import {
     IMPORT_FILE_TIPS,
@@ -20,6 +21,7 @@ import {
 } from 'ui/constants/tips'
 import PostmanSDK from 'postman-collection' 
 import { ToastContainer, toast } from 'react-toastify';
+import {ImportType} from '@/enums'
 
 const {Item, ItemGroup} = PostmanSDK;
 const { Dragger } = Upload;
@@ -31,92 +33,6 @@ class ImportModal extends React.Component {
         this.state = {
            
         }
-    }
-
-    importNotification = (name) => {
-        // notification.success({
-        //     message: `Collection ${name} imported`,
-        //     placement: 'bottomRight',
-        //     // duration: 100,
-        //     // getContainer: () => document.getElementById("rootPage")
-        // });
-        toast.success(`Collection ${name} imported`, {
-            position: toast.POSITION.BOTTOM_RIGHT,
-        })
-    }
-
-
-    getRequestScript = (events, eventName) => {
-        let targetEvents = events.listenersOwn(eventName),
-        targetEvent = targetEvents.length > 0 ? targetEvents[0] : {};
-        return targetEvent.script ? targetEvent.script.toSource() : ''
-    }
-
-    getCollectionObj = (sourceCollection, requestList, collectionList, parentId) => {
-       
-        const {name, auth, description, events, variables, items} = sourceCollection;
-        let collectionMetaData = {
-            id: UUID(),
-            parentId: parentId,
-            name: name,
-            description: description ? description.toString() : '',
-            auth: auth ? auth.toJSON() : undefined,
-            prerequest: this.getRequestScript(events, 'prerequest'),
-            test: this.getRequestScript(events, 'test'),
-            variable: variables ? variables.map(variable => {
-                let {key, value, disabled} = variable.toJSON();
-                return {id: UUID(), key: key, initialValue: value, currentValue: value, disabled: disabled}
-            }) : undefined
-        }
-        collectionList.push(collectionMetaData);
-        let collectionObj = {
-            id: collectionMetaData.id,
-            name: name,
-            items: []
-        };
-        items.each(o => {
-            console.log(o);
-            console.log(ItemGroup.isItemGroup(o));
-            if (ItemGroup.isItemGroup(o)) {
-                let collectionChild = this.getCollectionObj(o, requestList, collectionList, collectionMetaData.id)
-                collectionObj.items.push(collectionChild);
-            } else if (Item.isItem(o)) {
-                const {name, request, responses, events} = o;
-                const {auth, body, description, headers, method, url} = request;
-                let requestMetaData = {
-                    id: UUID(),
-                    parentId: collectionMetaData.id,
-                    name: name,
-                    url: url.toString(),
-                    method: method,
-                    header: headers.map(h => {
-                        let {key, value, description: headerDesc, disabled} = h;
-                        return {
-                            id: UUID(),
-                            key: key,
-                            value: value,
-                            disabled: disabled,
-                            description: headerDesc ? headerDesc.toString() : '',
-                        }
-                    }),
-                    description: description ? description.toString() : '',
-                    auth: auth ? auth.toJSON() : undefined,
-                    // param: param,
-                    prerequest: this.getRequestScript(events, 'prerequest'),
-                    test: this.getRequestScript(events, 'test'),
-                }
-                if (body) {
-                    requestMetaData.body = body.toJSON();
-                }
-                requestList.push(requestMetaData);
-                collectionObj.items.push({
-                    id: requestMetaData.id,
-                    name: name,
-                    method: method,
-                });
-            } 
-        })
-        return collectionObj;
     }
 
     componentDidMount() {
@@ -149,40 +65,15 @@ class ImportModal extends React.Component {
         this.setState({activeTabKey: activeTabKey})
     }
 
-    handleAddCollection = async (myCollection) => {
-        let requestList = [], collectionList = [];
-        let collectionObj = this.getCollectionObj(myCollection, requestList, collectionList)
-        let collectionMetaData = collectionList[0];
-        await importCollection(collectionObj, collectionList, requestList)
-        publishCollectionSave(collectionMetaData)
-        this.importNotification(collectionMetaData.name)
-    }
-
     handleImportFileChange = async (chooseFileInfo) => {
         
         console.log('onchangeupdaload');
         console.log(chooseFileInfo);
 
-        let fs = window.require('fs');
         const {file, fileList} = chooseFileInfo;
         const {uid} = file;
         let targetFile = fileList.find(file => file.uid === uid);
-        let targetCollectionJson = JSON.parse(fs.readFileSync(targetFile.originFileObj.path).toString());
-        let Collection = require('postman-collection').Collection;
-        let myCollection = new Collection(targetCollectionJson);
-        // let collectionObj = myCollection.toJSON();
-        // console.log(collectionObj);
-
-        const {name} = myCollection;
-        if (!name) return;
-
-        let existCollectionInfo = await queryCollectionMetaByName(name)
-        if (existCollectionInfo.length > 0) {
-            this.importFileConfirmRef.show(myCollection)
-        } else {
-            await this.handleAddCollection(myCollection)
-        }
-
+        importFromFilePath(targetFile.originFileObj.path, ImportType.COLLECTION.name())
         this.setState({modalVisible: false})
         
     }
@@ -191,29 +82,17 @@ class ImportModal extends React.Component {
         this.setState({modalVisible: visible})
     }
 
-    handleImportFileConfirmRef = (ref) => {
-        if (!ref) {
-            return
-        }
-        this.importFileConfirmRef = ref;
-    }
-
-    handleConfirmReplace = async (myCollection) => {
-        let existCollectionInfo = await queryCollectionMetaByName(myCollection.name)
-        if (existCollectionInfo.length === 0) {
-            return;
-        }
-        await deleteCollection(existCollectionInfo[0].id)
-        await this.handleAddCollection(myCollection)
-    }
-
-    handleConfirmCopy = async (myCollection) => {
-        myCollection.name = myCollection.name + " Copy";
-        this.handleAddCollection(myCollection);
-    }
-
     handleRawTextChange = (e) => {
         this.setState({pasteRawText: e.target.value})
+    }
+
+    handleImportClick = () => {
+        const {activeTabKey, pasteRawText} = this.state;
+        if (activeTabKey === 'raw') {
+            parseImportContent(pasteRawText, ImportType.COLLECTION.name())
+            this.setState({modalVisible: false})
+        }
+
     }
 
     render() {
@@ -223,7 +102,7 @@ class ImportModal extends React.Component {
   
         return (
             <>
-                <ImportFileConfirm 
+                <ImportCollectionConfirm 
                     ref={this.handleImportFileConfirmRef} 
                     onCopy={this.handleConfirmCopy}
                     onReplace={this.handleConfirmReplace}
@@ -235,7 +114,9 @@ class ImportModal extends React.Component {
                     tooltipProps={{title: IMPORT_TITLE}} 
                     modalProps={{
                         title: "IMPORT", 
-                        footer: activeTabKey === 'file' || activeTabKey === 'folder' ? null : (<Button type="primary">Import</Button>),
+                        footer: activeTabKey === 'file' || activeTabKey === 'folder' ? null : (
+                            <Button type="primary" onClick={this.handleImportClick}>Import</Button>
+                        ),
                         // bodyStyle: { height: 400},
                     }} 
                     modalVisible={modalVisible}
@@ -279,13 +160,7 @@ class ImportModal extends React.Component {
                                     <Input placeholder="Enter a URL and press Import" />
                                 </TabPane>
                                 <TabPane tab="Paste Raw Text" key="raw">
-                                <Input.TextArea rows={12} onChange={this.handleRawTextChange}/>
-                                    {/* <Space size="large" direction="vertical" className="full-width">
-                                        <Input.TextArea rows={12} onChange={this.handleRawTextChange}/>
-                                        <div className="justify-content-flex-end">
-                                            <Button size="large" type="primary">Import</Button>
-                                        </div>
-                                    </Space> */}
+                                    <Input.TextArea rows={12} onChange={this.handleRawTextChange}/>
                                 </TabPane>
                             </Tabs>
                         </Space>

@@ -4,7 +4,7 @@ import {Upload, Tabs , Space, Typography, Radio, Button, Input, Modal, notificat
 import TooltipButton from '../tooltip_button'
 import PostmanButton from '../postman_button'
 import ButtonModal from '../button_modal'
-import ImportFileConfirm from '../import_file_confirm'
+import ImportCollectionConfirm from '../import_collection_confirm'
 import {deleteCollection, saveCollection, importCollection} from '@/utils/database_utils'
 
 import CommonSelectFile from '../common_select_file'
@@ -14,6 +14,7 @@ import {queryAllEnvironmentMeta, queryEnvironmentMeta} from '@/database/environm
 import {queryAllHeaderPreset} from '@/database/header_preset'
 
 import {publishCollectionSave} from '@/utils/event_utils'
+import {importFromFile, importFromFilePath} from '@/utils/business_utils'
 import {UUID, writeJsonFileSync, getJsonFromFile} from '@/utils/global_utils'
 import {getFullUrl, getExportEnabledKeyValueArr, getEventExportObj, getVariableExportEnabledArr} from '@/utils/common_utils'
 import {IMPORT_TITLE, SYNC_DATA_TITLE, CREATE_NEW, ACCOUNT_TITLE, NOTIFICATIONS_TITLE, SETTINGS_TITLE, RUNNER_TITLE} from '@/ui/constants/titles'

@@ -64,27 +64,40 @@ export const subscribeRequestDelete = (handle) => {
 /**
  * ======================================选中请求==========================================
  */
- const REQUEST_SELECTED_EVENT = 'request_selected_event';
- 
- export const publishRequestSelected = (data) => {
-     publish(REQUEST_SELECTED_EVENT, data)
- }
- 
- export const subscribeRequestSelected = (handle) => {
-     subscribe(REQUEST_SELECTED_EVENT, handle);
- }
+const REQUEST_SELECTED_EVENT = 'request_selected_event';
 
-/**
- * =====================================开启新tab===========================================
- */
- const OPEN_NEW_TAB_EVENT = 'open_new_tab_event';
- 
- export const publishNewTabOpen = (data) => {
+export const publishRequestSelected = (data) => {
+    publish(REQUEST_SELECTED_EVENT, data)
+}
+
+export const subscribeRequestSelected = (handle) => {
+    subscribe(REQUEST_SELECTED_EVENT, handle);
+}
+
+ /**
+  * =====================================开启新tab===========================================
+  */
+const OPEN_NEW_TAB_EVENT = 'open_new_tab_event';
+
+export const publishNewTabOpen = (data) => {
     publish(OPEN_NEW_TAB_EVENT, data)
 }
 
-export const subscribeNewTabOpen = (handle) => {
-    subscribe(OPEN_NEW_TAB_EVENT, handle);
+ export const subscribeNewTabOpen = (handle) => {
+     subscribe(OPEN_NEW_TAB_EVENT, handle);
+ }
+
+ /**
+  * =====================================导入collection弹框提醒===========================================
+  */
+const SHOW_IMPORT_COLLECTION_MODAL_EVENT = 'show_collection_import_event';
+
+export const publishImportCollectionModalShow = (data) => {
+    publish(SHOW_IMPORT_COLLECTION_MODAL_EVENT, data)
+}
+ 
+export const subscribeImportCollectionModalShow = (handle) => {
+    subscribe(SHOW_IMPORT_COLLECTION_MODAL_EVENT, handle);
 }
 
 const {ipcRenderer} = window.require('electron')

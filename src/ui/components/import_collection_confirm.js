@@ -1,8 +1,11 @@
 import React from 'react';
 import {Modal, Button, Space, Checkbox, Typography} from 'antd';
+import {subscribeImportCollectionModalShow} from '@/utils/event_utils'
+import {parseCollectionJsonFile, executeDeleteCollection} from '@/utils/business_utils'
+import {deleteCollection, } from '@/utils/database_utils'
 
 import PostmanButton from './postman_button'
-class ImportFileConfirm extends React.Component {
+class ImportCollectionConfirm extends React.Component {
     
     constructor(props) {
         super(props);
@@ -11,16 +14,16 @@ class ImportFileConfirm extends React.Component {
         }
     }
 
-    componentDidMount() {
-      
-    }
-
-    show = (importData) => {
+    handleModalShow = (msg, importData) => {
         if (importData) {
             const {importList} = this.state;
             importList.push(importData);
             this.setState({importList: importList, visible: true});
         }
+    }
+
+    componentDidMount() {
+        subscribeImportCollectionModalShow(this.handleModalShow)
     }
 
     handleClose = async (callback) => {
@@ -41,19 +44,33 @@ class ImportFileConfirm extends React.Component {
         this.handleClose(this.props.onCancel);
     }
 
+    doCopy = (importInfo) => {
+        const {fileJson = {}} = importInfo;
+        const {info = {}} = fileJson;
+        let newInfoObj = {...info, name: info.name + ' Copy'}
+        parseCollectionJsonFile({...fileJson, info: newInfoObj})
+    }
+
+    doReplace = async (importInfo) => {
+        const {existCollectionId, fileJson} = importInfo;
+        await executeDeleteCollection(existCollectionId)
+        await parseCollectionJsonFile(fileJson)
+    }
+
     handleCopy = () => {
-        this.handleClose(this.props.onCopy);
+        this.handleClose(this.doCopy);
     }
 
     handleReplace = () => {
-        this.handleClose(this.props.onReplace)
+        this.handleClose(this.doReplace)
     }
 
     render() {
      
         const { visible, importList } = this.state;
-        const importInfo = importList.length > 0 ? importList[importList.length - 1] : {};
-        const {name} = importInfo;
+        const importInfo = importList.length > 0 ? importList[0] : {};
+        const {fileJson = {}} = importInfo;
+        const {name = ''} = fileJson;
         return (
             <Modal
                 visible={visible}
@@ -85,9 +102,9 @@ class ImportFileConfirm extends React.Component {
     }
 }
 
-export default ImportFileConfirm;
+export default ImportCollectionConfirm;
 
-ImportFileConfirm.defaultProps = {
+ImportCollectionConfirm.defaultProps = {
     onCopy: () => {},
     onReplace: () => {},
     onCancel: () => {},
