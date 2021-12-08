@@ -10,7 +10,8 @@ export const queryCollectionMetaById = async (id) => {
 }
 
 export const insertCollectionMeta = async (doc) => {
-    
+    console.log('===============批量插入集合');
+    console.log(doc);
     let workspaceIdQuery = await currentWorkspaceIdQuery();
     return await insert(COLLECTION_META, Array.isArray(doc) ? doc.map(item => {
         return {...workspaceIdQuery, ...item}

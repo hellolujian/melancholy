@@ -16,7 +16,7 @@ import {queryAllHeaderPreset} from '@/database/header_preset'
 import {publishCollectionSave} from '@/utils/event_utils'
 import {importFromFile, importFromFilePath} from '@/utils/business_utils'
 import {UUID, writeJsonFileSync, getJsonFromFile} from '@/utils/global_utils'
-import {getFullUrl, getExportEnabledKeyValueArr, getEventExportObj, getVariableExportEnabledArr} from '@/utils/common_utils'
+import {getFullUrl, getExportEnabledKeyValueArr, getEventExportObj, getVariableExportEnabledArr, getVariableExportDisabledArr} from '@/utils/common_utils'
 import {IMPORT_TITLE, SYNC_DATA_TITLE, CREATE_NEW, ACCOUNT_TITLE, NOTIFICATIONS_TITLE, SETTINGS_TITLE, RUNNER_TITLE} from '@/ui/constants/titles'
 import {
     IMPORT_FILE_TIPS,
@@ -300,7 +300,10 @@ class DataSettings extends React.Component {
             const {id, items = []} = collection;
             const requestItems = items.filter(item => !item.items);
             const folderItems = items.filter(item => item.items);
-            let collectionMeta = await queryCollectionMetaById(id) || {};
+            let collectionMeta = await queryCollectionMetaById(id);
+            if (!collectionMeta) {
+                continue;
+            }
             const {name, description, auth, variable, test, prerequest} = collectionMeta;
             const flatItems = await this.traverseFolderItems(items);
             const {flatRequests, flatFolders} = flatItems;
@@ -310,26 +313,18 @@ class DataSettings extends React.Component {
                 description: description,
                 auth: auth,
                 events: getEventExportObj(prerequest, test),
-                variables: variable ? variable.map(variableItem => {
-                    const {key, initialValue, disabled} = variableItem;
-                    return {
-                        key: key,
-                        value: initialValue,
-                        disabled: disabled === true
-                    }
-                }) : null,
+                variables: getVariableExportDisabledArr(variable),
                 order: requestItems.map(item => item.id),
                 folders_order: folderItems.map(folderItem => folderItem.id),
                 folders: flatFolders.map(folderItem => {return {...folderItem, collectionId: id}}),
                 requests: flatRequests.map(requestItem => {return {...requestItem, collectionId: id}})
             }
-            console.log(collectionItem);
             collections.push(collectionItem);
-            // return collectionItem;
         }
         const allEnvironmentMeta = await queryAllEnvironmentMeta();
         const allHeaderPresetMeta = await queryAllHeaderPreset();
         let dumpData = {
+            version: 1,
             collections: collections,
             environments: allEnvironmentMeta.map(item => {
                 const {id, name, variable} = item;

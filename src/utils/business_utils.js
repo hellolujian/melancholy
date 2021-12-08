@@ -72,7 +72,7 @@ const getCollectionStatistics = (sourcePostmanCollection, parentId) => {
             const {requestMetaList: childRequestMetaList, collectionMetaList: childCollectionMetaList, collectionObj: childCollectionObj} = collectionChild;
             collectionObj.items.push(childCollectionObj);
             requestMetaList = [...requestMetaList, ...childRequestMetaList];
-            collectionMetaList = [...collectionMetaList, childCollectionMetaList];
+            collectionMetaList = [...collectionMetaList, ...childCollectionMetaList];
         } else if (Item.isItem(o)) {
             
             const {name, request} = o;
