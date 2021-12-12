@@ -255,7 +255,7 @@ export const syncRequestInCollection = async (requestId, key, value) => {
     let parentIdArr = await getParentIdArr(requestMetaInfo.parentId);
     let collectionInfo = await queryCollectionById(parentIdArr[0]);
     let target = getTargetItem(collectionInfo, [...parentIdArr, requestId]);
-    target.[key] = value;
+    target[key] = value;
     return await updateCollection(collectionInfo.id, {$set: { items: collectionInfo.items } })
 }
 
