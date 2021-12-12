@@ -259,6 +259,7 @@ export const syncRequestInCollection = async (requestId, key, value) => {
     return await updateCollection(collectionInfo.id, {$set: { items: collectionInfo.items } })
 }
 
+
 export const saveRequest = async (doc) => {
     const {id, name, method} = doc;
     let requestMetaInfo = await queryRequestMetaById(id);
