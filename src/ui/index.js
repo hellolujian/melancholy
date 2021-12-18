@@ -26,7 +26,7 @@ import PostmanSDK from 'postman-collection'
 
 import { ToastContainer, toast } from 'react-toastify';
 
-const {PropertyList, QueryParam, Url, RequestAuth, VariableScope} = PostmanSDK;
+const {PropertyList, QueryParam, Url, RequestAuth, VariableScope, EventList, Event} = PostmanSDK;
 
 const { TabPane } = Tabs;
 const { SubMenu } = Menu;
@@ -161,6 +161,37 @@ class Home extends React.Component {
 
       console.log(vscope);
       console.log(vscope.toJSON());
+
+      console.log('========================一下为eventlist')
+      let eventList = new EventList();
+      [
+        {
+          "listen": "prerequest",
+          "script": {
+            "id": "7d16759e-c036-4837-af80-4f149b20935e",
+            "exec": [
+              "console.log('请求的用户执行脚本');",
+              "console.log('换行');"
+            ],
+            "type": "text/javascript"
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "id": "0577e315-526f-4802-9ae9-92fcdc218028",
+            "exec": [
+              "console.log('请求的test执行脚本');",
+              "console.log('换行');"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ].forEach(item => {
+        eventList.add(new Event(item))
+      })
+
+      console.log(eventList);
     }
 
     componentWillUnmount() {

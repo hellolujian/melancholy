@@ -1,7 +1,7 @@
 import PostmanSDK from 'postman-collection'
 import {UUID, writeJsonFileSync, getSaveFilePath, getContentFromFilePath, getSingleSelectFilePath} from './global_utils'
 import { ToastContainer, toast } from 'react-toastify';
-const {Url, QueryParam, PropertyList} = PostmanSDK
+const {Url, QueryParam, PropertyList, EventList, Event} = PostmanSDK
 
 // 获取postmanUrl对象
 export const getPostmanUrl = (url = '', param = []) => {
@@ -31,11 +31,43 @@ export const getFullUrl = (requestMeta) => {
     return getUrlString(url, param);
 }
 
+export const parseFullUrl = (fullUrl) => {
+    if (fullUrl) {
+        return {url: '', param: []};
+    }
+
+    let urlJson = Url.parse(fullUrl);
+    const postmanUrl = new Url(urlJson);
+    let queryString = postmanUrl.getQueryString();
+    let queryStringArr = [];
+    if (queryString) {
+        queryStringArr = QueryParam.parse(queryString);
+        postmanUrl.query = new PropertyList();
+    }
+    let urlString = postmanUrl.toString();
+    return {url: urlString, param: queryStringArr.map(item => ({...item, id: UUID()}))};  
+}
 // postman的event转db存储
 export const postmanEventToDbScript = (events, eventName) => {
     let targetEvents = events.listenersOwn(eventName),
     targetEvent = targetEvents.length > 0 ? targetEvents[0] : {};
     return targetEvent.script ? targetEvent.script.toSource() : ''
+}
+
+// json对象转postman的EventList
+export const parseEventsToPostman = (events = []) => {
+    let eventList = new EventList();
+    events.forEach(event => eventList.add(new Event(event)))
+    return eventList;
+}
+
+export const getScriptFromEventsJson = (events) => {
+    const eventList = parseEventsToPostman(events);
+    const prerequest = postmanEventToDbScript(eventList, 'prerequest')
+    const test = postmanEventToDbScript(events, 'test')
+    return {
+        prerequest: prerequest, test: test,
+    }
 }
 
 export const getPostmanUrlJson = (url, param) => {
@@ -160,6 +192,20 @@ export const postmanListToMelancholyDbArr = (keyValueArr = []) => {
             value: value,
             disabled: disabled,
             description: description ? description.toString() : '',
+        }
+    })
+}
+
+// 普通的list对象转为db存储结构
+export const exportedListToMelancholyDbArr = (keyValueArr = []) => {
+    return keyValueArr.map(h => {
+        let {key, value, description, enabled} = h;
+        return {
+            id: UUID(),
+            key: key,
+            value: value,
+            disabled: enabled === false,
+            description: description || '',
         }
     })
 }

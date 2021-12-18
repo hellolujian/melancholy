@@ -1,7 +1,8 @@
 import PostmanSDK from 'postman-collection'
 import {UUID, getContentFromFilePath, getSingleSelectFilePath} from './global_utils'
 import {getMelancholyDBVariables, postmanEventToDbScript, postmanListToMelancholyDbArr, 
-    getUrlWithoutQueryString, getCopyMelancholyDBVariables
+    getUrlWithoutQueryString, getCopyMelancholyDBVariables, exportedListToMelancholyDbArr,
+    parseFullUrl, getScriptFromEventsJson
 } from './common_utils'
 import {deleteCollection, saveCollection, importCollection} from '@/utils/database_utils'
 import {queryEnvironmentMeta, updateEnvironmentMeta, insertEnvironmentMeta} from '@/database/environment_meta'
@@ -10,6 +11,7 @@ import {getCurrentWorkspaceId, getCurrentWorkspace} from '@/utils/store_utils';
 import {queryWorkspaceMetaById, updateWorkspaceMeta} from '@/database/workspace_meta'
 
 import {queryCollectionMetaById, queryCollectionMetaByName} from '@/database/collection_meta'
+import {insertHeaderPreset, queryHeaderPreset, updateHeaderPreset} from '@/database/header_preset'
 import { ToastContainer, toast } from 'react-toastify';
 import {ImportType, VariableScopeType, getVariableScopeType} from '@/enums'
 const {Url, QueryParam, PropertyList, Collection, ItemGroup, Item} = PostmanSDK
@@ -95,12 +97,15 @@ const getCollectionStatistics = (sourcePostmanCollection, parentId) => {
 }
 
 export const checkImportType = (fileJson) => {
-    const {info, item, name, values} = fileJson;
+    const {info, item, name, values, collections} = fileJson;
     if (info && info.name && item) {
         return ImportType.COLLECTION.name();
     }
     if (name && values && Array.isArray(values)) {
         return ImportType.ENVIRONMENT.name();
+    }
+    if (collections && Array.isArray(collections)) {
+        return ImportType.DUMP.name();
     }
 
 }
@@ -113,6 +118,72 @@ export const parseCollectionJsonFile = async (fileJson) => {
     
     await importCollection(collectionObj, collectionMetaList, requestMetaList)
     publishCollectionSave(collectionMetaList[0]);
+}
+
+const importEnvironment = async (fileJson) => {
+    let toastContent = '';
+    const {name, values, _postman_variable_scope} = fileJson;
+    let variables = getMelancholyDBVariables(values);
+    if (VariableScopeType.GLOBALS.code === _postman_variable_scope) {
+        let currentWorkspace = await getCurrentWorkspace();
+        const {id: currentWorkspaceId, variable} = currentWorkspace;
+        const alreadyVariable = getCopyMelancholyDBVariables(variable)
+        await updateWorkspaceMeta(currentWorkspaceId, {$set: {variable: [...alreadyVariable, ...variables]}});
+        toastContent = `${VariableScopeType.GLOBALS.label} imported`;
+    } else {
+        let envDbObject = {
+            id: UUID(),
+            name: name,
+            variable: variables
+        };
+        await insertEnvironmentMeta(envDbObject);
+        toastContent = `${VariableScopeType.ENVIRONMENT.label} ${name} imported`
+    }
+    return toastContent;
+}
+
+const getCollectionDbObj = (item, folders, requests) => {
+    const {name, order, folders_order} = item;
+    let items = [];
+    let collectionId = UUID();
+    folders_order.forEach(folderId => {
+        let folderInfo = folders.find(folder => folder.id === folderId);
+        if (folderInfo) {
+            items.push(getCollectionDbObj(folderInfo, folders, requests));
+        }
+    })
+    let requestMetaList = [];
+    order.forEach(requestId => {
+        let requestInfo = requests.find(request => request.id === requestId);
+        if (requestInfo) {
+            let requestNewId = UUID();
+            let {name, url, method, description, events, headerData, auth} = requestInfo;
+            items.push(
+                {
+                    id: requestNewId,
+                    name: name,
+                    method: method
+                }
+            );
+            requestMetaList.push({
+                id: requestNewId,
+                parentId: collectionId,
+                name: name,
+                method: method,
+                // body: body,
+                header: exportedListToMelancholyDbArr(headerData),
+                description: description,
+                auth: auth,
+                ...getScriptFromEventsJson(events),
+                ...parseFullUrl(url),
+            })
+        }
+    })
+    return {
+        id: collectionId,
+        name: name,
+        items: items
+    }
 }
 
 export const parseImportContent = async (content, type, callback = () => {}) => {
@@ -142,23 +213,48 @@ export const parseImportContent = async (content, type, callback = () => {}) => 
                 
                 break;
             case ImportType.ENVIRONMENT.name(): 
-                const {name: environmentName, values, _postman_variable_scope} = fileJson;
-                let variables = getMelancholyDBVariables(values);
-                if (VariableScopeType.GLOBALS.code === _postman_variable_scope) {
-                    let currentWorkspace = await getCurrentWorkspace();
-                    const {id: currentWorkspaceId, variable} = currentWorkspace;
-                    const alreadyVariable = getCopyMelancholyDBVariables(variable)
-                    await updateWorkspaceMeta(currentWorkspaceId, {$set: {variable: [...alreadyVariable, ...variables]}});
-                    toastContent = `${VariableScopeType.GLOBALS.label} imported`;
-                } else {
-                    let envDbObject = {
-                        id: UUID(),
-                        name: environmentName,
-                        variable: variables
-                    };
-                    await insertEnvironmentMeta(envDbObject);
-                    toastContent = `${VariableScopeType.ENVIRONMENT.label} ${environmentName} imported`
+                toastContent = importEnvironment(fileJson)
+                break;
+            case ImportType.DUMP.name():
+                const {collections, environments, headerPresets, globals} = fileJson;
+                for (let env of environments) {
+                    await importEnvironment(env);
+                    
+                } 
+                await insertHeaderPreset(
+                    headerPresets.map(headerPreset => {
+                        const {name, headers} = headerPreset; 
+                        return {
+                            id: UUID(),
+                            name: name,
+                            preset: exportedListToMelancholyDbArr(headers)
+                        }
+                    })
+                )
+                for (let collection of collections) {
+                    const {folders, requests} = collection;
+                    let collectionMetaList = folders.map(folder => {
+
+                        // let collectionMeta = {
+                        //     id: UUID(), 
+                        //     parentId: newParentId || parentId,
+                        //     name: duplicateName, 
+                        //     description: description,
+                        //     auth: auth,
+                        //     prerequest: prerequest,
+                        //     test: test,
+                        //     variable: variable
+                        // }
+                    })
+
+                    let requestMetaList = [];
+                    let collectionDBItem = getCollectionDbObj(collection, folders, requests);
+                    await importCollection({...collectionDBItem, requestCount: requests.length}, collectionMetaList, requestMetaList)
+                    publishCollectionSave();
                 }
+                
+                
+    
                 break;
             default: break;
         }
