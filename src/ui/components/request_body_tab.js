@@ -151,7 +151,7 @@ class RequestBodyTab extends React.Component {
         { label: 'binary', value: 'file', content: (
           <Space>
             <RequestBodySelectFile 
-              value={modeValue} 
+              value={modeValue && modeValue.src ? modeValue.src : ''} 
               onSelect={this.handleBodyFileSelectd} 
             />
           </Space>

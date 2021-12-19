@@ -1,6 +1,7 @@
 import PostmanSDK from 'postman-collection'
 import {UUID, writeJsonFileSync, getSaveFilePath, getContentFromFilePath, getSingleSelectFilePath} from './global_utils'
 import { ToastContainer, toast } from 'react-toastify';
+import {RequestBodyModeType} from '@/enums'
 const {Url, QueryParam, PropertyList, EventList, Event} = PostmanSDK
 
 // 获取postmanUrl对象
@@ -32,7 +33,7 @@ export const getFullUrl = (requestMeta) => {
 }
 
 export const parseFullUrl = (fullUrl) => {
-    if (fullUrl) {
+    if (!fullUrl) {
         return {url: '', param: []};
     }
 
@@ -47,6 +48,15 @@ export const parseFullUrl = (fullUrl) => {
     let urlString = postmanUrl.toString();
     return {url: urlString, param: queryStringArr.map(item => ({...item, id: UUID()}))};  
 }
+
+export const getUrlWithoutQueryStringByFullUrl = (fullUrl) => {
+    if (!fullUrl) return '';
+    let urlJson = Url.parse(fullUrl);
+    const postmanUrl = new Url(urlJson);
+    postmanUrl.query = new PropertyList();
+    return postmanUrl.toString();
+}
+
 // postman的event转db存储
 export const postmanEventToDbScript = (events, eventName) => {
     let targetEvents = events.listenersOwn(eventName),
@@ -62,9 +72,9 @@ export const parseEventsToPostman = (events = []) => {
 }
 
 export const getScriptFromEventsJson = (events) => {
-    const eventList = parseEventsToPostman(events);
+    const eventList = parseEventsToPostman(events || []);
     const prerequest = postmanEventToDbScript(eventList, 'prerequest')
-    const test = postmanEventToDbScript(events, 'test')
+    const test = postmanEventToDbScript(eventList, 'test')
     return {
         prerequest: prerequest, test: test,
     }
@@ -125,7 +135,7 @@ export const getEventExportObj = (prerequest, test) => {
         }
         return events;
     } else {
-        return null;
+        return undefined;
     }
 }
 
@@ -196,16 +206,108 @@ export const postmanListToMelancholyDbArr = (keyValueArr = []) => {
     })
 }
 
-// 普通的list对象转为db存储结构
-export const exportedListToMelancholyDbArr = (keyValueArr = []) => {
+// json对象的list转db存储结构
+export const normalDescAndDisabledListToMelancholyDbArr = (keyValueArr = []) => {
     return keyValueArr.map(h => {
-        let {key, value, description, enabled} = h;
+        let {key, value, description = '', disabled = false} = h;
         return {
             id: UUID(),
             key: key,
             value: value,
-            disabled: enabled === false,
-            description: description || '',
+            disabled: disabled,
+            description: description,
         }
     })
+}
+
+// 普通的list对象转为db存储结构
+export const exportedListToMelancholyDbArr = (keyValueArr = []) => {
+    return keyValueArr.map(h => {
+        let {key, value, description, enabled, type} = h;
+
+        if (type === 'file') {
+            return {
+                id: UUID(), 
+                key: key,
+                src: Array.isArray(value) ? value : (value ? [value] : ''),
+                description: description || '',
+                type: type,
+                disabled: enabled === false
+            }
+        } else {
+            return {
+                id: UUID(),
+                key: key,
+                value: value,
+                description: description || '',
+                disabled: enabled === false
+            }
+        }
+    })
+}
+
+export const exportedFormdataJsonToMelancholy = (keyValueArr = []) => {
+    return keyValueArr.map(item => {
+        const {key, value, src, description = {}, disabled, type} = item;
+        if (type === 'file') {
+            return {
+                id: UUID(), 
+                key: key,
+                src: Array.isArray(src) ? src : (src ? [src] : ''),
+                description: description.content,
+                type: type,
+                disabled: disabled
+            }
+        } else {
+            return {
+                id: UUID(),
+                key: key,
+                value: value,
+                description: description.content,
+                disabled: disabled
+            }
+        }
+    })
+}
+
+export const parseExportedBodyToMelancholy = (dumpRequestItem) => {
+    const {dataMode, rawModeData, graphqlModeData, dataOptions, data} = dumpRequestItem;
+    if (!dataMode) {
+        return undefined;
+    }
+    switch (dataMode) {
+        case 'params': 
+            return {
+                mode: RequestBodyModeType.FORMDATA.code,
+                formdata: exportedListToMelancholyDbArr(data)
+            }
+        case RequestBodyModeType.URLENCODED.code: 
+            return {
+                mode: dataMode,
+                [dataMode]: exportedListToMelancholyDbArr(data)
+            }
+        case RequestBodyModeType.RAW.code: 
+            return {
+                mode: dataMode,
+                [dataMode]: rawModeData,
+                options: dataOptions
+            }
+            case RequestBodyModeType.GRAPHQL.code: 
+                return {
+                    mode: dataMode,
+                    [dataMode]: graphqlModeData,
+                }
+            case RequestBodyModeType.BINARY.code: 
+                return {
+                    mode: 'file',
+                    file: {
+                        src: rawModeData
+                    },
+                }
+        default: 
+            return {
+                mode: dataMode,
+                [dataMode]: rawModeData
+            };
+    }
 }

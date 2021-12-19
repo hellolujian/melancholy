@@ -26,7 +26,7 @@ import PostmanSDK from 'postman-collection'
 
 import { ToastContainer, toast } from 'react-toastify';
 
-const {PropertyList, QueryParam, Url, RequestAuth, VariableScope, EventList, Event} = PostmanSDK;
+const {PropertyList, QueryParam, Url, RequestAuth, VariableScope, EventList, Even, Collection} = PostmanSDK;
 
 const { TabPane } = Tabs;
 const { SubMenu } = Menu;
@@ -192,6 +192,11 @@ class Home extends React.Component {
       })
 
       console.log(eventList);
+
+      console.log("一下以为从良了次年通过==========================");
+      var fs = window.require('fs')
+      let myCollection = new Collection(JSON.stringify(fs.readFileSync('C:\\Users\\lujian\\Desktop\\空集合.postman_collection.json').toString()));
+      console.log(myCollection);
     }
 
     componentWillUnmount() {

@@ -6,7 +6,7 @@ export const TabType = Enum.define("TabType", ["REQUEST", "EXAMPLE", "BOOTCAMP"]
 
 export const ImportType = Enum.define("ImportType", ["COLLECTION", "DUMP", "ENVIRONMENT"])
 
-export const VariableScopeType = Enum.define("RequestBodyModeType", {
+export const VariableScopeType = Enum.define("VariableScopeType", {
     constants: {
         ENVIRONMENT: {
             code: 'environment', 

@@ -2,7 +2,8 @@ import PostmanSDK from 'postman-collection'
 import {UUID, getContentFromFilePath, getSingleSelectFilePath} from './global_utils'
 import {getMelancholyDBVariables, postmanEventToDbScript, postmanListToMelancholyDbArr, 
     getUrlWithoutQueryString, getCopyMelancholyDBVariables, exportedListToMelancholyDbArr,
-    parseFullUrl, getScriptFromEventsJson
+    parseFullUrl, getScriptFromEventsJson, getUrlWithoutQueryStringByFullUrl, 
+    exportedFormdataJsonToMelancholy, parseExportedBodyToMelancholy, normalDescAndDisabledListToMelancholyDbArr
 } from './common_utils'
 import {deleteCollection, saveCollection, importCollection} from '@/utils/database_utils'
 import {queryEnvironmentMeta, updateEnvironmentMeta, insertEnvironmentMeta} from '@/database/environment_meta'
@@ -51,7 +52,23 @@ const getRequestMeta = (postmanItem, parentId) => {
         prerequest: postmanEventToDbScript(events, 'prerequest'),
         test: postmanEventToDbScript(events, 'test'),
     }
-    return body ? {...requestMetaData, body: body.toJSON} : requestMetaData
+    if (body) {
+        console.log('===================body.tojosn()==========');
+        console.log(body.toJSON())
+        const bodyJson = body.toJSON();
+        const {mode} = bodyJson;
+        const modeData = bodyJson[mode];
+        const bodyDbObj = {
+            ...bodyJson
+        }
+        switch (mode) {
+            case 'formdata':
+            case "urlencoded": 
+                bodyDbObj[mode] =  exportedFormdataJsonToMelancholy(modeData)
+                return {...requestMetaData, body: bodyDbObj}
+            default: return {...requestMetaData, body: bodyDbObj}
+        }
+    } 
    
 }
 
@@ -142,22 +159,34 @@ const importEnvironment = async (fileJson) => {
     return toastContent;
 }
 
-const getCollectionDbObj = (item, folders, requests) => {
-    const {name, order, folders_order} = item;
+const getCollectionDbObj = (item, folders, requests, parentId) => {
+    const {name, order, folders_order, description, auth, events, variables} = item;
     let items = [];
     let collectionId = UUID();
+    let collectionMetaList = [{
+        id: collectionId, 
+        parentId: parentId,
+        name: name, 
+        description: description,
+        auth: auth ? auth : undefined,
+        ...getScriptFromEventsJson(events),
+        variable: normalDescAndDisabledListToMelancholyDbArr(variables)
+    }]
+    let requestMetaList = [];
     folders_order.forEach(folderId => {
         let folderInfo = folders.find(folder => folder.id === folderId);
         if (folderInfo) {
-            items.push(getCollectionDbObj(folderInfo, folders, requests));
+            const childItemObj = getCollectionDbObj(folderInfo, folders, requests, collectionId);
+            items.push(childItemObj.collectionObj);
+            requestMetaList = [...requestMetaList, ...childItemObj.requestMetaList];
+            collectionMetaList = [...collectionMetaList, ...childItemObj.collectionMetaList]
         }
     })
-    let requestMetaList = [];
     order.forEach(requestId => {
         let requestInfo = requests.find(request => request.id === requestId);
         if (requestInfo) {
             let requestNewId = UUID();
-            let {name, url, method, description, events, headerData, auth} = requestInfo;
+            let {name, url, method, description, events, headerData, auth, queryParams} = requestInfo;
             items.push(
                 {
                     id: requestNewId,
@@ -170,19 +199,25 @@ const getCollectionDbObj = (item, folders, requests) => {
                 parentId: collectionId,
                 name: name,
                 method: method,
-                // body: body,
+                body: parseExportedBodyToMelancholy(requestInfo),
                 header: exportedListToMelancholyDbArr(headerData),
                 description: description,
-                auth: auth,
+                auth: auth ? auth : undefined,
                 ...getScriptFromEventsJson(events),
-                ...parseFullUrl(url),
+                url: getUrlWithoutQueryStringByFullUrl(url),
+                param: exportedListToMelancholyDbArr(queryParams)
             })
         }
     })
     return {
-        id: collectionId,
-        name: name,
-        items: items
+        collectionObj: {
+            id: collectionId,
+            name: name,
+            items: items
+        },
+        requestMetaList: requestMetaList,
+        collectionMetaList: collectionMetaList
+
     }
 }
 
@@ -233,23 +268,9 @@ export const parseImportContent = async (content, type, callback = () => {}) => 
                 )
                 for (let collection of collections) {
                     const {folders, requests} = collection;
-                    let collectionMetaList = folders.map(folder => {
-
-                        // let collectionMeta = {
-                        //     id: UUID(), 
-                        //     parentId: newParentId || parentId,
-                        //     name: duplicateName, 
-                        //     description: description,
-                        //     auth: auth,
-                        //     prerequest: prerequest,
-                        //     test: test,
-                        //     variable: variable
-                        // }
-                    })
-
-                    let requestMetaList = [];
                     let collectionDBItem = getCollectionDbObj(collection, folders, requests);
-                    await importCollection({...collectionDBItem, requestCount: requests.length}, collectionMetaList, requestMetaList)
+                    let {collectionMetaList, requestMetaList, collectionObj} = collectionDBItem;
+                    await importCollection({...collectionObj, requestCount: requests.length}, collectionMetaList, requestMetaList)
                     publishCollectionSave();
                 }
                 
