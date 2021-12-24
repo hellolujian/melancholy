@@ -1,19 +1,23 @@
 import React from 'react';
-import {Popover, Button, List, Tabs, Menu, Dropdown, Space, Row, Col, Divider, Typography} from 'antd';
+import {Popover, Button, List, Tabs, Menu, 
+    Dropdown, Space, Row, Col, Divider, Typography} from 'antd';
 import TooltipButton from 'ui/components/tooltip_button'
-import { UserOutlined, AppstoreFilled , PlusOutlined, CaretDownFilled, } from '@ant-design/icons';
+import { AppstoreFilled, CaretDownFilled, } from '@ant-design/icons';
 
 import {stopClickPropagation} from '@/utils/global_utils';
+import {confirmModal} from '@/utils/common_utils';
 import {getCurrentWorkspaceId, setStoreValue} from '@/utils/store_utils';
 import RequiredInput from './required_input'
-import RenameInput from './rename_input'
 import WorkspaceModal from './workspace_modal'
 import Ellipsis from 'react-ellipsis-component';
 import {ELLIPSIS_ICON, GOU_ICON} from '@/ui/constants/icons'
 import {queryWorkspaceMeta, updateWorkspaceMeta} from '@/database/workspace_meta'
 import {OptType} from '@/enums'
+
 import 'ui/style/workspace_card.css'
+
 const { TabPane } = Tabs;
+
 class WorkspaceCard extends React.Component {
 
     constructor(props) {
@@ -33,10 +37,21 @@ class WorkspaceCard extends React.Component {
         this.refreshData({currentWorkspaceId: currentWorkspaceId})
     }
 
-    deleteWorkspace = async (target) => {
-        const {id} = target;
-        await updateWorkspaceMeta(id, {$set: {deleted: true }})
-        this.refreshData()
+    deleteWorkspace = (target) => {
+        confirmModal({
+            title: "DELETE WORKSPACE",
+            content: (
+                <Typography.Paragraph>
+                    <div>Are you sure you want to delete this workspace?</div>
+                    Members of this workspace might lose access to the collections and environments in this workspace.
+                </Typography.Paragraph>
+            ),
+            onOk: async () => {
+                const {id} = target;
+                await updateWorkspaceMeta(id, {$set: {deleted: true }})
+                this.refreshData()
+            }
+        })
     }
 
     handleCreateBtnClick = (workspaceInfo = {}) => {
@@ -49,7 +64,8 @@ class WorkspaceCard extends React.Component {
     }
 
     menus = [
-        {label: "View Details", key: 'viewdetails', event: () => {}},
+        {label: "View Details", key: 'viewdetails', event: () => {}, disabled: true},
+        {label: "Invite to Workspace", key: 'invite', event: () => {}, disabled: true},
         {label: 'Rename', key: 'rename', event: this.showRenameInput},
         {label: 'Edit Workspace', key: 'editworkspace', event: (item) => this.handleCreateBtnClick(item)},
         {label: 'Delete', key: 'delete', event: this.deleteWorkspace}
@@ -67,7 +83,6 @@ class WorkspaceCard extends React.Component {
             return;
         }
         setStoreValue('workspaceId', id);
-        // this.setState({currentWorkspaceId: id})
         window.location.reload()
     }
 
@@ -86,12 +101,10 @@ class WorkspaceCard extends React.Component {
         } else {
             await this.refreshData();
         }
-        
     }
 
     render() {
      
-        
         const {workspaceList, editingId, modalVisible, currentWorkspaceId, workspaceInfo} = this.state;
         let currentWorkspace = workspaceList.find(workspace => workspace.id === currentWorkspaceId) || {}
         return (
@@ -110,7 +123,7 @@ class WorkspaceCard extends React.Component {
                                 <Typography.Link onClick={this.handleCreateBtnClick}>
                                     Create New
                                 </Typography.Link>
-                                <Typography.Link>All workspaces</Typography.Link>
+                                <Typography.Link disabled>All workspaces</Typography.Link>
                             </Space>
                             
                         )}
@@ -152,7 +165,7 @@ class WorkspaceCard extends React.Component {
                                                     <Menu onClick={({key, domEvent}) => this.handleWorkspaceItemMenuClick(key, item, domEvent)}>
                                                         {
                                                             this.menus.map(menu => (
-                                                                <Menu.Item key={menu.key} disabled={item.isDefault && menu.key === 'delete'}>
+                                                                <Menu.Item key={menu.key} disabled={menu.disabled || (item.isDefault && menu.key === 'delete')}>
                                                                     {menu.label}
                                                                 </Menu.Item>
                                                             ))

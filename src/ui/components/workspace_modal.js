@@ -98,7 +98,7 @@ class WorkspaceModal extends React.Component {
                         name="name"
                         rules={[{ required: true, message: 'Please input name!' }]}
                     >
-                        <Input />
+                        <Input autoFocus />
                     </Form.Item>
                 
                 </Form>

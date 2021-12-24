@@ -1,5 +1,7 @@
 .workspace-card-list {
-  width: 350px
+  width: 350px;
+  max-height: 300px;
+  overflow: auto;
 }
 
 .workspace-card-list .workspace-card-list-item {

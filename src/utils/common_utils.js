@@ -1,6 +1,7 @@
 import PostmanSDK from 'postman-collection'
 import {UUID, writeJsonFileSync, getSaveFilePath, getContentFromFilePath, getSingleSelectFilePath} from './global_utils'
 import { ToastContainer, toast } from 'react-toastify';
+import {Modal} from 'antd'
 import {RequestBodyModeType} from '@/enums'
 const {Url, QueryParam, PropertyList, EventList, Event} = PostmanSDK
 
@@ -310,4 +311,20 @@ export const parseExportedBodyToMelancholy = (dumpRequestItem) => {
                 [dataMode]: rawModeData
             };
     }
+}
+
+export const confirmModal = (modalProps = {}) => {
+    Modal.confirm({
+        title: 'DELETE',
+        icon: null,
+        closable: true,
+        width: 530,
+        okText: 'Delete',
+        cancelText: 'Cancel',
+        zIndex: 999999,
+        okButtonProps: { 
+            danger: true,
+        },
+        ...modalProps,
+    });
 }
