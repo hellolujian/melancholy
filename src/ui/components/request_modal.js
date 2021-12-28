@@ -131,6 +131,8 @@ class RequestModal extends React.Component {
 
                         <DescriptionEditor 
                             scene="form" 
+                            defaultValue={requestInfo && requestInfo.description}
+                            value={requestInfo && requestInfo.description}
                             mdEditorShow 
                             mdEditorProps={{style: {height: "120px"}}}
                         />

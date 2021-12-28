@@ -1,5 +1,5 @@
 .description-md-editor {
-  overflow-y: auto !important;
+  overflow-y: hidden !important;
   
 }
 
@@ -9,4 +9,31 @@
 
 textarea.description-md-editor::placeholder {
   font-size: 10px;
+}
+
+.description-editor-not-edit-class {
+  display: none;
+}
+
+.description-editor-container-class:hover .description-editor-not-edit-class {
+  display: inline-block
+}
+
+.description-editor-container-class {
+  padding-right: 20px;
+}
+
+.description-editor-container-class .rc-md-editor {
+  background: unset !important;
+  border: unset !important;
+  display: inline-block !important;
+}
+
+.description-editor-container-class .section-container {
+  padding: 0px 10px !important;
+
+}
+
+.description-editor-container-class p {
+  margin: 0px !important;
 }

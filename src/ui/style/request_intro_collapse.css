@@ -2,7 +2,7 @@
   /* display: none; */
   visibility: hidden;
 }
-.site-collapse-custom-collapse-panel:hover .request-intro-edit-icon {
+.panel-head-customize:hover .request-intro-edit-icon {
   /* display: inline-block; */
   visibility: visible;
 }

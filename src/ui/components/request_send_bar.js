@@ -76,7 +76,7 @@ class RequestSendBar extends React.Component {
             />
         )
         return (
-            <Row gutter={[32, 32]} style={{padding: 10, background: 'white'}} >
+            <Row gutter={[32, 0]} style={{padding: 10, background: 'white'}} >
                 
                 <Col flex='auto'>
                     <Input 

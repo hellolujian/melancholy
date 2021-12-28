@@ -43,10 +43,24 @@ import FolderItem from '@/ui/components/folder_rc_item'
 import RequestRCItem from '@/ui/components/request_rc_item'
 
 
+
+
+import hljs from 'highlight.js'
+import 'highlight.js/styles/atom-one-light.css'
+
+
+
+
+import Editor from 'md-editor-rt';
+import 'md-editor-rt/lib/style.css';
+
+
 import 'ui/style/common.css'
 import 'ui/style/layout.css'
 import 'ui/style/global.css'
 import 'ui/style/test.css'
+
+
 
 
 
@@ -62,11 +76,16 @@ const {Option} = Select;
 const {Text, Link} = Typography
 
 class Home extends React.Component {
-
+  mdEditor = null
+  mdParser = null
   rcTreeRef = React.createRef();
 
     constructor(props) {
         super(props);
+
+       
+
+
         this.state = {
           width: 350,
           tabActiveKey: 'collections',
@@ -86,11 +105,14 @@ class Home extends React.Component {
     }
 
     componentDidMount = async () => {
+      // alert(document.getElementById( "test-scroll").scrollHeight)
+      // document.getElementById("test-scroll").style.height = document.getElementById( "test-scroll").scrollHeight + 1 +"px";
       this.setState({contentWidth: window.innerWidth - this.state.width})
       window.addEventListener('resize', this.handleWindowResize)
 
       let collectionData = await loadCollection();
         this.setState({collectionData: collectionData});
+
 
     }
 
@@ -219,15 +241,54 @@ handleProgress = (obj) => {
   console.log(obj);
 }
 
+handleChange = () => {
+  // alert('sdf')
+}
+
+setText = (value) => {
+  this.setState({ text: value})
+}
+
+handleImageUpload(file, callback) {
+  const reader = new FileReader()
+  reader.onload = () => {      
+    const convertBase64UrlToBlob = (urlData) => {  
+      let arr = urlData.split(','), mime = arr[0].match(/:(.*?);/)[1]
+      let bstr = atob(arr[1])
+      let n = bstr.length
+      let u8arr = new Uint8Array(n)
+      while (n--) {
+        u8arr[n] = bstr.charCodeAt(n)
+      }
+      return new Blob([u8arr], {type:mime})
+    }
+    const blob = convertBase64UrlToBlob(reader.result)
+    setTimeout(() => {
+      // setTimeout 模拟异步上传图片
+      // 当异步上传获取图片地址后，执行calback回调（参数为imageUrl字符串），即可将图片地址写入markdown
+      callback('https://avatars0.githubusercontent.com/u/21263805?s=40&v=4')
+    }, 1000)
+  }
+  reader.readAsDataURL(file)
+}
+
 
     render() {
 
-      return <>
-      dsfwer了解士大夫
-      <Upload directory onProgress={this.handleProgress}>
-        <Button>上传</Button>
-      </Upload>
-      </>;
+
+
+      return (
+        <div className="demo-wrap">
+         
+         
+        </div>
+      );
+
+
+
+
+
+      
     }
 }
 
