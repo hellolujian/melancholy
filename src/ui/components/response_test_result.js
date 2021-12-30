@@ -8,12 +8,6 @@ import { EyeOutlined, CaretDownOutlined  } from '@ant-design/icons';
 import ResponseBody from './response_body'
 import 'ui/style/request_body_tab.css'
 
-
-import AceEditor from "react-ace";
-import "ace-builds/src-noconflict/mode-json";
-import "ace-builds/src-noconflict/theme-tomorrow";
-import "ace-builds/src-noconflict/ext-language_tools"
-
 const { TabPane } = Tabs;
 
 const { Panel } = Collapse;

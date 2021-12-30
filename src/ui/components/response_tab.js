@@ -8,10 +8,6 @@ import KeyValueTable from './key_value_table'
 import ResponseBody from './response_body'
 import 'ui/style/request_body_tab.css'
 
-import "ace-builds/src-noconflict/mode-json";
-import "ace-builds/src-noconflict/theme-tomorrow";
-import "ace-builds/src-noconflict/ext-language_tools"
-
 import ResponseTestResult from "./response_test_result"
 
 import 'ui/style/response_tab.css'

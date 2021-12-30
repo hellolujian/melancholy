@@ -588,40 +588,7 @@ class DraggableTabs extends React.Component {
     return result;
   }
 
-  handleRequestTabContentSave = async (value, saveTabData) => {
-    const {requestInfo, activeTabKey, tabData: oldTabData} = this.state;
-    let tabData = saveTabData || oldTabData
-    if (value.hasOwnProperty('name')) {
-      await saveRequest({id: requestInfo.id, ...value});
-      publishRequestSave({metaData: {id: requestInfo.id, name: value.name}});
-      return;
-    } else if (value.hasOwnProperty('description')) {
-      await updateRequestMeta(requestInfo.id, {$set: value})
-    } else {
-      const activeTab = tabData.find(item => item.id === activeTabKey);
-      let updateDraft = activeTab.draft;
-      console.log('baocun=================');
-      console.log(updateDraft);
-      if (updateDraft) {
-        let setObj = {draft: updateDraft};
-        if (value.hasOwnProperty('method')) {
-          setObj.icon = value.method;
-        }
-        await updateTabMeta(activeTabKey, {$set: setObj})
-      } else {
-        let updateObj = {$unset: {draft: true}};
-        if (value.hasOwnProperty('method')) {
-          updateObj = {
-            ...updateObj,
-            $set: {icon: value.method}
-          };
-        }
-        await updateTabMeta(activeTabKey, updateObj)
-      }
-    }
-  }
-
-  handleRequestTabContentChange = async (value, saveFlag) => {
+  handleRequestTabContentChange = async (value) => {
     console.log('病根传过来的参数：');
     console.log(value);
     const {requestInfo, activeTabKey, tabData} = this.state;
@@ -655,10 +622,42 @@ class DraggableTabs extends React.Component {
       }
       tabData[tabData.findIndex(item => item.id === activeTabKey)] = targetTab;
       this.setState({tabData: tabData});
-      if (saveFlag) {
-        this.handleRequestTabContentSave(value, tabData);
+    }
+    return tabData;
+  }
+
+  handleRequestTabContentSave = async (value) => {
+    let tabData = await this.handleRequestTabContentChange(value)
+    const {requestInfo, activeTabKey} = this.state;
+
+    // tab下方的请求名称和详情直接保存至元数据，不存为草稿
+    if (value.hasOwnProperty('name')) {
+      await saveRequest({id: requestInfo.id, ...value});
+      publishRequestSave({metaData: {id: requestInfo.id, name: value.name}});
+      return;
+    } else if (value.hasOwnProperty('description')) {
+      await updateRequestMeta(requestInfo.id, {$set: value})
+    } else {
+      const activeTab = tabData.find(item => item.id === activeTabKey);
+      let updateDraft = activeTab.draft;
+      console.log('baocun=================');
+      console.log(updateDraft);
+      if (updateDraft) {
+        let setObj = {draft: updateDraft};
+        if (value.hasOwnProperty('method')) {
+          setObj.icon = value.method;
+        }
+        await updateTabMeta(activeTabKey, {$set: setObj})
+      } else {
+        let updateObj = {$unset: {draft: true}};
+        if (value.hasOwnProperty('method')) {
+          updateObj = {
+            ...updateObj,
+            $set: {icon: value.method}
+          };
+        }
+        await updateTabMeta(activeTabKey, updateObj)
       }
-      
     }
   }
 

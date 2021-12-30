@@ -21,8 +21,8 @@ class RequestTabContent extends React.Component {
       
     }
 
-    handleChange = (value, saveFlag) => {
-        this.props.onChange(value, saveFlag);
+    handleChange = (value) => {
+        this.props.onChange(value);
     }
 
     handleSave = (value) => {

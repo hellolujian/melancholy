@@ -2,7 +2,6 @@ import React from 'react';
 import { Collapse, Typography, Popover, Button, Row, Col  } from 'antd';
 import { CaretRightOutlined, CaretDownOutlined } from '@ant-design/icons';
 import DescriptionEditor from 'ui/components/description_editor'
-import AceMarkdownEditor from 'ui/components/ace_markdown_editor'
 import { EDIT_ICON } from '@/ui/constants/icons'
 import EditableText from './editable_text'
 import RequestExamples from './request_examples'
@@ -84,7 +83,6 @@ class RequestIntro extends React.Component {
                 showArrow={sourceRequestExist ? true : false} 
                 // extra={<RequestExamples />}
                 >
-                {/* TODO: 重新赋值，切换tab时 */}
                 {
                   sourceRequestExist && (
                     <DescriptionEditor 

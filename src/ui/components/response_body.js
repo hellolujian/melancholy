@@ -5,7 +5,7 @@ import TooltipButton from './tooltip_button';
 import {WRAP_ICON} from 'ui/constants/icons'
 
 
-import Editor from 'dt-react-monaco-editor'
+// import Editor from 'dt-react-monaco-editor'
 const { Option } = Select;
 class ResponseBody extends React.Component {
 
@@ -66,11 +66,11 @@ class ResponseBody extends React.Component {
                 <TooltipButton title="Wrap Line" buttonProps={{icon: WRAP_ICON, type: 'text', className: 'postman-button-class'}} /> 
             </Space>
 
-                <Editor
+                {/* <Editor
                     value='// 初始注释'
                     language="json"
                     options={{ readOnly: false }}
-                />
+                /> */}
             </Space>
                         
         )

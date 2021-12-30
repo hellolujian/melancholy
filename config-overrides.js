@@ -6,6 +6,21 @@ const path = require("path");
  
 const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 
+const alter_config = () => (config) => {
+  config.plugins.push(new MonacoWebpackPlugin(
+    // {
+    //   languages: ['json', 'javascript', 'markdown'],
+    //   features: [
+
+    //     ['accessibilityHelp', 'bracketMatching', 'caretOperations', 'clipboard', 'codeAction', 'codelens', 'colorDetector', 'comment', 'contextmenu', 'coreCommands', 'cursorUndo', 'dnd', 'find', 'folding', 'fontZoom', 'format', 'gotoError', 'gotoLine', 'gotoSymbol', 'hover', 'iPadShowKeyboard', 'inPlaceReplace', 'inspectTokens', 'linesOperations', 'links', 'multicursor', 'parameterHints', 'quickCommand', 'quickOutline', 'referenceSearch', 'rename', 'smartSelect', 'snippets', 'suggest', 'toggleHighContrast', 'toggleTabFocusMode', 'transpose', 'wordHighlighter', 'wordOperations', 'wordPartOperations']
+    //   ]
+    // }
+  // /monaco-editor(\\|\/)esm(\\|\/)vs(\\|\/)editor(\\|\/)common(\\|\/)services/,
+  //       __dirname
+  ));
+  return config;
+}
+
 module.exports = override(
   fixBabelImports('import', { //配置按需加载
     libraryName: 'antd',
@@ -26,10 +41,5 @@ module.exports = override(
       database: path.resolve(__dirname, 'src/database'),
       enums: path.resolve(__dirname, 'src/enums'),
     }),
-    (config) => {
-      config.plugins.push(new MonacoWebpackPlugin({
-        languages: ['json']
-      }));
-      return config;
-    }
+    alter_config()
 );
