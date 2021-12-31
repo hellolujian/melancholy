@@ -29,7 +29,7 @@ import {
   publishRequestSave,
   publishRequestModalOpen,
   subscribeRequestDelete,
-  listenShortcut
+  listenShortcut,
 } from '@/utils/event_utils'
 import {
   saveRequest, syncRequestInCollection
@@ -81,20 +81,15 @@ const WrapTabNode = DropTarget('DND_NODE', cardTarget, connect => ({
   }))(TabNode),
 );
 
-class DraggableTabs extends React.Component {
+class RequestTabsTop extends React.Component {
+
+  reqeustTabConfirmRef = React.createRef();
 
   constructor(props) {
     super(props);
     this.state = {
       tabData: [],
     };
-  }
-
-  reqeustTabConfirmRef = (ref) => {
-    if (!ref) {
-      return
-    }
-    this.reqeustTabConfirmRef = ref;
   }
   
   /**
@@ -104,20 +99,8 @@ class DraggableTabs extends React.Component {
    * @returns 
    */
   handleActiveTab = async (activeTab, refInfo) => {
-    if (!activeTab) {
-      this.setState({activeTabKey: null, requestInfo: null})
-      return;
-    }
-    const {refId, type, id, draft = {}, name} = activeTab;
-    let updateObj = {activeTabKey: id};
-    switch (type) {
-      case TabType.REQUEST.name(): 
-        let requestMetaInfo = refInfo ? refInfo : (refId ? await queryRequestMetaById(refId) : {name: name})
-        updateObj.requestInfo = {...requestMetaInfo, ...draft};
-        break;
-      default: break;
-    }
-    this.setState(updateObj);
+    this.props.onActiveTabChange(activeTab)
+    this.setState({activeTabKey: activeTab ? activeTab.id : null});
   }
 
   // 刷新数据
@@ -207,7 +190,7 @@ class DraggableTabs extends React.Component {
     } else {
       const targetTab = tabData.find(tab => tab.id === closeTabKey);
       if (targetTab.draft) {
-        this.reqeustTabConfirmRef.show([targetTab]);
+        this.reqeustTabConfirmRef.current.show([targetTab]);
       } else {
         await this.doCloseTab(closeTabKey)
       }
@@ -230,7 +213,7 @@ class DraggableTabs extends React.Component {
   // 关闭其他
   handleCloseOtherTabs = (key) => {
     const {tabData} = this.state;
-    this.reqeustTabConfirmRef.show(tabData.filter(tab => tab.id !== key));
+    this.reqeustTabConfirmRef.current.show(tabData.filter(tab => tab.id !== key));
   }
 
   // 关闭所有
@@ -264,7 +247,7 @@ class DraggableTabs extends React.Component {
         await doCloseAll();
       }
     } else {
-      this.reqeustTabConfirmRef.show(tabData);
+      this.reqeustTabConfirmRef.current.show(tabData);
     }
   }
 
@@ -299,7 +282,6 @@ class DraggableTabs extends React.Component {
   handleRequestSave = async (msg, {metaData, extend = {}}) => {
     const {id, name} = metaData;
     if (!id) return;
-    let requestInfoId = id;
     if (extend.hasOwnProperty('justSave')) {
       // 通过弹框的另存为的请求，需要将tab的草稿内容更新到该请求上，并且更新该tab的refId
       const {justSave, tabInfo} = extend;
@@ -316,17 +298,13 @@ class DraggableTabs extends React.Component {
           test: test, 
           param: param
       });
-      requestInfoId = tabInfo.refId;
     } else {
       // 普通的修改请求，只需更新tab的name即可
       await multiUpdateTabMeta({refId: id, type: TabType.REQUEST.name()}, {$set: {name: name}});
       await this.refreshData();
     }
-    const {requestInfo} = this.state;
-    if (requestInfo && (requestInfo.id === requestInfoId)) {
-      let newRequestMetaInfo = await queryRequestMetaById(id);
-      this.setState({requestInfo: newRequestMetaInfo})
-    }
+
+    this.props.onActiveTabChange(this.state.activeTab)
 
   }
 
@@ -366,7 +344,7 @@ class DraggableTabs extends React.Component {
     if (targetTab.sourceDeleted) {
       this.handleSaveAs(targetTab, true);
     } else if (targetTab.conflict) {
-      this.reqeustTabConfirmRef.show([targetTab], true);
+      this.reqeustTabConfirmRef.current.show([targetTab], true);
     } else if (!targetTab.refId) {
       this.handleSaveAs(targetTab, true)
     } else {
@@ -378,8 +356,43 @@ class DraggableTabs extends React.Component {
   // 处理请求删除
   handleRequestDelete = async (msg, {id}) => {
     await multiUpdateTabMeta({refId: id, type: TabType.REQUEST.name()}, {$set: {sourceDeleted: true}});
-    const {requestInfo} = this.state;
-    await this.refreshData(requestInfo && requestInfo.id === id ? {requestInfo: {...requestInfo, deleted: true}} : {});
+    this.props.onActiveTabChange(this.state.activeTab)
+    await this.refreshData();
+  }
+
+  handleRequestTabContentChange = async (value) => {
+    console.log(value);
+    const {activeTabKey, tabData} = this.state;
+    if (!(value.hasOwnProperty('name') || value.hasOwnProperty('description'))) {
+      let targetTab = tabData.find(item => item.id === activeTabKey);
+      console.log('目标对象===================');
+      console.log(targetTab);
+      let {draft = {}} = targetTab;
+      let newDraft = {...draft, ...value};
+      let preRequestInfo = targetTab.refId ? await queryRequestMetaById(targetTab.refId) : {method: 'get'};
+      let oldDraft = getSpecificFieldObj(preRequestInfo, Object.keys(value))
+      console.log('老的草稿');
+      console.log(oldDraft);
+      console.log('心得草稿');
+      console.log(newDraft);
+      if (compareObjectIgnoreEmpty(newDraft, oldDraft)) {
+        console.log('是否香港等=====');
+        targetTab = this.removeTargetField(targetTab, 'draft')
+      } else {
+        targetTab.draft = newDraft;
+      }
+
+      console.log('最后的targetTab');
+      console.log(targetTab);
+      console.log('===变更后的tabdata纸==');
+      console.log(tabData);
+      if (value.method) {
+        targetTab.icon = value.method;
+      }
+      tabData[tabData.findIndex(item => item.id === activeTabKey)] = targetTab;
+      this.setState({tabData: tabData});
+    }
+    return tabData;
   }
 
   componentDidMount = async () => {
@@ -568,17 +581,6 @@ class DraggableTabs extends React.Component {
     }
   }
 
-  removeUndefinedValue = (obj) => {
-    let result = {};
-    Object.keys(obj).forEach(key => {
-      let value = obj[key];
-      if (value !== undefined) {
-        result[key] = value;
-      }
-    })
-    return result;
-  }
-
   removeTargetField = (obj, deleteField) => {
     let newKeys = Object.keys(obj).filter(key => deleteField !== key);
     let result = {};
@@ -586,79 +588,6 @@ class DraggableTabs extends React.Component {
       result[key] = obj[key];
     })
     return result;
-  }
-
-  handleRequestTabContentChange = async (value) => {
-    console.log('病根传过来的参数：');
-    console.log(value);
-    const {requestInfo, activeTabKey, tabData} = this.state;
-    this.setState({requestInfo: {...requestInfo, ...value}});
-    if (!(value.hasOwnProperty('name') || value.hasOwnProperty('description'))) {
-      let targetTab = tabData.find(item => item.id === activeTabKey);
-      console.log('目标对象===================');
-      console.log(targetTab);
-      let {draft = {}} = targetTab;
-      let newDraft = {...draft, ...value};
-      let preRequestInfo = targetTab.refId ? await queryRequestMetaById(targetTab.refId) : {method: 'get'};
-      let oldDraft = getSpecificFieldObj(preRequestInfo, Object.keys(value))
-      console.log('老的草稿');
-      console.log(oldDraft);
-      console.log('心得草稿');
-      console.log(newDraft);
-      if (compareObjectIgnoreEmpty(newDraft, oldDraft)) {
-        console.log('是否香港等=====');
-        targetTab = this.removeTargetField(targetTab, 'draft')
-      } else {
-        targetTab.draft = newDraft;
-      }
-     
-
-      console.log('最后的targetTab');
-      console.log(targetTab);
-      console.log('===变更后的tabdata纸==');
-      console.log(tabData);
-      if (value.method) {
-        targetTab.icon = value.method;
-      }
-      tabData[tabData.findIndex(item => item.id === activeTabKey)] = targetTab;
-      this.setState({tabData: tabData});
-    }
-    return tabData;
-  }
-
-  handleRequestTabContentSave = async (value) => {
-    let tabData = await this.handleRequestTabContentChange(value)
-    const {requestInfo, activeTabKey} = this.state;
-
-    // tab下方的请求名称和详情直接保存至元数据，不存为草稿
-    if (value.hasOwnProperty('name')) {
-      await saveRequest({id: requestInfo.id, ...value});
-      publishRequestSave({metaData: {id: requestInfo.id, name: value.name}});
-      return;
-    } else if (value.hasOwnProperty('description')) {
-      await updateRequestMeta(requestInfo.id, {$set: value})
-    } else {
-      const activeTab = tabData.find(item => item.id === activeTabKey);
-      let updateDraft = activeTab.draft;
-      console.log('baocun=================');
-      console.log(updateDraft);
-      if (updateDraft) {
-        let setObj = {draft: updateDraft};
-        if (value.hasOwnProperty('method')) {
-          setObj.icon = value.method;
-        }
-        await updateTabMeta(activeTabKey, {$set: setObj})
-      } else {
-        let updateObj = {$unset: {draft: true}};
-        if (value.hasOwnProperty('method')) {
-          updateObj = {
-            ...updateObj,
-            $set: {icon: value.method}
-          };
-        }
-        await updateTabMeta(activeTabKey, updateObj)
-      }
-    }
   }
 
   handleSaveClick = (saveAs) => {
@@ -672,18 +601,18 @@ class DraggableTabs extends React.Component {
   }
 
   render() {
-    const { tabData, activeTabKey, recentClosedTabs = [], requestInfo } = this.state;
+    const { tabData, activeTabKey, recentClosedTabs = [] } = this.state;
     return (
       <>
-        {/* <RequestTabConfirm 
+        <RequestTabConfirm 
           ref={this.reqeustTabConfirmRef} 
           onSave={this.handleConfirmSave}
           onSaveAs={this.handleSaveAs}
           onNotSave={this.handleNotSave}
           onCancel={this.handleCancel}
-        /> */}
+        />
       
-        {/* <DndProvider backend={HTML5Backend}>
+        <DndProvider backend={HTML5Backend}>
           <Tabs 
             id="request-tabs-id"
             activeKey={activeTabKey}
@@ -775,40 +704,10 @@ class DraggableTabs extends React.Component {
           
             }
           </Tabs>
-        </DndProvider> */}
-
-        {
-          tabData.length === 0 ? (
-            <Empty style={{height: 'calc(100% - 35px)'}} className="flex-direction-column vertical-center horizontal-center" 
-              description={
-                <Typography.Title type="secondary" level={5}>
-                  Hit Ctrl + T to open a new request or select a new request from the sidebar
-                </Typography.Title>
-              }
-            />
-          ) : (
-            <div style={{height: 'calc(100% - 35px)',  overflowY: 'scroll', overflowX: 'hidden', paddingBottom: 20}} className="request-tab-content">
-              {
-                requestInfo && (
-                  <RequestTabContent 
-                    value={requestInfo} 
-                    onSave={this.handleRequestTabContentSave}
-                    onSaveClick={this.handleSaveClick}
-                    // onChange={this.handleRequestTabContentChange}
-                  />
-                )
-              }
-              {/* <div style={{height: 900}}></div> */}
-            </div>
-            
-          )
-        }
-        
-        
-        
+        </DndProvider>
         
       </>
     );
   }
 }
-export default DraggableTabs
+export default RequestTabsTop

@@ -1,10 +1,12 @@
 
 const { 
-  fixBabelImports,
+  fixBabelImports, addWebpackResolve,
   addLessLoader,override, addWebpackAlias } = require('customize-cra');
 const path = require("path");
  
 const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
+
+const NodePolyfillPlugin = require('node-polyfill-webpack-plugin')
 
 const alter_config = () => (config) => {
   config.plugins.push(new MonacoWebpackPlugin(
@@ -18,21 +20,23 @@ const alter_config = () => (config) => {
   // /monaco-editor(\\|\/)esm(\\|\/)vs(\\|\/)editor(\\|\/)common(\\|\/)services/,
   //       __dirname
   ));
+
+  config.plugins.push(new NodePolyfillPlugin())
   return config;
 }
 
 module.exports = override(
-  fixBabelImports('import', { //配置按需加载
-    libraryName: 'antd',
-    libraryDirectory: 'es',
-    style: true,
-  }),
-  addLessLoader({
-    javascriptEnabled: true,
-    // modifyVars: {
-    //   '@primary-color': '#1DA57A'
-    // }
-  }),
+  // fixBabelImports('import', { //配置按需加载
+  //   libraryName: 'antd',
+  //   libraryDirectory: 'es',
+  //   style: true,
+  // }),
+  // addLessLoader({
+  //   javascriptEnabled: true,
+  //   // modifyVars: {
+  //   //   '@primary-color': '#1DA57A'
+  //   // }
+  // }),
     addWebpackAlias({
       "@": path.resolve(__dirname, "src"),
       components: path.resolve(__dirname, 'src/components'),

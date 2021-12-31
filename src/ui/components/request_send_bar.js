@@ -46,6 +46,8 @@ class RequestSendBar extends React.Component {
     handleUrlChange = (e) => {
         
         this.props.onChange(this.getUrlObj(e.target.value));
+        this.setState({value: this.getUrlObj(e.target.value)})
+
     }
 
     handleMethodChange = (value) => {

@@ -56,10 +56,6 @@ class RequestRCItem extends React.Component {
         this.props.onDuplicate();
     }
 
-    handleOpenNewTab = () => {
-        publishNewTabOpen()
-    }
-
     // 菜单配置
     menuItems = [
         { name: 'open', label: 'Open in New Tab', icon: OPEN_NEW_ICON, event: () => publishNewTabOpen(this.props.item)},

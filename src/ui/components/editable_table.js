@@ -8,12 +8,9 @@ import 'ui/style/editable_table.css'
 import arrayMove from 'array-move';
 import RequestMethodSelect from './request_method_select'
 import Ellipsis from 'react-ellipsis-component';
-import TextareaAutosize from 'rc-textarea';
 import RequestBodySelectFile from './request_body_select_file';
 
-// import TextareaAutosize from "react-autosize-textarea"
 
-// import Textarea from 'react-expanding-textarea'
 
 const {Link} = Typography;
 const SortableItem = sortableElement(props => <tr {...props} />);

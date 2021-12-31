@@ -3,21 +3,21 @@ import ReactDOM from 'react-dom';
 import MonacoEditor, { MonacoDiffEditor } from "react-monaco-editor";
 
 
+import AceEditor from "react-ace";
+import "ace-builds/src-noconflict/mode-javascript";
 
 
 // import { PlusOutlined, SearchOutlined,} from '@ant-design/icons';
 // import CollectionModal from 'ui/components/collection_modal'
 // import TooltipButton from 'ui/components/tooltip_button';
-// import RequestTabs from 'ui/components/request_tabs'
 // import LayoutHeader from 'ui/components/layout_header'
 // import CollectionRCTree from 'ui/components/collection_rc_tree'
-import ResponseTab from 'ui/components/response_tab'
+// import ResponseTab from 'ui/components/response_tab'
 
-import {Rnd} from 'react-rnd';
-import {ADD_ICON} from 'ui/constants/icons'
-import {publishCollectionModalOpen} from '@/utils/event_utils'
-import {getStoreValue} from '@/utils/store_utils'
-import TextareaAutosize from "react-autosize-textarea"
+// import {Rnd} from 'react-rnd';
+// import {ADD_ICON} from 'ui/constants/icons'
+// import {publishCollectionModalOpen} from '@/utils/event_utils'
+// import {getStoreValue} from '@/utils/store_utils'
 
 
 
@@ -33,10 +33,10 @@ class Home extends React.Component {
   }
 
   handleEditorChange = (it, event) => {
-    // console.log('handleEditorChange', it.text, it.html, event);
-    this.setState({
-      value: it.text,
-    });
+    console.log('handleEditorChange', it.text, it.html, event);
+    // this.setState({
+    //   value: it.text,
+    // });
   };
 
   handleImageUpload = (file) => {
@@ -89,14 +89,43 @@ class Home extends React.Component {
 
     return (
 
-        <MonacoEditor
-        height="600"
-        language="javascript"
-        theme="vs-light"
-        // value={code}
-        // options={options}
-        onChange={this.onChange}
+      <AceEditor
+                    style={{
+                        border: '1px solid lightgray', 
+                        width: '100%', 
+                        // height: '300px',
+                    }}
+                    // ref={this.onRef}
+                    // height={height}
+                    mode='javascript'
+                    theme="chrome"
+                    name="script_editorrwe"
+                    onLoad={this.onLoad}
+                    onChange={this.handleChange}
+                    onBlur={this.handleBlur}
+                    // fontSize={14}
+                    showPrintMargin={false}
+                    showGutter={true}
+                    highlightActiveLine={true}
+                    // value={value}
+                    onCursorChange={this.handleCursorChange}
+                    setOptions={{
+                        enableBasicAutocompletion: true,
+                        enableLiveAutocompletion: true,
+                        enableSnippets: true,
+                        showLineNumbers: true
+                    }}
+                    // {...aceEditorProps}
                 />
+
+        // <MonacoEditor
+        // height="600"
+        // language="javascript"
+        // theme="vs-light"
+        // // value={code}
+        // // options={options}
+        // onChange={this.handleEditorChange}
+        //         />
     );
   }
 }

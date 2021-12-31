@@ -7,11 +7,9 @@ import {
 import { PlusOutlined, SearchOutlined,} from '@ant-design/icons';
 import CollectionModal from 'ui/components/collection_modal'
 import TooltipButton from 'ui/components/tooltip_button';
-import RequestTabs from 'ui/components/request_tabs'
 import LayoutHeader from 'ui/components/layout_header'
 import CollectionTree from 'ui/components/collection_tree'
 import ResponseTab from 'ui/components/response_tab'
-import Upload from 'rc-upload'
 import {
   duplicateRequest, 
   deleteRequest,
@@ -27,7 +25,6 @@ import KeyValueTable from 'ui/components/key_value_table'
 import {Rnd} from 'react-rnd';
 import {ADD_ICON} from 'ui/constants/icons'
 import {publishCollectionModalOpen} from '@/utils/event_utils'
-import TextareaAutosize from "react-autosize-textarea"
 
 
 import { CaretRightOutlined,  CaretDownOutlined , FolderFilled} from '@ant-design/icons';
