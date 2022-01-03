@@ -206,8 +206,9 @@ const NeDB = require('nedb');
 const db = {};
 const initDatabase = (dbName) => {
   if (!db[dbName]) {
+    let dbDir = isDev ? __dirname : app.getPath('userData');;
       db[dbName] = new NeDB({
-          filename: path.join(__dirname, `databases/${dbName}.db`), 
+          filename: path.join(dbDir, `databases/${dbName}.db`), 
           autoload: true,
           timestampData: true,
       });
@@ -362,10 +363,12 @@ const initWorkspace = async () => {
 global.CURRENT_WORKSPACE = initWorkspace
 
 function createWindow() {
-    console.log(__dirname );
-    // const log = require('electron-log');
-    // log.debug(app.getPath('userData'));
 
+  console.log('createwindow:====')
+    console.log(__dirname );
+    const log = require('electron-log');
+    log.debug(app.getPath('userData'));
+    log.info(app.getPath('userData'))
 
     
 
@@ -390,6 +393,7 @@ function createWindow() {
           }
     })
     webContents = win.webContents;
+    require("@electron/remote/main").enable(webContents)
 
     // 然后加载应用的 index.html。  url 及本地文件形式
     const localFile = `file://${path.join(__dirname, './build/index.html')}`
@@ -417,11 +421,14 @@ global.LOCAL_SHORTCUT_EVENT = LOCAL_SHORTCUT_EVENT
 // Electron 会在初始化后并准备
 // 创建浏览器窗口时，调用这个函数。
 // 部分 API 在 ready 事件触发后才能使用。
-app.on('ready', async () => {
-  await initWorkspace()
+app.on('ready', () => {
+  
+  console.log('ready=================');
+  initWorkspace()
   require('@electron/remote/main').initialize();
-  createWindow();
-  isDev && createDevTools();
+  if (!win) {
+    createWindow();
+  }
   const electronLocalshortcut = require('electron-localshortcut');
   localShortcutList.forEach(item => {
     electronLocalshortcut.register(item.accelerator, () => {
@@ -434,6 +441,8 @@ app.on('ready', async () => {
 
 // 当全部窗口关闭时退出。
 app.on('window-all-closed', () => {
+
+  console.log('window-all-closed');
     // 在 macOS 上，除非用户用 Cmd + Q 确定地退出，
     // 否则绝大部分应用及其菜单栏会保持激活。
     if (process.platform !== 'darwin') {
@@ -442,11 +451,13 @@ app.on('window-all-closed', () => {
 })
 
 app.on('will-quit', function () {
+  console.log('will-quit');
   const electronLocalshortcut = require('electron-localshortcut');
   electronLocalshortcut.unregisterAll();
 })
 
 app.on('activate', () => {
+  console.log('activate');
     // 在macOS上，当单击dock图标并且没有其他窗口打开时，
     // 通常在应用程序中重新创建一个窗口。
     if (win === null) {

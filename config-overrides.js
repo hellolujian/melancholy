@@ -3,6 +3,9 @@ const {
   fixBabelImports, addWebpackResolve,
   addLessLoader,override, addWebpackAlias } = require('customize-cra');
 const path = require("path");
+// 打包到指定目录
+const paths = require('react-scripts/config/paths');
+paths.appBuild = path.join(path.dirname(paths.appBuild), '/electron/build');
  
 const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 

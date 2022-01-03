@@ -41,12 +41,15 @@
     "uuid": "^8.3.2",
     "web-vitals": "^2.1.2"
   },
+  "homepage": ".",
   "scripts": {
     "ui": "cross-env PORT=8000 react-app-rewired start",
     "electron": "npm start --prefix electron",
     "start": "concurrently \"cross-env BROWSER=none npm run ui\" \"wait-on http://localhost:8000 && nodemon --watch electron/main.js --exec npm run electron\"",
     "start2": "react-app-rewired start",
-    "build": "react-scripts build",
+    "build": "react-app-rewired build",
+    "build_electron": "npm run build --prefix electron",
+    "package": "npm run build && npm run build_electron",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
@@ -76,7 +79,7 @@
     "monaco-editor-webpack-plugin": "^7.0.1",
     "nodemon": "^2.0.15",
     "npm-run-all": "^4.1.5",
-    "react-app-rewired": "^2.1.11",
+    "react-app-rewired": "^2.1.8",
     "react-scripts": "^5.0.0",
     "wait-on": "^6.0.0"
   }

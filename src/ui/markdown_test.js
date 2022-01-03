@@ -89,34 +89,36 @@ class Home extends React.Component {
 
     return (
 
-      <AceEditor
-                    style={{
-                        border: '1px solid lightgray', 
-                        width: '100%', 
-                        // height: '300px',
-                    }}
-                    // ref={this.onRef}
-                    // height={height}
-                    mode='javascript'
-                    theme="chrome"
-                    name="script_editorrwe"
-                    onLoad={this.onLoad}
-                    onChange={this.handleChange}
-                    onBlur={this.handleBlur}
-                    // fontSize={14}
-                    showPrintMargin={false}
-                    showGutter={true}
-                    highlightActiveLine={true}
-                    // value={value}
-                    onCursorChange={this.handleCursorChange}
-                    setOptions={{
-                        enableBasicAutocompletion: true,
-                        enableLiveAutocompletion: true,
-                        enableSnippets: true,
-                        showLineNumbers: true
-                    }}
-                    // {...aceEditorProps}
-                />
+      <h1>sdfsadfasd</h1>
+
+      // <AceEditor
+      //               style={{
+      //                   border: '1px solid lightgray', 
+      //                   width: '100%', 
+      //                   // height: '300px',
+      //               }}
+      //               // ref={this.onRef}
+      //               // height={height}
+      //               mode='javascript'
+      //               theme="chrome"
+      //               name="script_editorrwe"
+      //               onLoad={this.onLoad}
+      //               onChange={this.handleChange}
+      //               onBlur={this.handleBlur}
+      //               // fontSize={14}
+      //               showPrintMargin={false}
+      //               showGutter={true}
+      //               highlightActiveLine={true}
+      //               // value={value}
+      //               onCursorChange={this.handleCursorChange}
+      //               setOptions={{
+      //                   enableBasicAutocompletion: true,
+      //                   enableLiveAutocompletion: true,
+      //                   enableSnippets: true,
+      //                   showLineNumbers: true
+      //               }}
+      //               // {...aceEditorProps}
+      //           />
 
         // <MonacoEditor
         // height="600"
