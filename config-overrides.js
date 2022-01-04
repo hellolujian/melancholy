@@ -3,6 +3,9 @@ const {
   fixBabelImports, addWebpackResolve,
   addLessLoader,override, addWebpackAlias } = require('customize-cra');
 const path = require("path");
+
+// 删除打包后的map文件
+process.env.GENERATE_SOURCEMAP = "false"
 // 打包到指定目录
 const paths = require('react-scripts/config/paths');
 paths.appBuild = path.join(path.dirname(paths.appBuild), '/electron/build');
@@ -20,8 +23,6 @@ const alter_config = () => (config) => {
     //     ['accessibilityHelp', 'bracketMatching', 'caretOperations', 'clipboard', 'codeAction', 'codelens', 'colorDetector', 'comment', 'contextmenu', 'coreCommands', 'cursorUndo', 'dnd', 'find', 'folding', 'fontZoom', 'format', 'gotoError', 'gotoLine', 'gotoSymbol', 'hover', 'iPadShowKeyboard', 'inPlaceReplace', 'inspectTokens', 'linesOperations', 'links', 'multicursor', 'parameterHints', 'quickCommand', 'quickOutline', 'referenceSearch', 'rename', 'smartSelect', 'snippets', 'suggest', 'toggleHighContrast', 'toggleTabFocusMode', 'transpose', 'wordHighlighter', 'wordOperations', 'wordPartOperations']
     //   ]
     // }
-  // /monaco-editor(\\|\/)esm(\\|\/)vs(\\|\/)editor(\\|\/)common(\\|\/)services/,
-  //       __dirname
   ));
 
   config.plugins.push(new NodePolyfillPlugin())
@@ -29,11 +30,11 @@ const alter_config = () => (config) => {
 }
 
 module.exports = override(
-  // fixBabelImports('import', { //配置按需加载
-  //   libraryName: 'antd',
-  //   libraryDirectory: 'es',
-  //   style: true,
-  // }),
+  fixBabelImports('import', { //配置按需加载
+    libraryName: 'antd',
+    libraryDirectory: 'es',
+    style: true,
+  }),
   // addLessLoader({
   //   javascriptEnabled: true,
   //   // modifyVars: {
