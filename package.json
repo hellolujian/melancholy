@@ -47,8 +47,9 @@
     "electron": "npm start --prefix electron",
     "start": "concurrently \"cross-env BROWSER=none npm run ui\" \"wait-on http://localhost:8000 && nodemon --watch electron/main.js --exec npm run electron\"",
     "start2": "react-app-rewired start",
-    "build": "react-app-rewired build",
+    "build_react": "react-app-rewired build",
     "build_electron": "npm run build --prefix electron",
+    "build": "npm run build_react && npm run build_electron",
     "package": "npm run build && npm run build_electron",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
