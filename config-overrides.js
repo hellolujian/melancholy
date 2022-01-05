@@ -30,17 +30,17 @@ const alter_config = () => (config) => {
 }
 
 module.exports = override(
-  fixBabelImports('import', { //配置按需加载
-    libraryName: 'antd',
-    libraryDirectory: 'es',
-    style: true,
+  fixBabelImports("import", {
+    libraryName: "antd", 
+    libraryDirectory: "es", 
+    style: "css" // change importing css to less
   }),
-  // addLessLoader({
-  //   javascriptEnabled: true,
-  //   // modifyVars: {
-  //   //   '@primary-color': '#1DA57A'
-  //   // }
-  // }),
+  addLessLoader({
+    lessOptions:{
+      javascriptEnabled:true ,
+      ModifyVars:{  '@primary-color':'#eee'  } 
+  }
+  }),
     addWebpackAlias({
       "@": path.resolve(__dirname, "src"),
       components: path.resolve(__dirname, 'src/components'),

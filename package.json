@@ -7,7 +7,7 @@
     "@testing-library/react": "^12.1.2",
     "@testing-library/user-event": "^13.5.0",
     "ace-builds": "^1.4.13",
-    "antd": "^4.16.0",
+    "antd": "^4.18.2",
     "array-move": "^3.0.1",
     "highlight.js": "^11.3.1",
     "less": "^4.1.2",
@@ -42,16 +42,18 @@
   },
   "homepage": ".",
   "scripts": {
-    "ui": "cross-env PORT=8000 react-app-rewired start",
+    "ui": "cross-env PORT=8000 craco start",
     "electron": "npm start --prefix electron",
     "start": "concurrently \"cross-env BROWSER=none npm run ui\" \"wait-on http://localhost:8000 && nodemon --watch electron/main.js --exec npm run electron\"",
-    "start2": "react-app-rewired start",
-    "build_react": "react-app-rewired build",
+    "build_react": "craco build",
     "build_electron": "npm run build --prefix electron",
     "build": "npm run build_react && npm run build_electron",
     "package": "npm run build && npm run build_electron",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "ui_old": "cross-env PORT=8000 react-app-rewired start",
+    "start_old": "react-app-rewired start",
+    "build_react_old": "react-app-rewired build"
   },
   "eslintConfig": {
     "extends": [
@@ -72,8 +74,10 @@
     ]
   },
   "devDependencies": {
+    "@craco/craco": "^6.4.3",
     "babel-plugin-import": "^1.13.3",
     "concurrently": "^6.5.1",
+    "craco-less": "^2.0.0",
     "cross-env": "^7.0.3",
     "customize-cra": "^1.0.0",
     "monaco-editor-webpack-plugin": "^7.0.1",
