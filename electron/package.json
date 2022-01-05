@@ -1,6 +1,6 @@
 {
 	"name": "melancholy",
-	"version": "1.0.7",
+	"version": "1.0.8",
 	"author": "Jian.Lu",
 	"description": "Rest API Debug Tool",
 	"dependencies": {

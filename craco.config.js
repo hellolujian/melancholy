@@ -45,14 +45,9 @@ module.exports = {
     },
 
     configure: (webpackConfig, {env, paths}) => {
-      console.log('===============================================');
-      
-      paths.appBuild = 'electron/build';
-      console.log('打包路径：' + paths.appBuild);
       webpackConfig.output = {
         ...webpackConfig.output,
-        // path: path.resolve(__dirname, 'build'),
-        publicPath: '/'
+        path: path.resolve(__dirname, 'electron/build'),
       }
 
       return webpackConfig
