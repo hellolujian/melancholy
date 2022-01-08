@@ -1,6 +1,7 @@
 const path = require("path");
 const CracoLessPlugin = require('craco-less');
 const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
+const SimpleProgressWebpackPlugin = require( 'simple-progress-webpack-plugin' )
 
 // 删除打包后的map文件
 process.env.GENERATE_SOURCEMAP = "false"
@@ -35,6 +36,9 @@ module.exports = {
     ]
   },
   webpack: {
+    plugins: [
+      new SimpleProgressWebpackPlugin()
+    ],
     alias: {
       "@": path.resolve(__dirname, "src"),
       components: path.resolve(__dirname, 'src/components'),
@@ -45,6 +49,7 @@ module.exports = {
     },
 
     configure: (webpackConfig, {env, paths}) => {
+      paths.appBuild = path.join(path.dirname(paths.appBuild), '/electron/build');;
       webpackConfig.output = {
         ...webpackConfig.output,
         path: path.resolve(__dirname, 'electron/build'),
