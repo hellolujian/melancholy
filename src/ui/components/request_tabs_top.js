@@ -467,13 +467,13 @@ class RequestTabsTop extends React.Component {
             node.ref.current.style.maxWidth = '220px'
             let style = {
                 height: 2, 
-                borderLeft: '1px solid #f0f0f0', 
-                borderRight: '1px solid #f0f0f0', 
+                borderLeft: '1px solid var(--request-tabs-border, #f0f0f0)', 
+                borderRight: '1px solid var(--request-tabs-border, #f0f0f0)', 
                 position: 'absolute', bottom: 0, 
                 width: window.getComputedStyle(node.ref.current).width
               };
               if (activeTabKey === key) {
-                style.background = '#fafafa';
+                style.backgroundColor = 'var(--request-tabs-active-background, #fafafa)';
               }
               finalNode = (
                 <div>

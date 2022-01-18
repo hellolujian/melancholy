@@ -12,7 +12,7 @@ import CollectionRCTree from 'ui/components/collection_rc_tree'
 import ResponseTab from 'ui/components/response_tab'
 
 import MainRightContainer from 'ui/components/main_right_container';
-
+import { setTheme } from '@/utils/style_utils';
 import {Rnd} from 'react-rnd';
 import {ADD_ICON} from 'ui/constants/icons'
 import {publishCollectionModalOpen} from '@/utils/event_utils'
@@ -69,7 +69,16 @@ class Home extends React.Component {
       this.setState({contentWidth: e.target.innerWidth - this.state.width, collectionTreeHeight: document.body.clientHeight - 240})
     }
 
+    componentWillMount() {
+      setTheme()
+    }
+
     componentDidMount() {
+      const fs = window.require('fs');
+      const path = window.require('path')
+      
+      // console.log(fs.readFileSync(path.join(path.dirname(window.__dirname), '/node_modules/antd/dist/antd.dark.css')).toString());
+      // console.log(path.join(path.dirname(window.__dirname), '/node_modules/antd/dist/antd.dark.css'));
       let urlopt = Url.parse("https://localhost:8000/api/getuserInfo");
       console.log(urlopt);
       let postmanUrl = new Url(urlopt);
@@ -194,7 +203,6 @@ class Home extends React.Component {
       console.log(eventList);
 
       console.log("一下以为从良了次年通过==========================");
-      var fs = window.require('fs')
       let myCollection = new Collection(JSON.stringify(fs.readFileSync('C:\\Users\\lujian\\Desktop\\空集合.postman_collection.json').toString()));
       console.log(myCollection);
     }

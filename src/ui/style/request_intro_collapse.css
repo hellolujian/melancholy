@@ -24,6 +24,9 @@
 
 }
 
+.site-collapse-custom-collapse {
+  background: var(--request-tabs-active-background, #fafafa) !important;
+}
 .site-collapse-custom-collapse > .site-collapse-custom-collapse-panel > .ant-collapse-header .ant-collapse-arrow {
   display: inline-flex;
   align-items: center;

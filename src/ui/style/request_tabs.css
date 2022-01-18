@@ -77,11 +77,12 @@
 }
 
 .request-tabs-class .ant-tabs-tab {
-  background: #fff !important
+  background: var(--background-color, #fff) !important
 }
 
 .request-tabs-class .ant-tabs-tab-active {
-  background: #fafafa !important;
+  /* background: #fafafa !important; */
+  background: var(--request-tabs-active-background, #fafafa) !important;
   /* border-bottom: 1px solid #fafafa !important; */
 }
 

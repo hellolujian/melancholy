@@ -12,8 +12,10 @@ import {
 import GeneralSettings from './settings/general_settings'
 import ShortcutsSettings from './settings/shortcuts_settings'
 import DataSettings from './settings/data_settings'
+import ThemeSettings from './settings/theme_settings'
 import {IMPORT_TITLE, SYNC_DATA_TITLE, CREATE_NEW, ACCOUNT_TITLE, NOTIFICATIONS_TITLE, SETTINGS_TITLE, RUNNER_TITLE} from '@/ui/constants/titles'
 
+import 'ui/style/theme.css'
 const { Dragger } = Upload;
 const { TabPane } = Tabs;
 
@@ -63,9 +65,7 @@ class SettingsModal extends React.Component {
             {
                 label: 'Themes',
                 value: 'themes',
-                content: (
-                    null
-                )
+                content: <ThemeSettings />
             },
             {
                 label: 'Shortcuts',
@@ -124,7 +124,7 @@ class SettingsModal extends React.Component {
                 modalProps={{title: "SETTINGS", footer: null, width: 800, bodyStyle:{height: 600, overflowY: 'auto' }}} 
                 modalContent={(
 
-                        <Tabs defaultActiveKey="data" onChange={this.callback}>
+                        <Tabs defaultActiveKey="themes" onChange={this.callback}>
                             {
                                 tabs.map(tab => (
                                     <TabPane tab={tab.label} key={tab.value}>

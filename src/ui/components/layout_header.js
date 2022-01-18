@@ -48,10 +48,6 @@ class LayoutHeader extends React.Component {
         this.setState({visibleModal: key})
     }
 
-    handleOpenNewBtnClick = () => {
-        
-    }
-
     handleOpenNewBtnClick = ({key}) => {
         if (key === 'tab') {
             publishNewTabOpen()
