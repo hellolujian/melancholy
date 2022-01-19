@@ -7,8 +7,8 @@ const getStoreValue = (key) => {
     return getValue(key)
 }
 
-const setStoreValue = (key, value) => {
-    return setValue(key, value)
+const setStoreValue = (key, value, fileName) => {
+    setValue(key, value, fileName);
 }
 
 const getCurrentWorkspace = async () => {

@@ -109,3 +109,18 @@ export const listenShortcut = (key, handle) => {
         }
     })
 }
+
+
+
+ /**
+  * =====================================导入collection弹框提醒===========================================
+  */
+  const CHANGE_THEME_EVENT = 'change_theme_event';
+
+  export const publishThemeChange = (data) => {
+      publish(CHANGE_THEME_EVENT, data)
+  }
+   
+  export const subscribeThemeChange = (handle) => {
+      subscribe(CHANGE_THEME_EVENT, handle);
+  }

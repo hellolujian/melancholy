@@ -7,6 +7,10 @@ import { EDIT_ICON } from '@/ui/constants/icons'
 
 import MonacoEditor from "react-monaco-editor";
 
+import {getStoreValue} from '@/utils/store_utils'
+
+import {subscribeThemeChange} from '@/utils/event_utils'
+
 import MarkdownIt from 'markdown-it'
 import hljs from 'highlight.js';
 import MdLiteEditor from 'react-markdown-editor-lite'
@@ -39,8 +43,13 @@ class DescriptionEditor extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            mdEditorShow: props.mdEditorShow
+            mdEditorShow: props.mdEditorShow,
+            currentTheme:  getStoreValue("theme")
         }
+    }
+
+    handleChangeTheme = (theme, data) => {
+        this.setState({currentTheme: data})
     }
 
     componentDidMount() {
@@ -49,6 +58,8 @@ class DescriptionEditor extends React.Component {
         if (this.props.defaultValue) {
             this.setState({value: this.props.defaultValue});
         }
+
+        subscribeThemeChange(this.handleChangeTheme)
     }
 
     componentWillReceiveProps(nextProps) {
@@ -101,7 +112,7 @@ class DescriptionEditor extends React.Component {
     }
 
     render() {
-        const {mdEditorShow, value} = this.state;
+        const {mdEditorShow, value, currentTheme} = this.state;
         const {mdEditorProps, scene = "single"} = this.props;
 
         const options = {
@@ -119,7 +130,7 @@ class DescriptionEditor extends React.Component {
                 <MonacoEditor
                     height="300"
                     language="markdown"
-                    theme="vs-light"
+                    theme={currentTheme === 'dark' ? "hc-black" : "vs-light"}
                     value={value}
                     options={options}
                     onChange={this.handleMonacoEditorChange}
@@ -145,7 +156,7 @@ class DescriptionEditor extends React.Component {
                     <Col flex="none">
                         <MdLiteEditor
                             view={{menu: false, html: true, md: false}}
-                            htmlClass="description-editor-html-class custom-html-style"
+                            htmlClass="custom-html-style description-editor-html-class"
                             renderHTML={(text) => mdParser.render(text)}
                             value={value}
                         />

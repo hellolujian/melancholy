@@ -80,7 +80,7 @@ class DataSettings extends React.Component {
                     hoverable 
                     className="theme-item-class"
                     style={{
-                        border: theme !== 'dark' ? '3px solid #F26b3a' : '0px'
+                        border: theme !== 'dark' ? '3px solid var(--primary-color, #F26b3a)' : '0px'
                     }}
                     bodyStyle={{display: 'none'}}
                     cover={
@@ -89,7 +89,7 @@ class DataSettings extends React.Component {
                           src="/assets/default_theme.png"
                         />
                     }
-                    onClick={this.handleChangeTheme}
+                    onClick={() => this.handleChangeTheme('default')}
                     
                 >
                     
@@ -102,7 +102,7 @@ class DataSettings extends React.Component {
                         className="theme-item-class"
                         hoverable 
                         style={{
-                            border: theme === 'dark' ? '3px solid #F26b3a' : '0px'
+                            border: theme === 'dark' ? '3px solid #var(--primary-color, #F26b3a)' : '0px'
                         }}
                         bodyStyle={{display: 'none'}}
                         cover={

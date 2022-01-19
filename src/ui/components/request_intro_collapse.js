@@ -72,7 +72,7 @@ class RequestIntro extends React.Component {
             <Collapse
               bordered={false}
               activeKey={activeKey}
-              expandIcon={({ isActive }) => <CaretRightOutlined rotate={isActive ? 90 : 0} />}
+              expandIcon={({ isActive }) => <CaretRightOutlined style={{paddingTop: 10}} rotate={isActive ? 90 : 0} />}
               onChange={this.handleActiveKeyChange}
               className="site-collapse-custom-collapse"
             >

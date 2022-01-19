@@ -37,3 +37,7 @@ textarea.description-md-editor::placeholder {
 .description-editor-container-class p {
   margin: 0px !important;
 }
+
+.description-editor-html-class {
+  color: unset !important;
+}

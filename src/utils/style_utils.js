@@ -1,5 +1,8 @@
 import {darkThemeCss, defaultThemeCss} from '@/styles/index.js'
 
+import {publishThemeChange} from '@/utils/event_utils'
+
+import {getCurrentWorkspaceId, setStoreValue} from '@/utils/store_utils';
 export const setTheme = (theme = 'default') => {
 
     let themeCss = defaultThemeCss;
@@ -33,4 +36,8 @@ export const setTheme = (theme = 'default') => {
     } else {
         styleNode.innerHTML = themeCss
     }
+
+    setStoreValue('theme', theme);
+
+    publishThemeChange(theme)
 }
