@@ -7,10 +7,12 @@ const getStoreValue = (key) => {
     return getValue(key)
 }
 
-const setStoreValue = (key, value, fileName) => {
-    console.log('sdfsdfsdf');
-    console.log(storeUtil);
-    setValue(key, value, fileName);
+const setStoreValue = (key, value, fileName, callback) => {
+    setValue(key, value, fileName, callback);
+}
+
+const setStoreValueWithCallback = (key, value, callback) => {
+    setValue(key, value, undefined, callback);
 }
 
 const getCurrentWorkspace = async () => {
@@ -50,5 +52,5 @@ const setCurrentWorkspaceSession = async (updateObj) => {
 
 export { 
     getStoreValue, setStoreValue, getCurrentWorkspaceId, currentWorkspaceIdQuery, 
-    getCurrentWorkspaceSession, setCurrentWorkspaceSession, getCurrentWorkspace
+    getCurrentWorkspaceSession, setCurrentWorkspaceSession, getCurrentWorkspace, setStoreValueWithCallback
 }

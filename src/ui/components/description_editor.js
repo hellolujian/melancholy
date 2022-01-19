@@ -127,15 +127,17 @@ class DescriptionEditor extends React.Component {
 
         return mdEditorShow ? (
             <>
-                <MonacoEditor
-                    height="300"
-                    language="markdown"
-                    theme={currentTheme === 'dark' ? "hc-black" : "vs-light"}
-                    value={value}
-                    options={options}
-                    onChange={this.handleMonacoEditorChange}
-                    editorDidMount={this.editorDidMount}
-                />
+                <div style={{border: '1px solid var(--common-border-color, lightgray)'}}>
+                    <MonacoEditor
+                        height="300"
+                        language="markdown"
+                        theme={currentTheme === 'dark' ? "hc-black" : "vs-light"}
+                        value={value}
+                        options={options}
+                        onChange={this.handleMonacoEditorChange}
+                        editorDidMount={this.editorDidMount}
+                    />
+                </div>
                     
                 <div className="justify-content-space-between description-md-editor-footer">
                     <span style={{fontSize: 12}}>{DESCRIPTION_MARKDOWN_TIPS}</span>

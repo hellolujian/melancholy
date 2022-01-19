@@ -20,8 +20,16 @@ import {
 
 import Icon from '@ant-design/icons'
 
-import {SQUARE_PLUS_ICON, ADD_REQUEST_ICON, ADD_REQUEST_ICON_48, COLLECTION_ICON, COLLECTION_ICON_48, ENVIRONMENT_ICON, ENVIRONMENT_ICON_48,
-    MOCK_COLLECTION, MOCK_COLLECTION_48, MONITOR_COLLECTION_ICON, MONITOR_COLLECTION_ICON_48, DOCUMENTATION_ICON, DOCUMENTATION_ICON_48, CLOSE_SVG,CLOSE_ICON
+import {
+    SQUARE_PLUS_ICON, ADD_REQUEST_ICON, ADD_REQUEST_ICON_48, COLLECTION_ICON, 
+    COLLECTION_ICON_48, ENVIRONMENT_ICON, ENVIRONMENT_ICON_48,
+    MOCK_COLLECTION, MOCK_COLLECTION_48, MONITOR_COLLECTION_ICON, 
+    MONITOR_COLLECTION_ICON_48, DOCUMENTATION_ICON, DOCUMENTATION_ICON_48, 
+    CLOSE_SVG, CLOSE_ICON, DARK_THEME_ADD_REQUEST_ICON, DARK_THEME_ENVIRONMENT_ICON,
+    DARK_THEME_COLLECTION_ICON, DARK_THEME_DOCUMENTATION_ICON,DARK_THEME_MOCK_COLLECTION,
+    DARK_THEME_MONITOR_COLLECTION_ICON, DARK_THEME_ADD_REQUEST_ICON_48, DARK_THEME_COLLECTION_ICON_48,
+    DARK_THEME_ENVIRONMENT_ICON_48, DARK_THEME_DOCUMENTATION_ICON_48, DARK_THEME_MOCK_COLLECTION_48,
+    DARK_THEME_MONITOR_COLLECTION_ICON_48
 } from 'ui/constants/icons';
 import {POSTMAN_DOCS_TIPS} from 'ui/constants/tips'
 import ImportModal from './import_modal'
@@ -37,6 +45,7 @@ import DocumentationModal from './documentation_modal'
 
 import {IMPORT_TITLE, SYNC_DATA_TITLE, CREATE_NEW, ACCOUNT_TITLE, NOTIFICATIONS_TITLE, SETTINGS_TITLE, RUNNER_TITLE} from '@/ui/constants/titles'
 import {publishCollectionModalOpen, publishRequestModalOpen} from '@/utils/event_utils'
+import {getByTheme} from '@/utils/style_utils'
 import 'ui/style/new_button_modal.css'
 const { Header,} = Layout;
 const { TabPane } = Tabs;
@@ -102,22 +111,22 @@ class NewButtonModal extends React.Component {
             items: [
                 {
                     key: 'request',
-                    icon: ADD_REQUEST_ICON_48,
-                    smallIcon: ADD_REQUEST_ICON,
+                    icon: () => getByTheme(ADD_REQUEST_ICON_48, DARK_THEME_ADD_REQUEST_ICON_48),
+                    smallIcon: () => getByTheme(ADD_REQUEST_ICON, DARK_THEME_ADD_REQUEST_ICON),
                     label: 'Request',
                     desc: 'Create a basic request'
                 },
                 {
                     key: 'collection',
-                    icon: COLLECTION_ICON_48,
-                    smallIcon: COLLECTION_ICON,
+                    icon: () => getByTheme(COLLECTION_ICON_48, DARK_THEME_COLLECTION_ICON_48),
+                    smallIcon: () => getByTheme(COLLECTION_ICON, DARK_THEME_COLLECTION_ICON),
                     label: 'Collection',
                     desc: 'Save your requests in a collection for reuse and sharing'
                 },
                 {
                     key: 'environment',
-                    icon: ENVIRONMENT_ICON_48,
-                    smallIcon: ENVIRONMENT_ICON,
+                    icon: () => getByTheme(ENVIRONMENT_ICON_48, DARK_THEME_ENVIRONMENT_ICON_48),
+                    smallIcon: () => getByTheme(ENVIRONMENT_ICON, DARK_THEME_ENVIRONMENT_ICON),
                     label: 'Environment',
                     desc: 'Save values you frequently use in an environment'
                 },  
@@ -128,22 +137,22 @@ class NewButtonModal extends React.Component {
             items: [
                 {
                     key: 'documentation',
-                    icon: DOCUMENTATION_ICON_48,
-                    smallIcon: DOCUMENTATION_ICON,
+                    icon: () => getByTheme(DOCUMENTATION_ICON_48, DARK_THEME_DOCUMENTATION_ICON_48),
+                    smallIcon: () => getByTheme(DOCUMENTATION_ICON, DARK_THEME_DOCUMENTATION_ICON),
                     label: 'Documentation',
                     desc: 'Create and publish beautiful documentation for your APIs'
                 },
                 {
                     key: 'mockserver',
-                    icon: MOCK_COLLECTION_48,
-                    smallIcon: MOCK_COLLECTION,
+                    icon: () => getByTheme(MOCK_COLLECTION_48, DARK_THEME_MOCK_COLLECTION_48),
+                    smallIcon: () => getByTheme(MOCK_COLLECTION, DARK_THEME_MOCK_COLLECTION),
                     label: 'Mock Server',
                     desc: 'Create a mock server for your in-development APIs'
                 },
                 {
                     key: 'monitor',
-                    icon: MONITOR_COLLECTION_ICON_48,
-                    smallIcon: MONITOR_COLLECTION_ICON,
+                    icon: () => getByTheme(MONITOR_COLLECTION_ICON_48, DARK_THEME_MONITOR_COLLECTION_ICON_48),
+                    smallIcon: () => getByTheme(MONITOR_COLLECTION_ICON, DARK_THEME_MONITOR_COLLECTION_ICON),
                     label: 'Monitor',
                     desc: 'Schedule automated tests and check performance of your APIs'
                 },  
@@ -183,7 +192,7 @@ class NewButtonModal extends React.Component {
                                                         bordered={false} 
                                                         hoverable >
                                                         <Meta
-                                                            avatar={item.icon}
+                                                            avatar={item.icon()}
                                                             title={item.label}
                                                             description={item.desc}
                                                         />
@@ -222,7 +231,7 @@ class NewButtonModal extends React.Component {
                                     <Menu.ItemGroup title={operation.title} key={index}>
                                         {
                                             operation.items.map(item => (
-                                                <Menu.Item key={item.key} icon={item.smallIcon}>{item.label}</Menu.Item>
+                                                <Menu.Item key={item.key} icon={item.smallIcon()}>{item.label}</Menu.Item>
                                             ))
                                         }
                                     </Menu.ItemGroup>

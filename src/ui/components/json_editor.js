@@ -1,5 +1,8 @@
 import React from 'react';
 import {Input, Tabs, Button, Form, Modal, Space, Typography, Alert} from 'antd';
+import {getCurrentTheme, getEditIcon} from '@/utils/style_utils'
+
+import {subscribeThemeChange} from '@/utils/event_utils'
 
 import AceEditor from "react-ace";
 import "ace-builds/webpack-resolver"
@@ -20,11 +23,17 @@ class JsonEditor extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-           
+            currentTheme:  getCurrentTheme()
         }
     }
 
+    handleChangeTheme = (theme, data) => {
+        this.setState({currentTheme: data})
+    }
+    
     componentDidMount = () => {
+        
+        subscribeThemeChange(this.handleChangeTheme)
   }
 
     handleChange = (value) => {
@@ -67,13 +76,14 @@ class JsonEditor extends React.Component {
     render() {
      
         const {value, mode = 'json'} = this.props;
+        let {currentTheme} = this.state
         return (
             <>
             <AceEditor
-                style={{border: '1px solid lightgray', width: '100%', height: 300,}}
+                style={{border: '1px solid var(--common-border-color, lightgray)', width: '100%', height: 300,}}
                 ref={this.onRef}
                 mode={mode}
-                theme="tomorrow"
+                theme={currentTheme === 'dark' ? "terminal" : "tomorrow"}
                 name="blah2"
                 onLoad={this.onLoad}
                 

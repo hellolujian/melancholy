@@ -58,12 +58,12 @@ class FolderRCItem extends React.Component {
 
     // 菜单配置
     menuItems = [
-        { name: 'rename', label: 'Rename', icon: getByTheme(RENAME_ICON, DARK_THEME_RENAME_ICON), event: this.showCollectionNameInput},
-        { name: 'edit', label: 'Edit', icon: getByTheme(EDIT_ICON, DARK_THEME_EDIT_ICON), event: () => publishCollectionModalOpen({collectionId: this.props.item.id, scene: 'edit'})},
-        { name: 'add_request', label: 'Add Request', icon: getByTheme(ADD_REQUEST_ICON, DARK_THEME_ADD_REQUEST_ICON), event: () => publishRequestModalOpen({parentId: this.props.item.id})},
-        { name: 'add_folder', label: 'Add Folder', icon: getByTheme(ADD_FOLDER_ICON, DARK_THEME_ADD_FOLDER_ICON), event: () => publishCollectionModalOpen({collectionId: this.props.item.id, scene: 'add'})},
-        { name: 'duplicate', label: 'Duplicate', icon: getByTheme(DUPLICATE_ICON, DARK_THEME_DUPLICATE_ICON), event: this.duplicateCollection },
-        { name: 'delete', label: 'Delete', icon: getByTheme(DELETE_ICON, DARK_THEME_DELETE_ICON), event: this.deleteCollection },
+        { name: 'rename', label: 'Rename', icon: () => getByTheme(RENAME_ICON, DARK_THEME_RENAME_ICON), event: this.showCollectionNameInput},
+        { name: 'edit', label: 'Edit', icon: () => getByTheme(EDIT_ICON, DARK_THEME_EDIT_ICON), event: () => publishCollectionModalOpen({collectionId: this.props.item.id, scene: 'edit'})},
+        { name: 'add_request', label: 'Add Request', icon: () => getByTheme(ADD_REQUEST_ICON, DARK_THEME_ADD_REQUEST_ICON), event: () => publishRequestModalOpen({parentId: this.props.item.id})},
+        { name: 'add_folder', label: 'Add Folder', icon: () => getByTheme(ADD_FOLDER_ICON, DARK_THEME_ADD_FOLDER_ICON), event: () => publishCollectionModalOpen({collectionId: this.props.item.id, scene: 'add'})},
+        { name: 'duplicate', label: 'Duplicate', icon: () => getByTheme(DUPLICATE_ICON, DARK_THEME_DUPLICATE_ICON), event: this.duplicateCollection },
+        { name: 'delete', label: 'Delete', icon: () => getByTheme(DELETE_ICON, DARK_THEME_DELETE_ICON), event: this.deleteCollection },
     ]
 
     // 处理菜单点击
@@ -84,7 +84,7 @@ class FolderRCItem extends React.Component {
                     this.menuItems.map(item => (
                         <Menu.Item 
                             key={item.name} 
-                            icon={item.icon}>
+                            icon={item.icon()}>
                             {item.label}
                         </Menu.Item>
                     ))
@@ -93,19 +93,7 @@ class FolderRCItem extends React.Component {
         );
       
         const viewMoreActionButton = (
-            <Dropdown overlay={(
-                <Menu onClick={this.handleMenuClick}>
-                {
-                    this.menuItems.map(item => (
-                        <Menu.Item 
-                            key={item.name} 
-                            icon={item.icon}>
-                            {item.label}
-                        </Menu.Item>
-                    ))
-                }
-            </Menu>
-            )} placement="bottomRight" trigger="click">
+            <Dropdown overlay={menu} placement="bottomRight" trigger="click">
                 <Tooltip title="View more actions">
                     <PostmanButton className="folder-item-display" onClick={stopClickPropagation} icon={getEllipsisIcon()} />
                 </Tooltip>

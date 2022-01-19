@@ -59,11 +59,11 @@ class RequestRCItem extends React.Component {
 
     // 菜单配置
     menuItems = [
-        { name: 'open', label: 'Open in New Tab', icon: getByTheme(OPEN_NEW_ICON, DARK_THEME_OPEN_NEW_ICON), event: () => publishNewTabOpen(this.props.item)},
-        { name: 'rename', label: 'Rename', icon: getByTheme(RENAME_ICON, DARK_THEME_RENAME_ICON), event: this.showCollectionNameInput},
-        { name: 'edit', label: 'Edit', icon: getByTheme(EDIT_ICON, DARK_THEME_EDIT_ICON), event: () => publishRequestModalOpen({requestId: this.props.item.id})},
-        { name: 'duplicate', label: 'Duplicate', icon: getByTheme(DUPLICATE_ICON, DARK_THEME_DUPLICATE_ICON), event: this.duplicateRequest },
-        { name: 'delete', label: 'Delete', icon: getByTheme(DELETE_ICON, DARK_THEME_DELETE_ICON), event: this.deleteRequest },
+        { name: 'open', label: 'Open in New Tab', icon: () => getByTheme(OPEN_NEW_ICON, DARK_THEME_OPEN_NEW_ICON), event: () => publishNewTabOpen(this.props.item)},
+        { name: 'rename', label: 'Rename', icon: () => getByTheme(RENAME_ICON, DARK_THEME_RENAME_ICON), event: this.showCollectionNameInput},
+        { name: 'edit', label: 'Edit', icon: () => getByTheme(EDIT_ICON, DARK_THEME_EDIT_ICON), event: () => publishRequestModalOpen({requestId: this.props.item.id})},
+        { name: 'duplicate', label: 'Duplicate', icon: () => getByTheme(DUPLICATE_ICON, DARK_THEME_DUPLICATE_ICON), event: this.duplicateRequest },
+        { name: 'delete', label: 'Delete', icon: () => getByTheme(DELETE_ICON, DARK_THEME_DELETE_ICON), event: this.deleteRequest },
     ]
 
     // 处理菜单点击
@@ -84,7 +84,7 @@ class RequestRCItem extends React.Component {
                     this.menuItems.map(item => (
                         <Menu.Item 
                             key={item.name} 
-                            icon={item.icon}>
+                            icon={item.icon()}>
                             {item.label}
                         </Menu.Item>
                     ))
@@ -93,19 +93,7 @@ class RequestRCItem extends React.Component {
         );
       
         const viewMoreActionButton = (
-            <Dropdown overlay={(
-                <Menu onClick={this.handleMenuClick}>
-                {
-                    this.menuItems.map(item => (
-                        <Menu.Item 
-                            key={item.name} 
-                            icon={item.icon}>
-                            {item.label}
-                        </Menu.Item>
-                    ))
-                }
-            </Menu>
-            )} placement="bottomRight" trigger="click">
+            <Dropdown overlay={menu} placement="bottomRight" trigger="click">
                 <Tooltip title="View more actions">
                     <PostmanButton className="folder-item-display" onClick={stopClickPropagation} icon={getEllipsisIcon()} />
                 </Tooltip>

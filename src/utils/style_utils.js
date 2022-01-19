@@ -2,7 +2,7 @@ import {darkThemeCss, defaultThemeCss} from '@/styles/index.js'
 
 import {publishThemeChange} from '@/utils/event_utils'
 
-import {getStoreValue, setStoreValue} from '@/utils/store_utils';
+import {getStoreValue, setStoreValue, setStoreValueWithCallback} from '@/utils/store_utils';
 
 import { EDIT_ICON, DARK_THEME_EDIT_ICON , DARK_THEME_ELLIPSIS_ICON, ELLIPSIS_ICON} from '@/ui/constants/icons'
 
@@ -48,7 +48,7 @@ export const setTheme = (theme) => {
     } else {
         styleNode.innerHTML = themeCss
     }
-
+    
     setStoreValue('theme', theme);
 
     publishThemeChange(theme)

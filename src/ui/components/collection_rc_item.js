@@ -15,7 +15,7 @@ import Ellipsis from 'react-ellipsis-component';
 import PostmanButton from './postman_button'
 import {stopClickPropagation} from '@/utils/global_utils';
 import {publishCollectionModalOpen, publishRequestModalOpen} from '@/utils/event_utils'
-import {getByTheme, getEllipsisIcon} from '@/utils/style_utils'
+import {getByTheme, getEllipsisIcon, getCurrentTheme} from '@/utils/style_utils'
 import {
     SHARE_COLLECTION_ICON, DARK_THEME_SHARE_COLLECTION_ICON, MANAGE_ROLES_ICON, DARK_THEME_MANAGE_ROLES_ICON, RENAME_ICON, DARK_THEME_RENAME_ICON, 
     EDIT_ICON, DARK_THEME_EDIT_ICON, CREATE_FORK_ICON, DARK_THEME_CREATE_FORK_ICON, 
@@ -83,21 +83,21 @@ class CollectionRCItem extends React.Component {
 
     // 菜单配置
     menuItems = [
-        { name: 'share_collection', label: 'Share Collection', icon: getByTheme(SHARE_COLLECTION_ICON, DARK_THEME_SHARE_COLLECTION_ICON),  },
-        { name: 'manage_roles', label: 'Manage Roles', icon: getByTheme(MANAGE_ROLES_ICON, DARK_THEME_MANAGE_ROLES_ICON), },
-        { name: 'rename', label: 'Rename', icon: getByTheme(RENAME_ICON, DARK_THEME_RENAME_ICON), event: this.showCollectionNameInput},
-        { name: 'edit', label: 'Edit', icon: getByTheme(EDIT_ICON, DARK_THEME_EDIT_ICON), event: () => publishCollectionModalOpen({collectionId: this.props.item.id, scene: 'edit'})},
-        { name: 'create_fork', label: 'Create a fork', icon: getByTheme(CREATE_FORK_ICON, DARK_THEME_CREATE_FORK_ICON), },
-        { name: 'merge_changes', label: 'Merge changes', icon: getByTheme(MERGE_CHANGES_ICON, DARK_THEME_MERGE_CHANGES_ICON), },
-        { name: 'add_request', label: 'Add Request', icon: getByTheme(ADD_REQUEST_ICON, DARK_THEME_ADD_REQUEST_ICON), event: () => publishRequestModalOpen({parentId: this.props.item.id})},
-        { name: 'add_folder', label: 'Add Folder', icon: getByTheme(ADD_FOLDER_ICON, DARK_THEME_ADD_FOLDER_ICON), event: () => publishCollectionModalOpen({collectionId: this.props.item.id, scene: 'add'})},
-        { name: 'duplicate', label: 'Duplicate', icon: getByTheme(DUPLICATE_ICON, DARK_THEME_DUPLICATE_ICON), event: this.duplicateCollection },
-        { name: 'export', label: 'Export', icon: getByTheme(EXPORT_ICON, DARK_THEME_EXPORT_ICON), event: this.handleExport},
-        { name: 'monitor_collection', label: 'Monitor Collection', icon: getByTheme(MONITOR_COLLECTION_ICON, DARK_THEME_MONITOR_COLLECTION_ICON), },
-        { name: 'mock_collection', label: 'Mock Collection', icon: getByTheme(MOCK_COLLECTION, DARK_THEME_MOCK_COLLECTION), },
-        { name: 'publish_docs', label: 'Publish Docs', icon: getByTheme(PUBLISH_DOCS_ICON, DARK_THEME_PUBLISH_DOCS_ICON), },
-        { name: 'remove_from_workspace', label: 'Remove from workspace', icon: getByTheme(REMOVE_FROM_WORKSPACE_ICON, DARK_THEME_REMOVE_FROM_WORKSPACE_ICON), event: this.props.onRemove },
-        { name: 'delete', label: 'Delete', icon: getByTheme(DELETE_ICON, DARK_THEME_DELETE_ICON), event: this.deleteCollection },
+        { name: 'share_collection', label: 'Share Collection', icon: () => getByTheme(SHARE_COLLECTION_ICON, DARK_THEME_SHARE_COLLECTION_ICON),  },
+        { name: 'manage_roles', label: 'Manage Roles', icon: () => getByTheme(MANAGE_ROLES_ICON, DARK_THEME_MANAGE_ROLES_ICON), },
+        { name: 'rename', label: 'Rename', icon: () => getByTheme(RENAME_ICON, DARK_THEME_RENAME_ICON), event: this.showCollectionNameInput},
+        { name: 'edit', label: 'Edit', icon: () => getByTheme(EDIT_ICON, DARK_THEME_EDIT_ICON), event: () => publishCollectionModalOpen({collectionId: this.props.item.id, scene: 'edit'})},
+        { name: 'create_fork', label: 'Create a fork', icon: () => getByTheme(CREATE_FORK_ICON, DARK_THEME_CREATE_FORK_ICON), },
+        { name: 'merge_changes', label: 'Merge changes', icon: () => getByTheme(MERGE_CHANGES_ICON, DARK_THEME_MERGE_CHANGES_ICON), },
+        { name: 'add_request', label: 'Add Request', icon: () => getByTheme(ADD_REQUEST_ICON, DARK_THEME_ADD_REQUEST_ICON), event: () => publishRequestModalOpen({parentId: this.props.item.id})},
+        { name: 'add_folder', label: 'Add Folder', icon: () => getByTheme(ADD_FOLDER_ICON, DARK_THEME_ADD_FOLDER_ICON), event: () => publishCollectionModalOpen({collectionId: this.props.item.id, scene: 'add'})},
+        { name: 'duplicate', label: 'Duplicate', icon: () => getByTheme(DUPLICATE_ICON, DARK_THEME_DUPLICATE_ICON), event: this.duplicateCollection },
+        { name: 'export', label: 'Export', icon: () => getByTheme(EXPORT_ICON, DARK_THEME_EXPORT_ICON), event: this.handleExport},
+        { name: 'monitor_collection', label: 'Monitor Collection', icon: () => getByTheme(MONITOR_COLLECTION_ICON, DARK_THEME_MONITOR_COLLECTION_ICON), },
+        { name: 'mock_collection', label: 'Mock Collection', icon: () => getByTheme(MOCK_COLLECTION, DARK_THEME_MOCK_COLLECTION), },
+        { name: 'publish_docs', label: 'Publish Docs', icon: () => getByTheme(PUBLISH_DOCS_ICON, DARK_THEME_PUBLISH_DOCS_ICON), },
+        { name: 'remove_from_workspace', label: 'Remove from workspace', icon: () => getByTheme(REMOVE_FROM_WORKSPACE_ICON, DARK_THEME_REMOVE_FROM_WORKSPACE_ICON), event: this.props.onRemove },
+        { name: 'delete', label: 'Delete', icon: () => getByTheme(DELETE_ICON, DARK_THEME_DELETE_ICON), event: this.deleteCollection },
     ]
 
     // 处理菜单点击
@@ -128,7 +128,7 @@ class CollectionRCItem extends React.Component {
                     this.menuItems.map(item => (
                         <Menu.Item 
                             key={item.name} 
-                            icon={item.icon}>
+                            icon={item.icon()}>
                             {item.label}
                         </Menu.Item>
                     ))
