@@ -4,7 +4,7 @@ import {publishThemeChange} from '@/utils/event_utils'
 
 import {getStoreValue, setStoreValue} from '@/utils/store_utils';
 
-import { EDIT_ICON, DARK_THEME_EDIT_ICON } from '@/ui/constants/icons'
+import { EDIT_ICON, DARK_THEME_EDIT_ICON , DARK_THEME_ELLIPSIS_ICON, ELLIPSIS_ICON} from '@/ui/constants/icons'
 
 export const getCurrentTheme = () => {
 
@@ -24,7 +24,9 @@ export const setTheme = (theme) => {
             :root {
                 --background-color: #000;
                 --request-tabs-active-background: #1A1A1A;
-                --request-tabs-border: #303030
+                --request-tabs-border: #303030;
+                --common-border-color: #434343;
+                --tree-item-selected-background-color: #282828
             }
             `
             break;
@@ -54,4 +56,12 @@ export const setTheme = (theme) => {
 
 export const getEditIcon = () => {
     return getCurrentTheme() === 'dark' ? DARK_THEME_EDIT_ICON : EDIT_ICON
+}
+
+export const getEllipsisIcon = () => {
+    return getCurrentTheme() === 'dark' ? DARK_THEME_ELLIPSIS_ICON : ELLIPSIS_ICON
+}
+
+export const getByTheme = (defaultCom, darkCom) => {
+    return getCurrentTheme() === 'dark' ? darkCom : defaultCom
 }

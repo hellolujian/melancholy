@@ -23,17 +23,29 @@ import "ace-builds/src-noconflict/mode-text";
 import 'ace-builds/src-noconflict/theme-chrome';
 import "ace-builds/src-noconflict/ext-language_tools"
 
+
+import {getCurrentTheme, getEditIcon} from '@/utils/style_utils'
+
+import {subscribeThemeChange} from '@/utils/event_utils'
+
 class ScriptEditor extends React.Component {
 
     constructor(props) {
         super(props);
         this.state = {
-           value: props.value
+           value: props.value,
+           currentTheme:  getCurrentTheme()
         }
     }
 
+
+    handleChangeTheme = (theme, data) => {
+        this.setState({currentTheme: data})
+    }
+    
     componentDidMount() {
       
+        subscribeThemeChange(this.handleChangeTheme)
     }
 
     handleChange = (newValue) => {
@@ -69,19 +81,20 @@ class ScriptEditor extends React.Component {
     render() {
      
         let {aceEditorProps, height = '360px', value = '', mode = 'javascript'} = this.props;
+        let {currentTheme} = this.state
 
         return (
             <>
                 <AceEditor
                     style={{
-                        border: '1px solid lightgray', 
+                        border: '1px solid var(--common-border-color, lightgray)', 
                         width: '100%', 
                         // height: '300px',
                     }}
                     ref={this.onRef}
                     height={height}
                     mode={mode}
-                    theme="chrome"
+                    theme={currentTheme === 'dark' ? "terminal" : "chrome"}
                     name="script_editor"
                     onLoad={this.onLoad}
                     onChange={this.handleChange}

@@ -5,13 +5,13 @@
   height: 65px;
   display: flex !important;
   align-items: center !important;
-  border-top: 1px solid lightgrey;
+  border-top: 1px solid var(--common-border-color, lightgrey);
   line-height: unset !important;
   padding-left: 6px !important;
 }
 
 .collection-tree-collection-item-class:last-child {
-  border-bottom: 1px solid lightgrey
+  border-bottom: 1px solid var(--common-border-color, lightgrey)
 }
 
 .collection-tree-collection-item-class .rc-tree-node-content-wrapper {
@@ -80,7 +80,7 @@
 }
 
 .collection-tree-collection-item-class:hover {
-  background-color: #f5f5f5;
+  background-color: var(--request-tabs-active-background, #f5f5f5);
 }
 
 .collection-tree-collection-item-class .rc-tree-node-selected {
@@ -88,25 +88,25 @@
   box-shadow: unset;
 }
 .collection-tree-collection-item-class.rc-tree-treenode-selected {
-  background-color: #ECECEC;  
+  background-color: var(--tree-item-selected-background-color, #ECECEC);  
   /* box-shadow: 0px 2px 5px #ECECEC; */
   /* box-shadow: 0 0 0 1px #ffb951; */
 }
 
 .collection-tree-collection-item-class.rc-tree-treenode-switcher-open {
   /* background-color: #ECECEC;   */
-  box-shadow: 0px 2px 5px #ECECEC;
+  box-shadow: 0px 2px 5px var(--tree-item-selected-background-color, #ECECEC);
   /* box-shadow: 0 0 0 1px #ffb951; */
 }
 
 
 .collection-tree-request-item-class .rc-tree-node-selected {
-  background-color: #ECECEC !important;  
+  background-color: var(--tree-item-selected-background-color, #ECECEC) !important;  
   box-shadow: unset;
 }
 
 .collection-tree-request-item-class .rc-tree-node-content-wrapper:hover {
-  background-color: #f5f5f5;
+  background-color: var(--request-tabs-active-background, #f5f5f5);
 }
 
 .collection-item-rate-class {
@@ -131,22 +131,24 @@
 }
 
 .collection-tree-folder-item-class:hover .rc-tree-node-content-wrapper {
-  background-color: #f5f5f5;
+  background-color: var(--request-tabs-active-background, #f5f5f5);
 }
 
 
 .collection-tree-folder-item-class:hover .rc-tree-switcher {
-  background-color: #f5f5f5 !important;  
+  background-color: var(--request-tabs-active-background, #f5f5f5) !important;  
 
 }
 
 .collection-tree-folder-item-class .rc-tree-node-selected {
-  background-color: #ECECEC !important;  
+  
+  background-color: var(--tree-item-selected-background-color, #ECECEC) !important;   
   box-shadow: unset;
 }
 
 .collection-tree-folder-item-class.rc-tree-treenode-selected .rc-tree-switcher_open {
-  background-color: #ECECEC !important;  
+  
+  background-color: var(--tree-item-selected-background-color, #ECECEC) !important;   
 }
 
 .collection-star-normal {

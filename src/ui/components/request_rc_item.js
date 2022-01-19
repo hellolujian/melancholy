@@ -15,10 +15,11 @@ import PostmanButton from './postman_button'
 import Ellipsis from 'react-ellipsis-component';
 
 import {stopClickPropagation} from '@/utils/global_utils';
+import {getEllipsisIcon, getByTheme} from '@/utils/style_utils';
 import {publishNewTabOpen, publishRequestModalOpen, publishRequestSelected} from '@/utils/event_utils'
 import {
-    OPEN_NEW_ICON, ELLIPSIS_ICON, RENAME_ICON, EDIT_ICON, CREATE_FORK_ICON, 
-    MERGE_CHANGES_ICON, ADD_REQUEST_ICON, ADD_FOLDER_ICON, DUPLICATE_ICON,
+    OPEN_NEW_ICON, DARK_THEME_DELETE_ICON, RENAME_ICON, EDIT_ICON, DARK_THEME_OPEN_NEW_ICON, 
+    DARK_THEME_RENAME_ICON, DARK_THEME_EDIT_ICON, DARK_THEME_DUPLICATE_ICON, DUPLICATE_ICON,
     EXPORT_ICON, MOCK_COLLECTION, MONITOR_COLLECTION_ICON, PUBLISH_DOCS_ICON, 
     REMOVE_FROM_WORKSPACE_ICON, DELETE_ICON, COLLECTION_FOLDER_ICON, GET_REQUEST_ICON, POST_REQUEST_ICON
 } from '@/ui/constants/icons'
@@ -58,11 +59,11 @@ class RequestRCItem extends React.Component {
 
     // 菜单配置
     menuItems = [
-        { name: 'open', label: 'Open in New Tab', icon: OPEN_NEW_ICON, event: () => publishNewTabOpen(this.props.item)},
-        { name: 'rename', label: 'Rename', icon: RENAME_ICON, event: this.showCollectionNameInput},
-        { name: 'edit', label: 'Edit', icon: EDIT_ICON, event: () => publishRequestModalOpen({requestId: this.props.item.id})},
-        { name: 'duplicate', label: 'Duplicate', icon: DUPLICATE_ICON, event: this.duplicateRequest },
-        { name: 'delete', label: 'Delete', icon: DELETE_ICON, event: this.deleteRequest },
+        { name: 'open', label: 'Open in New Tab', icon: getByTheme(OPEN_NEW_ICON, DARK_THEME_OPEN_NEW_ICON), event: () => publishNewTabOpen(this.props.item)},
+        { name: 'rename', label: 'Rename', icon: getByTheme(RENAME_ICON, DARK_THEME_RENAME_ICON), event: this.showCollectionNameInput},
+        { name: 'edit', label: 'Edit', icon: getByTheme(EDIT_ICON, DARK_THEME_EDIT_ICON), event: () => publishRequestModalOpen({requestId: this.props.item.id})},
+        { name: 'duplicate', label: 'Duplicate', icon: getByTheme(DUPLICATE_ICON, DARK_THEME_DUPLICATE_ICON), event: this.duplicateRequest },
+        { name: 'delete', label: 'Delete', icon: getByTheme(DELETE_ICON, DARK_THEME_DELETE_ICON), event: this.deleteRequest },
     ]
 
     // 处理菜单点击
@@ -106,7 +107,7 @@ class RequestRCItem extends React.Component {
             </Menu>
             )} placement="bottomRight" trigger="click">
                 <Tooltip title="View more actions">
-                    <PostmanButton className="folder-item-display" onClick={stopClickPropagation} icon={ELLIPSIS_ICON} />
+                    <PostmanButton className="folder-item-display" onClick={stopClickPropagation} icon={getEllipsisIcon()} />
                 </Tooltip>
             </Dropdown>
         );

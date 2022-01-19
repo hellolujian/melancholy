@@ -27,7 +27,7 @@
   
   padding: 0 !important;
 
-  background-color: white !important;
+  background-color: var(--background-color, white) !important;
 }
 
 .common-editable-table .cell-textarea-not-edit {
@@ -45,7 +45,7 @@
 }
 
 .cell-textarea:focus {
-  outline: lightgray solid 1px;
+  outline: 1px solid lightgray  ;
 }
 
 /* .ant-input:focus {

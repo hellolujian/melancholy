@@ -103,21 +103,14 @@ class RequestSendSetting extends React.Component {
                 }
             >
                 <TabPane 
+                    key="params" 
                     className="request-setting-tab-param-panel" 
                     tab={
                         <div className="vertical-end">
                             Params {param && param.length > 0 && GREEN_DOT_SVG}
                         </div>
                     } 
-                    key="params">
-                    <KeyValueTable 
-                        cene="params"
-                        value={param}
-                        tableProps={{title: () => "Query Params"}}  
-                        onSave={this.handleParamsSave}
-                        onChange={this.handleParamsChange}
-                    />
-                </TabPane>
+                />
                 <TabPane 
                     key="authorization"
                     tab={
@@ -192,6 +185,18 @@ class RequestSendSetting extends React.Component {
                         value={body}
                         onSave={this.handleBodySave}
                         onChange={this.handleBodyChange}
+                    />
+                )
+            }
+
+            {
+                activeTabKey === 'params' && (
+                    <KeyValueTable 
+                        cene="params"
+                        value={param}
+                        tableProps={{title: () => "Query Params"}}  
+                        onSave={this.handleParamsSave}
+                        onChange={this.handleParamsChange}
                     />
                 )
             }
