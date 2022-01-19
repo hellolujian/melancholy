@@ -1,6 +1,7 @@
 import React from 'react';
 import {Input, Typography, Space} from 'antd';
-import { EDIT_ICON } from '@/ui/constants/icons'
+
+import {getCurrentTheme, getEditIcon} from '@/utils/style_utils'
 import RequiredInput from './required_input'
 import {stopClickPropagation} from '@/utils/global_utils';
 import 'ui/style/required_input.css'
@@ -59,7 +60,7 @@ class EditableText extends React.Component {
                         // </Space>
                         <Space align="center">
                             <Ellipsis text={value} />
-                            <span className={editIconClass} onClick={this.handleEditIconClick}>{EDIT_ICON}</span>
+                            <span className={editIconClass} onClick={this.handleEditIconClick}>{getEditIcon()}</span>
                         </Space>
                     )
                 }

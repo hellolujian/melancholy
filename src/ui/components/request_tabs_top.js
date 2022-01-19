@@ -92,6 +92,13 @@ class RequestTabsTop extends React.Component {
     };
   }
   
+  // 点击tab变更
+  onActiveTabChange = () => {
+    const {tabData, activeTabKey} = this.state;
+    let targetTab = tabData.find(item => item.id === activeTabKey);
+    this.props.onActiveTabChange(targetTab)
+  }
+  
   /**
    * 处理activeTab的变更
    * @param {*} activeTab 
@@ -304,7 +311,7 @@ class RequestTabsTop extends React.Component {
       await this.refreshData();
     }
 
-    this.props.onActiveTabChange(this.state.activeTab)
+    this.onActiveTabChange()
 
   }
 
@@ -356,7 +363,8 @@ class RequestTabsTop extends React.Component {
   // 处理请求删除
   handleRequestDelete = async (msg, {id}) => {
     await multiUpdateTabMeta({refId: id, type: TabType.REQUEST.name()}, {$set: {sourceDeleted: true}});
-    this.props.onActiveTabChange(this.state.activeTab)
+    
+    this.onActiveTabChange()
     await this.refreshData();
   }
 

@@ -3,11 +3,9 @@ import {Typography, Button, Space, Row, Col } from 'antd';
 
 import {DESCRIPTION_MARKDOWN_TIPS,} from 'ui/constants/tips'
 
-import { EDIT_ICON } from '@/ui/constants/icons'
-
 import MonacoEditor from "react-monaco-editor";
 
-import {getCurrentTheme} from '@/utils/style_utils'
+import {getCurrentTheme, getEditIcon} from '@/utils/style_utils'
 
 import {subscribeThemeChange} from '@/utils/event_utils'
 
@@ -115,6 +113,8 @@ class DescriptionEditor extends React.Component {
         const {mdEditorShow, value, currentTheme} = this.state;
         const {mdEditorProps, scene = "single"} = this.props;
 
+        let editIcon = getEditIcon()
+
         const options = {
             minimap: {
                 enabled: false
@@ -162,7 +162,7 @@ class DescriptionEditor extends React.Component {
                         />
                     </Col>
                     <Col className='description-editor-not-edit-class'>
-                        <Link onClick={this.handleEditClick}>{EDIT_ICON}</Link>
+                        <Link onClick={this.handleEditClick}>{editIcon}</Link>
                     </Col>
                 </Row>
             ) : (

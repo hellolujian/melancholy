@@ -33,7 +33,7 @@ import {
 
 import {RequestBodyModeType} from '@/enums'
 
-import { setTheme } from '@/utils/style_utils';
+import { setTheme, getCurrentTheme } from '@/utils/style_utils';
 const {Item, ItemGroup, RequestAuth} = PostmanSDK;
 const { Dragger } = Upload;
 const { TabPane } = Tabs;
@@ -43,7 +43,7 @@ class DataSettings extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-           
+           theme: getCurrentTheme()
         }
     }
 
@@ -102,7 +102,7 @@ class DataSettings extends React.Component {
                         className="theme-item-class"
                         hoverable 
                         style={{
-                            border: theme === 'dark' ? '3px solid #var(--primary-color, #F26b3a)' : '0px'
+                            border: theme === 'dark' ? '3px solid var(--primary-color, #F26b3a)' : '0px'
                         }}
                         bodyStyle={{display: 'none'}}
                         cover={

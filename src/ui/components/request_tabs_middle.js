@@ -82,7 +82,6 @@ class RequestTabsMiddle extends React.Component {
     if (value.hasOwnProperty('name')) {
       await saveRequest({id: requestInfo.id, ...value});
       publishRequestSave({metaData: {id: requestInfo.id, name: value.name}});
-      return;
     } else if (value.hasOwnProperty('description')) {
       await updateRequestMeta(requestInfo.id, {$set: value})
     } else {

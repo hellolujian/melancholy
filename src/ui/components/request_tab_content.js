@@ -43,6 +43,7 @@ class RequestTabContent extends React.Component {
                     onSave={this.handleSave}
                     onChange={this.handleChange}
                 />
+                
                 <Sticky className="main-right-sticky-class" scrollElement=".request-tab-content">
                     
                     <RequestSendBar 

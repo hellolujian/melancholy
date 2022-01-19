@@ -192,8 +192,12 @@ const getStoreByKey = (key, fileName = "session_store", defaultValue) => {
 }
 
 const setStoreByKey = (key, value, fileName = "session_store") => {
+  console.log('key: %s, value: %s, fileName: %s', key, value, fileName);
+  console.log('设置绘画');
   const Store = require('electron-store')
   const store = new Store({cwd: 'Custom Storage', name: fileName});
+  console.log('设置成功')
+  console.log(store);
   store.set(key, value)
 }
 

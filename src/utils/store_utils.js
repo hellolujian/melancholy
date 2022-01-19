@@ -8,6 +8,8 @@ const getStoreValue = (key) => {
 }
 
 const setStoreValue = (key, value, fileName) => {
+    console.log('sdfsdfsdf');
+    console.log(storeUtil);
     setValue(key, value, fileName);
 }
 

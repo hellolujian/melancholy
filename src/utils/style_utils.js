@@ -4,6 +4,8 @@ import {publishThemeChange} from '@/utils/event_utils'
 
 import {getStoreValue, setStoreValue} from '@/utils/store_utils';
 
+import { EDIT_ICON, DARK_THEME_EDIT_ICON } from '@/ui/constants/icons'
+
 export const getCurrentTheme = () => {
 
     return getStoreValue("theme")
@@ -11,7 +13,7 @@ export const getCurrentTheme = () => {
 
 export const setTheme = (theme) => {
 
-    if (!theme) theme = getCurrentTheme();
+    if (!theme) theme = getCurrentTheme() || 'default';
 
     let themeCss = defaultThemeCss;
     let variablesCss = '';
@@ -48,4 +50,8 @@ export const setTheme = (theme) => {
     setStoreValue('theme', theme);
 
     publishThemeChange(theme)
+}
+
+export const getEditIcon = () => {
+    return getCurrentTheme() === 'dark' ? DARK_THEME_EDIT_ICON : EDIT_ICON
 }
