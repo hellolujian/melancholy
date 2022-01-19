@@ -7,7 +7,7 @@ import { EDIT_ICON } from '@/ui/constants/icons'
 
 import MonacoEditor from "react-monaco-editor";
 
-import {getStoreValue} from '@/utils/store_utils'
+import {getCurrentTheme} from '@/utils/style_utils'
 
 import {subscribeThemeChange} from '@/utils/event_utils'
 
@@ -44,7 +44,7 @@ class DescriptionEditor extends React.Component {
         super(props);
         this.state = {
             mdEditorShow: props.mdEditorShow,
-            currentTheme:  getStoreValue("theme")
+            currentTheme:  getCurrentTheme()
         }
     }
 

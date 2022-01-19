@@ -2,8 +2,16 @@ import {darkThemeCss, defaultThemeCss} from '@/styles/index.js'
 
 import {publishThemeChange} from '@/utils/event_utils'
 
-import {getCurrentWorkspaceId, setStoreValue} from '@/utils/store_utils';
-export const setTheme = (theme = 'default') => {
+import {getStoreValue, setStoreValue} from '@/utils/store_utils';
+
+export const getCurrentTheme = () => {
+
+    return getStoreValue("theme")
+}
+
+export const setTheme = (theme) => {
+
+    if (!theme) theme = getCurrentTheme();
 
     let themeCss = defaultThemeCss;
     let variablesCss = '';
