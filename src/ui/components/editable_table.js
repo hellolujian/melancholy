@@ -148,6 +148,7 @@ class EditableTable extends React.Component {
   }
 
   handleSelectItemChange = (record, value, dataIndex) => {
+    console.log(value);
     const dataSource = this.getRealDataSource();
     const {rowKey} = this.props;
     let changedRecordIndex = dataSource.findIndex(item => item[rowKey] === record[rowKey])
@@ -304,6 +305,7 @@ class EditableTable extends React.Component {
                     bordered={false} 
                     style={{width: 200}} 
                     size="small" 
+                    value={text}
                     onChange={(value) => this.handleSelectItemChange(record, value, col.dataIndex)}
                   />
                 );
