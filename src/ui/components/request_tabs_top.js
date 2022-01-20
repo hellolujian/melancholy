@@ -10,7 +10,7 @@ import RequestTabContent from './request_tab_content'
 import EnvironmentSetting from './environment_setting';
 import RequestTabConfirm from './request_tab_confirm';
 import Ellipsis from 'react-ellipsis-component';
-import { UNSAVED_DOT_ICON, POST_REQUEST_ICON, GET_REQUEST_ICON, CLOSE_SVG, UNSAVED_DOT_SVG } from 'ui/constants/icons'
+import { UNSAVED_DOT_ICON, POST_REQUEST_ICON, DARK_THEME_CLOSE_SVG, CLOSE_SVG, UNSAVED_DOT_SVG } from 'ui/constants/icons'
 
 import {
   insertTabMeta, 
@@ -36,6 +36,7 @@ import {
 } from '@/utils/database_utils'
 import {TabIconType, TabType, getIconByCode} from '@/enums'
 import {UUID, compareObjectIgnoreEmpty, getSpecificFieldObj} from '@/utils/global_utils'
+import {getByTheme} from '@/utils/style_utils'
 import 'ui/style/request_tabs.css'
 
 const { TabPane } = Tabs;
@@ -699,7 +700,7 @@ class RequestTabsTop extends React.Component {
                         }
                         <Icon 
                           className={item.draft ? "close-tab-icon-none" : "close-tab-icon-hide"} 
-                          component={() => CLOSE_SVG} 
+                          component={() => getByTheme(CLOSE_SVG, DARK_THEME_CLOSE_SVG)} 
                           onClick={() => this.handleCloseTabClick(item.id)} 
                         />
                       </div>

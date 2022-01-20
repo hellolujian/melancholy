@@ -15,7 +15,7 @@ import MainRightContainer from 'ui/components/main_right_container';
 import { setTheme } from '@/utils/style_utils';
 import {Rnd} from 'react-rnd';
 import {ADD_ICON} from 'ui/constants/icons'
-import {publishCollectionModalOpen} from '@/utils/event_utils'
+import {publishCollectionModalOpen, subscribeThemeChange} from '@/utils/event_utils'
 import {getStoreValue} from '@/utils/store_utils'
 import 'ui/style/common.css'
 import 'ui/style/layout.css'
@@ -71,6 +71,10 @@ class Home extends React.Component {
 
     componentWillMount() {
       setTheme()
+    }
+
+    handleChangeTheme = (theme, data) => {
+        this.setState({currentTheme: data})
     }
 
     componentDidMount() {
@@ -205,6 +209,12 @@ class Home extends React.Component {
       console.log("一下以为从良了次年通过==========================");
       let myCollection = new Collection(JSON.stringify(fs.readFileSync('C:\\Users\\lujian\\Desktop\\空集合.postman_collection.json').toString()));
       console.log(myCollection);
+
+
+
+      
+        
+      subscribeThemeChange(this.handleChangeTheme)
     }
 
     componentWillUnmount() {

@@ -116,7 +116,7 @@ class DAPTVSettingTabs extends React.Component {
                         {COLLECTION_DESCRIPTION_TIPS}
                         <DescriptionEditor 
                             scene="form" 
-                            value={description}
+                            defaultValue={description}
                             mdEditorShow 
                             mdEditorProps={{style: {height: "300px"}}}
                             onChange={this.handleDescChange}

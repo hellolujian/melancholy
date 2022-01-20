@@ -1,7 +1,7 @@
 import React from 'react';
 import {Input, Row, Col, Button, Steps , Modal, Space, Typography, Card, Divider, Form} from 'antd';
 
-import MarkdownEditor from 'ui/components/markdown_editor'
+import DescriptionEditor from 'ui/components/description_editor'
 import MultiToggle from 'react-multi-toggle';
 import PostmanButton from './postman_button';
 import {
@@ -16,10 +16,23 @@ import {
     TESTS_TIPS
 } from 'ui/constants/tips'
 
-import {SQUARE_PLUS_ICON, ADD_REQUEST_ICON, ADD_REQUEST_ICON_48, COLLECTION_ICON_48, COLLECTION_ICON_32, ENVIRONMENT_ICON, ENVIRONMENT_ICON_48,
-    MOCK_COLLECTION, MOCK_COLLECTION_48, MONITOR_COLLECTION_ICON, CIRCLE_DOT_ICON, DOCUMENTATION_ICON, DOCUMENTATION_ICON_48, CLOSE_SVG,CLOSE_ICON
+import {
+    COLLECTION_ICON_32, COLLECTION_ICON_48, DARK_THEME_DOCUMENTATION_ICON_48, DARK_THEME_COLLECTION_ICON_48,
+    CIRCLE_DOT_ICON, DARK_THEME_COLLECTION_ICON_32, DOCUMENTATION_ICON_48, DARK_THEME_CIRCLE_DOT_ICON, CLOSE_ICON
 } from 'ui/constants/icons';
 
+import {insertCollectionMeta, queryCollectionMetaById, updateCollectionMeta} from '@/database/collection_meta'
+import {
+    loadCollection,
+    addCollectionWithRequests
+} from '@/utils/database_utils'
+
+import {
+    getByTheme,
+} from '@/utils/style_utils'
+
+import {UUID} from '@/utils/global_utils'
+import {parseFullUrl} from '@/utils/common_utils'
 
 import ApiTable from './api_table'
 const { Step } = Steps;
@@ -31,7 +44,7 @@ class DocumentationModal extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            groupSize: 2,
+            createDocWay: 'newapi',
             currentStep: 0,
             // visible: props.visible,
             description: `# Introduction
@@ -52,7 +65,10 @@ Is there a limit to the number of requests an user can send?`
         }
     }
 
-    componentDidMount() {
+    componentDidMount = async () => {
+
+        let collectionList = await loadCollection();
+        this.setState({collectionList: collectionList})
         
     }
 
@@ -66,7 +82,7 @@ Is there a limit to the number of requests an user can send?`
         this.props.onVisibleChange(false);
     }
 
-    onGroupSizeSelect = value => this.setState({ groupSize: value });
+    handleCreateDocWaySelect = value => this.setState({ createDocWay: value });
 
     NEXT_STEPS = [
         {
@@ -107,7 +123,29 @@ Is there a limit to the number of requests an user can send?`
         })
     }
 
-    handleCreateBtnClick = () => {
+    handleCreateBtnClick = async () => {
+        const {collectionId, documentationName, description, requestList} = this.state;
+        if (collectionId) {
+            await updateCollectionMeta(collectionId, {$set: {description: description}});
+        } else {
+            let collectionMetaId = UUID();
+            await addCollectionWithRequests({
+                name: documentationName,
+                id: collectionMetaId,
+                description: description
+            }, requestList.map(item => ({
+                id: item.id,
+                name: item.name,
+                description: item.description,
+                parentId: collectionMetaId,
+                method: item.method,
+                ...parseFullUrl(item.url),
+                body: {
+                    mode: 'raw',
+                    raw: item.body
+                }
+            })))
+        }
         this.setState({
             currentStep: 2
         })
@@ -127,18 +165,27 @@ Is there a limit to the number of requests an user can send?`
         this.setState({description: value})
     }
 
-    handleCollectionItemClick = (item) => {
-        this.setState({currentStep: 1, documentationName: 'nameistest'})
+    handleCollectionItemClick = async (item) => {
+        let collectionMeta = await queryCollectionMetaById(item.id);
+        console.log(collectionMeta);
+        if (collectionMeta) {
+            this.setState({currentStep: 1, collectionId: item.id, documentationName: collectionMeta.name, description: collectionMeta.description})
+        }
     }
 
     handleDomainNameChange = (e) => {
         this.setState({documentationName: e.target.value})
     }
 
+    handleRequestTableChange = (dataList) => {
+        this.setState({requestList: dataList})
+    }
+
     render() {
      
         const {workspaceId, collectionId, folderId, visible} = this.props;
-        const {groupSize, currentStep, description, documentationName} = this.state;
+        const {createDocWay, currentStep, description, documentationName, 
+            collectionList = [], requestList = []} = this.state;
         return (
             <div>
                 
@@ -166,12 +213,12 @@ Is there a limit to the number of requests an user can send?`
                         }
                         {
                             currentStep === 0 && (
-                                <Button type="primary" onClick={this.handleNextBtnClick}>Next</Button>
+                                <Button type="primary" disabled={requestList.length === 0} onClick={this.handleNextBtnClick}>Next</Button>
                             )
                         }
                         {
                             currentStep === 1 && (
-                                <Button type="primary" onClick={this.handleCreateBtnClick}>Create</Button>
+                                <Button type="primary" disabled={documentationName ? false : true} onClick={this.handleCreateBtnClick}>Create</Button>
                             )
                         }
                         {
@@ -190,31 +237,31 @@ Is there a limit to the number of requests an user can send?`
                                 options={[
                                     {
                                     displayName: 'Create a new API',
-                                    value: 2
+                                    value: 'newapi'
                                     },
                                     {
                                     displayName: 'Use collection from this workspace',
-                                    value: 4
+                                    value: 'fromexist'
                                     },
                                 ]}
-                                selectedOption={groupSize}
-                                onSelectOption={this.onGroupSizeSelect}
+                                selectedOption={createDocWay}
+                                onSelectOption={this.handleCreateDocWaySelect}
                             />
                             <Typography.Paragraph type="secondary">
                             Enter the requests you want to document. Add headers and sample responses to these requests by clicking on the (•••) icon.
                             </Typography.Paragraph>
 
                             {
-                                groupSize === 4 ? (
+                                createDocWay === 'fromexist' ? (
                                     <Card>
                                         <Space wrap>
                                         {
-                                            [1,3,4,5,6].map((item, index) => (
+                                            collectionList.map((item, index) => (
                                                 <Card bordered={false} hoverable key={index} onClick={() => this.handleCollectionItemClick(item)}>
                                                     <Meta
-                                                        avatar={COLLECTION_ICON_32}
-                                                        title="collection 1"
-                                                        description="6 requests"
+                                                        avatar={getByTheme(COLLECTION_ICON_32, DARK_THEME_COLLECTION_ICON_32)}
+                                                        title={item.name}
+                                                        description={`${item.requestCount} ${item.requestCount > 1 ? 'requests' : 'request'}`}
                                                     />
                                                 </Card>
                                             ))
@@ -223,7 +270,9 @@ Is there a limit to the number of requests an user can send?`
                                         
                                     </Card>
                                 ) : (
-                                    <ApiTable />
+                                    <ApiTable 
+                                        onChange={this.handleRequestTableChange}
+                                    />
                                 )
                                 
                             }
@@ -236,19 +285,28 @@ Is there a limit to the number of requests an user can send?`
                         <Form layout="vertical">
                             <Form.Item label="Name">
                                 <Row gutter={[16, 16]}>
-                                    <Col span={14}><Input value={documentationName} onChange={this.handleDomainNameChange}/></Col>
+                                    <Col span={14}>
+                                        <Input 
+                                            value={documentationName} 
+                                            disabled={createDocWay === 'fromexist'}
+                                            autoFocus
+                                            onChange={this.handleDomainNameChange}
+                                        />
+                                    </Col>
                                     <Col span={10} style={{padding: '0px 8px'}}>
                                     {DOCUMENTATION_NAME_TIPS}
                                     </Col>
                                 </Row>
                                 
                             </Form.Item>
-                            <Form.Item label="Add a description" name="description">
+                            <Form.Item label="Add a description">
                                 <Row gutter={[16, 16]}>
                                     <Col span={14}>
-                                        <MarkdownEditor 
-                                            mdEditorProps={{style: {height: "300px"}}} 
-                                            value={description} 
+                                        <DescriptionEditor 
+                                            mdEditorShow
+                                            scene="document"
+                                            // mdEditorProps={{style: {height: "300px"}}} 
+                                            defaultValue={description} 
                                             onChange={this.handleDescriptionChange}
                                         />
                                     </Col>
@@ -270,11 +328,22 @@ Is there a limit to the number of requests an user can send?`
                         <>
                             <Card bordered={false}>
                                 <Meta
-                                    avatar={DOCUMENTATION_ICON_48}
-                                    title="collection 1 documentation created"
+                                    avatar={getByTheme(DOCUMENTATION_ICON_48, DARK_THEME_DOCUMENTATION_ICON_48)}
+                                    title={documentationName + " documentation created"}
                                     description="This documentation is generated based on your inputs and is private."
                                 />
                             </Card>
+                            {
+                                createDocWay === 'newapi' && (
+                                    <Card bordered={false}>
+                                        <Meta
+                                            avatar={getByTheme(COLLECTION_ICON_48, DARK_THEME_COLLECTION_ICON_48)}
+                                            title={documentationName + " collection created"}
+                                            description="This collection contains all the requests which are being documented"
+                                        />
+                                    </Card>
+                                )
+                            }
 
                             <Divider orientation="left">NEXT STEPS</Divider>
 
@@ -282,7 +351,7 @@ Is there a limit to the number of requests an user can send?`
                                 this.NEXT_STEPS.map((item, index) => (
                                     <Card bodyStyle={{padding: '24px 0px 0px 24px'}} className="next-steps-item-card" bordered={false} key={index}>
                                         <Meta
-                                            avatar={CIRCLE_DOT_ICON}
+                                            avatar={getByTheme(CIRCLE_DOT_ICON, DARK_THEME_CIRCLE_DOT_ICON)}
                                             title={item.title}
                                             description={item.desc}
                                         />

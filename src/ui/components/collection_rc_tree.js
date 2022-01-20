@@ -32,7 +32,7 @@ import {
     publishRequestSave,
     publishRequestDelete,
     publishCollectionModalOpen,
-    subscribeThemeChange
+    
 } from '@/utils/event_utils'
 
 import {
@@ -84,8 +84,6 @@ class CollectionTree extends React.Component {
         subscribeCollectionSave(this.refreshData)
         subscribeRequestSave(this.refreshData)
         this.refreshData();
-        
-        subscribeThemeChange(this.handleChangeTheme)
     }
     
     handleSelectTreeNode = (selectedKeys, {selected, selectedNodes, node}) => {

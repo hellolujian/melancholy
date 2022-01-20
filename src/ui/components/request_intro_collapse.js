@@ -86,6 +86,7 @@ class RequestIntro extends React.Component {
                 {
                   sourceRequestExist && (
                     <DescriptionEditor 
+                      autoFocus
                       value={description}
                       defaultValue={description}
                       onSave={this.handleDescSave}

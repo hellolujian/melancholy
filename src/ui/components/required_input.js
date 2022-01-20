@@ -27,8 +27,8 @@ class RequiredInput extends React.Component {
         let value = e.target.value;
         if (value && value.trim()) {
             this.setState({value: value.trim()});
-            this.props.onSave(value.trim())
         }
+        this.props.onSave(value)
     }
 
     handleInputClick = (e) => {

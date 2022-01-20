@@ -31,3 +31,9 @@ export const queryCollectionMetaByName = async (name) => {
     let workspaceIdQuery = await currentWorkspaceIdQuery();
     return query(COLLECTION_META, {name: name, ...workspaceIdQuery});
 }
+
+export const queryCollectionMeta = async (param = {}) => {
+    
+    let workspaceIdQuery = await currentWorkspaceIdQuery();
+    return query(COLLECTION_META, {...param, ...workspaceIdQuery});
+}

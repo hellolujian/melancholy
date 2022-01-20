@@ -142,8 +142,23 @@ class EditableTable extends React.Component {
     }
     this.setState({dataSource: dataSource}, () => {
       document.getElementById(cellId).focus()
-      document.getElementById(cellId).setSelectionRange(value.length, value.length);
+      // document.getElementById(cellId).setSelectionRange(value.length, value.length);
     })
+    this.props.onChange(dataSource, false);
+  }
+
+  handleSelectItemChange = (record, value, dataIndex) => {
+    const dataSource = this.getRealDataSource();
+    const {rowKey} = this.props;
+    let changedRecordIndex = dataSource.findIndex(item => item[rowKey] === record[rowKey])
+    if (changedRecordIndex >= 0) {
+      let newRecord = {...dataSource[changedRecordIndex], [dataIndex]: value};
+      dataSource[changedRecordIndex] = newRecord
+    } else {
+      let newObj = {...record, [dataIndex]: value, [rowKey]: UUID()};
+      dataSource.push(newObj)
+    }
+    this.setState({dataSource: dataSource})
     this.props.onChange(dataSource, false);
   }
 
@@ -280,12 +295,17 @@ class EditableTable extends React.Component {
                 )
               }
             }
-            let cellComponentType = col.dataIndex === 'value' ? (col.type || record.type) : undefined;
+            let cellComponentType = col.dataIndex === 'value' || col.dataIndex === 'method' ? (col.type || record.type) : undefined;
             let cellComponent;
             switch (cellComponentType) {
               case 'select':
                 cellComponent = (
-                  <RequestMethodSelect bordered={false} style={{width: 200}} size="small" />
+                  <RequestMethodSelect 
+                    bordered={false} 
+                    style={{width: 200}} 
+                    size="small" 
+                    onChange={(value) => this.handleSelectItemChange(record, value, col.dataIndex)}
+                  />
                 );
                 break;
               case 'file': 

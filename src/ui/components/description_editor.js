@@ -42,7 +42,8 @@ class DescriptionEditor extends React.Component {
         super(props);
         this.state = {
             mdEditorShow: props.mdEditorShow,
-            currentTheme:  getCurrentTheme()
+            currentTheme:  getCurrentTheme(),
+            value: props.defaultValue
         }
     }
 
@@ -101,7 +102,8 @@ class DescriptionEditor extends React.Component {
     }
 
     editorDidMount = (editor, monaco) => {
-        editor.focus();
+        const {autoFocus} = this.props;
+        if (autoFocus) editor.focus();
     };
 
     handleMonacoEditorChange = (newValue, e) => {

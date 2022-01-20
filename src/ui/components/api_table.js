@@ -56,230 +56,82 @@ class ApiTable extends React.Component {
         this.stopClickPropagation(domEvent)
     }
 
+    handleChange = (dataSource, saveFlag = true) => {
+        this.props.onChange(dataSource, saveFlag);
+    }
+
     render() {
      
         const {scene, editable = true, draggable = true, tableProps} = this.props;
         return (
             <EditableTable 
-                rowKey='index'
+                rowKey='id'
                 showCheckbox={false}
                 tableProps={tableProps}
                 draggable={draggable}
                 editable={editable} 
                 ref={ref => this.editableTableRef = ref}
                 columns={
-                [
-                    {
-                        title: 'Method',
-                        dataIndex: 'mothod',
-                        // width: '33%',
-                        editable: editable,
-                        className: 'drag-visible',
-                        // placeholder: 'Key'
-                        type: 'select'
-                    },
-                    {
-                        name: 'Request URL',
-                        title: 'Request URL',
-                        dataIndex: 'url',
-                        // width: '33%',
-                        editable: editable,
-                        className: 'drag-visible',
-                        placeholder: 'URL'
-                    },
-                    {
-                        name: 'Request Body',
-                        title: 'Request Body',
-                        dataIndex: 'body',
-                        // width: '33%',
-                        editable: editable,
-                        className: 'drag-visible',
-                        placeholder: 'Body',
-                        hide: true,
-                    },
-                    {
-                        name: 'Description',
-                        title: 'Description',
-                        dataIndex: 'body',
-                        // width: '33%',
-                        editable: editable,
-                        className: 'drag-visible',
-                        placeholder: 'Description'
-                    },
-                    {
-                        name: 'Status Code',
-                        title: 'Status Code',
-                        dataIndex: 'statusCode',
-                        // width: '33%',
-                        editable: editable,
-                        className: 'drag-visible',
-                        placeholder: 'Code',
-                        defaultValue: 200
-                    },
-                    {
-                        name: 'Response Body',
-                        title: 'Response Body',
-                        dataIndex: 'body',
-                        // width: '33%',
-                        editable: editable,
-                        className: 'drag-visible',
-                        hide: true
-                    }
-                ]
-            } 
-           
-       
-            dataSource={
-                [
-                //     {
-                //       name: 'one',
-                //       initialValue: '32',
-                //       currentValue: 'London, Park Lane no. 0',
-                //       index: 0,
-                //     },
-                //     {
-                //       name: 'second',
-                //       initialValue: '32',
-                //       currentValue: 'London, Park Lane no. 1',
-                //       index: 1
-                //     },
-                //     {
-                //       name: 'third',
-                //       initialValue: '32',
-                //       currentValue: 'London, Park Lane no. 1',
-                //       index: 2
-                //     },
-                //     {
-                //       name: 'second',
-                //       initialValue: '32',
-                //       currentValue: 'London, Park Lane no. 1',
-                //       index: 3
-                //     },
-                //     {
-                //       name: 'third',
-                //       initialValue: '32',
-                //       currentValue: 'London, Park Lane no. 1',
-                //       index: 4
-                //     },
-                //     {
-                //       name: 'second',
-                //       initialValue: '32',
-                //       currentValue: 'London, Park Lane no. 1',
-                //       index: 5
-                //     },
-                //     {
-                //       name: 'third',
-                //       initialValue: '32',
-                //       currentValue: 'London, Park Lane no. 1',
-                //       index: 6
-                //     },
-                //     {
-                //       name: 'second',
-                //       initialValue: '32',
-                //       currentValue: 'London, Park Lane no. 1',
-                //       index: 7
-                //     },
-                //     {
-                //       name: 'third',
-                //       initialValue: '32',
-                //       currentValue: 'London, Park Lane no. 1',
-                //       index: 8
-                //     },
-                //     {
-                //       name: 'second',
-                //       initialValue: '32',
-                //       currentValue: 'London, Park Lane no. 1',
-                //       index: 9
-                //     },
-                //     {
-                //       name: 'third',
-                //       initialValue: '32',
-                //       currentValue: 'London, Park Lane no. 1',
-                //       index: 10
-                //     },
-                //     {
-                //       name: 'second',
-                //       initialValue: '32',
-                //       currentValue: 'London, Park Lane no. 1',
-                //       index: 11
-                //     },
-                //     {
-                //       name: 'third',
-                //       initialValue: '32',
-                //       currentValue: 'London, Park Lane no. 1',
-                //       index: 12
-                //     },
-                //   {
-                //       name: 'third',
-                //       initialValue: '32',
-                //       currentValue: 'London, Park Lane no. 1',
-                //       index: 2
-                //     },
-                //     {
-                //       name: 'second',
-                //       initialValue: '32',
-                //       currentValue: 'London, Park Lane no. 1',
-                //       index: 3
-                //     },
-                //     {
-                //       name: 'third',
-                //       initialValue: '32',
-                //       currentValue: 'London, Park Lane no. 1',
-                //       index: 4
-                //     },
-                //     {
-                //       name: 'second',
-                //       initialValue: '32',
-                //       currentValue: 'London, Park Lane no. 1',
-                //       index: 5
-                //     },
-                //     {
-                //       name: 'third',
-                //       initialValue: '32',
-                //       currentValue: 'London, Park Lane no. 1',
-                //       index: 6
-                //     },
-                //     {
-                //       name: 'second',
-                //       initialValue: '32',
-                //       currentValue: 'London, Park Lane no. 1',
-                //       index: 7
-                //     },
-                //     {
-                //       name: 'third',
-                //       initialValue: '32',
-                //       currentValue: 'London, Park Lane no. 1',
-                //       index: 8
-                //     },
-                //     {
-                //       name: 'second',
-                //       initialValue: '32',
-                //       currentValue: 'London, Park Lane no. 1',
-                //       index: 9
-                //     },
-                //     {
-                //       name: 'third',
-                //       initialValue: '32',
-                //       currentValue: 'London, Park Lane no. 1',
-                //       index: 10
-                //     },
-                    {
-                      name: 'second',
-                      initialValue: '32',
-                      currentValue: 'London, Park Lane no. 1',
-                      index: 11
-                    },
-                    {
-                      name: 'third',
-                      initialValue: '32',
-                      currentValue: 'London, Park Lane no. 1',
-                      index: 12
-                    },
-                  ]
-            }
-            // tableProps = {{
-            //     title: () => 'Query Params'
-            // }}
+                    [
+                        {
+                            title: 'Method',
+                            dataIndex: 'method',
+                            // width: '33%',
+                            editable: editable,
+                            className: 'drag-visible',
+                            // placeholder: 'Key'
+                            type: 'select'
+                        },
+                        {
+                            name: 'Request URL',
+                            title: 'Request URL',
+                            dataIndex: 'url',
+                            // width: '33%',
+                            editable: editable,
+                            className: 'drag-visible',
+                            placeholder: 'URL'
+                        },
+                        {
+                            name: 'Request Body',
+                            title: 'Request Body',
+                            dataIndex: 'body',
+                            // width: '33%',
+                            editable: editable,
+                            className: 'drag-visible',
+                            placeholder: 'Body',
+                            hide: true,
+                        },
+                        {
+                            name: 'Description',
+                            title: 'Description',
+                            dataIndex: 'description',
+                            // width: '33%',
+                            editable: editable,
+                            className: 'drag-visible',
+                            placeholder: 'Description'
+                        },
+                        {
+                            name: 'Status Code',
+                            title: 'Status Code',
+                            dataIndex: 'statusCode',
+                            // width: '33%',
+                            editable: editable,
+                            className: 'drag-visible',
+                            placeholder: 'Code',
+                            defaultValue: 200
+                        },
+                        {
+                            name: 'Response Body',
+                            title: 'Response Body',
+                            dataIndex: 'responseBody',
+                            // width: '33%',
+                            editable: editable,
+                            className: 'drag-visible',
+                            hide: true
+                        }
+                    ]
+                }
+                onChange={this.handleChange}
             />
         )
     }

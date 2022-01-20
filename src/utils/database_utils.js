@@ -4,6 +4,7 @@ import {insertCollectionMeta, updateCollectionMeta, queryCollectionMetaById, que
 import {insertRequestMeta, updateRequestMeta, queryRequestMetaById, queryRequestMetaByParentId, queryRequestCount, multiUpdateRequestMeta} from '@/database/request_meta'
 
 import {UUID} from '@/utils/global_utils'
+import {publishCollectionSave,} from '@/utils/event_utils'
 
 /**
  * 根据id数组定位到collection所在位置
@@ -524,4 +525,20 @@ export const importCollection = async (collection, collectionMetaList, requestMe
         requestCount: requestMetaList.length
     })
     
+}
+
+export const addCollectionWithRequests = async (collectionMeta, requestMetaList) => {
+    await insertRequestMeta(requestMetaList);
+    await insertCollectionMeta(collectionMeta);
+    await insertCollection({
+        id: collectionMeta.id,
+        name: collectionMeta.name,
+        requestCount: requestMetaList.length,
+        items: requestMetaList.map(item => ({
+            id: item.id,
+            name: item.name, 
+            method: item.method
+        }))
+    })
+    publishCollectionSave();
 }
