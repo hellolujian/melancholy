@@ -15,7 +15,8 @@ import PostmanButton from './postman_button'
 import Ellipsis from 'react-ellipsis-component';
 import {stopClickPropagation} from '@/utils/global_utils';
 import {getEllipsisIcon, getByTheme} from '@/utils/style_utils';
-import {publishCollectionModalOpen, publishRequestModalOpen} from '@/utils/event_utils'
+import {publishCollectionModalOpen, publishRequestModalOpen, listenShortcut} from '@/utils/event_utils'
+import {getCollectionTreeSelectedKey} from '@/utils/store_utils'
 import {
     DARK_THEME_DELETE_ICON, DARK_THEME_DUPLICATE_ICON, RENAME_ICON, EDIT_ICON, DARK_THEME_ADD_FOLDER_ICON, 
     DARK_THEME_ADD_REQUEST_ICON, ADD_REQUEST_ICON, ADD_FOLDER_ICON, DUPLICATE_ICON,
@@ -40,6 +41,17 @@ class FolderRCItem extends React.Component {
     // 渲染collection输入框
     showCollectionNameInput = (show = true) => {
         this.setState({showCollectionNameInput: show})
+    }
+    
+    handleRenameShortcut = () => {
+        const currentSelectedKey = getCollectionTreeSelectedKey();
+        if (currentSelectedKey === this.props.item.id) {
+            this.showCollectionNameInput()
+        }
+    }
+
+    componentDidMount() {
+        listenShortcut('renameitem', this.handleRenameShortcut)
     }
 
     // 保存collection名称

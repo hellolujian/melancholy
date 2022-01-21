@@ -8,6 +8,7 @@ const getStoreValue = (key) => {
 }
 
 const setStoreValue = (key, value, fileName, callback) => {
+    if (value === undefined) return;
     setValue(key, value, fileName, callback);
 }
 
@@ -50,7 +51,16 @@ const setCurrentWorkspaceSession = async (updateObj) => {
     setStoreValue('workspaceSession', newArr);
 }
 
+const setCollectionTreeSelectedKey = (selectedKey) => {
+    setStoreValue('collectionTreeSelectedKey', selectedKey);
+}
+
+const getCollectionTreeSelectedKey = () => {
+    return getValue('collectionTreeSelectedKey');
+}
+
 export { 
     getStoreValue, setStoreValue, getCurrentWorkspaceId, currentWorkspaceIdQuery, 
-    getCurrentWorkspaceSession, setCurrentWorkspaceSession, getCurrentWorkspace, setStoreValueWithCallback
+    getCurrentWorkspaceSession, setCurrentWorkspaceSession, getCurrentWorkspace, 
+    setStoreValueWithCallback, setCollectionTreeSelectedKey, getCollectionTreeSelectedKey
 }

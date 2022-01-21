@@ -44,8 +44,8 @@ import EnvironmentModal from './environment_modal'
 import DocumentationModal from './documentation_modal'
 
 import {IMPORT_TITLE, SYNC_DATA_TITLE, CREATE_NEW, ACCOUNT_TITLE, NOTIFICATIONS_TITLE, SETTINGS_TITLE, RUNNER_TITLE} from '@/ui/constants/titles'
-import {publishCollectionModalOpen, publishRequestModalOpen} from '@/utils/event_utils'
-import {getByTheme} from '@/utils/style_utils'
+import {publishCollectionModalOpen, publishRequestModalOpen, listenShortcut} from '@/utils/event_utils'
+import {getByTheme, getCloseSvg} from '@/utils/style_utils'
 import 'ui/style/new_button_modal.css'
 const { Header,} = Layout;
 const { TabPane } = Tabs;
@@ -63,8 +63,21 @@ class NewButtonModal extends React.Component {
         }
     }
 
+    // 处理新增按钮大弹框事件
+    handleNewModalVisibleChange = (visible) => {
+        let obj = {
+            newModalVisible: visible,
+        }
+        this.setState(obj)
+    }
+
+    // 处理新增按钮大弹框事件
+    handleNewModalOpen = (visible) => {
+        this.handleNewModalVisibleChange(true)
+    }
+
     componentDidMount() {
-      
+        listenShortcut('new', this.handleNewModalOpen)
     }
 
     // 处理rce弹框显示或隐藏
@@ -90,14 +103,6 @@ class NewButtonModal extends React.Component {
     handleNewMenuClick = ({key}) => {
         this.handleRCEModalVisibleChange(key, true)
         
-    }
-
-    // 处理新增按钮大弹框事件
-    handleNewModalVisibleChange = (visible) => {
-        let obj = {
-            newModalVisible: visible,
-        }
-        this.setState(obj)
     }
 
     // 处理新增按钮大弹框消失
@@ -170,7 +175,7 @@ class NewButtonModal extends React.Component {
                 className="new-modal-tabs common-tabs-class" 
                 tabBarExtraContent={(
                     <Button onClick={this.handleNewModalCancel} type="text">
-                        <Icon component={() => CLOSE_SVG} />
+                        <Icon component={() => getCloseSvg()} />
                     </Button>
                 )}>
                 <TabPane tab="Create New" key="createnew">

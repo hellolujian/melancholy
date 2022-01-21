@@ -11,6 +11,10 @@ import {queryCollectionMetaById, queryCollectionMetaByName} from '@/database/col
 
 import {publishCollectionSave} from '@/utils/event_utils'
 import {UUID} from '@/utils/global_utils'
+import {
+    listenShortcut,
+} from '@/utils/event_utils'
+ 
 import {parseImportContent, importFromFilePath} from '@/utils/business_utils'
 import {IMPORT_TITLE, SYNC_DATA_TITLE, CREATE_NEW, ACCOUNT_TITLE, NOTIFICATIONS_TITLE, SETTINGS_TITLE, RUNNER_TITLE} from '@/ui/constants/titles'
 import {
@@ -35,30 +39,16 @@ class ImportModal extends React.Component {
         }
     }
 
+    handleModalVisibleChange = (visible) => {
+        this.setState({modalVisible: visible})
+    }
+
+    handleModalOpen = () => {
+        this.setState({modalVisible: true})
+    }
+
     componentDidMount() {
-        // this.importNotification('newData.name')
-        // var VariableScope = require('postman-collection').VariableScope;
-        // let fs = window.require('fs')
-        // let env = new VariableScope(JSON.parse(fs.readFileSync('C:\\Users\\lujian01\\Desktop\\水电费.postman_environment.json').toString()));
-        // console.log('=====================env');
-        // console.log(env);
-
-        // var Collection = require('postman-collection').Collection,
-        // ItemGroup = require('postman-collection').ItemGroup,
-        // myCollection;
-
-        // let requestList = [], collectionList = [];
-        // let fs = window.require('fs');
-        // // C:\\Users\\lujian01\\Desktop\\预告同意.postman_collection.json
-        // myCollection = new Collection(JSON.parse(fs.readFileSync('C:\\Users\\lujian01\\Desktop\\1体育图.postman_collection.json').toString())); // create an empty collection
-        
-
-        // console.log('count: %s', this.getCollectionObj(myCollection, requestList, collectionList));
-        // console.log('reqlist')
-        // console.log(requestList)
-        // console.log('folderlist');
-        // console.log(collectionList)
-        // console.log(myCollection.variables.map(variable => variable.toJSON()));
+        listenShortcut('import', this.handleModalOpen)
     }
 
     handleTabKeyChange = (activeTabKey) => {

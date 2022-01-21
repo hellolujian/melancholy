@@ -3,11 +3,17 @@ import { Select, Button, Space, Input, Dropdown, Menu, Row, Col } from 'antd';
 import { EyeOutlined, CaretDownOutlined  } from '@ant-design/icons';
 import RequestMethodSelect from './request_method_select'
 
+import {
+    listenShortcut,
+  } from '@/utils/event_utils'
+
 import {UUID, compareObjectIgnoreEmpty, getSpecificFieldObj} from '@/utils/global_utils'
 import PostmanSDK from 'postman-collection'
 const {Url, QueryParam, PropertyList} = PostmanSDK
 const { Option } = Select;
 class RequestSendBar extends React.Component {
+
+    urlInputRef = React.createRef();
 
     constructor(props) {
         super(props);
@@ -16,8 +22,13 @@ class RequestSendBar extends React.Component {
         }
     }
 
+    focusUrlInput = () => {
+        this.urlInputRef.current.focus()
+    }
+
     componentDidMount() {
       
+        listenShortcut('requesturl', this.focusUrlInput)
     }
 
     getUrlObj = (fullUrl) => {
@@ -88,6 +99,7 @@ class RequestSendBar extends React.Component {
                         onChange={this.handleUrlChange} 
                         onBlur={this.handleUrlSave}
                         onPressEnter={this.handleUrlSave}
+                        ref={this.urlInputRef}
                     />
                 </Col>
 

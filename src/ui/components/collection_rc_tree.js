@@ -24,6 +24,7 @@ import RequestRCItem from './request_rc_item'
 import PostmanButton from './postman_button'
 import {stopClickPropagation, UUID, writeJsonFileSync, getJsonFromFile, saveJsonFileSync} from '@/utils/global_utils';
 import {getUrlString, getPostmanUrl, getEventExportObj, getVariableExportDisabledArr} from '@/utils/common_utils'
+import {setCollectionTreeSelectedKey, getCollectionTreeSelectedKey} from '@/utils/store_utils'
 import {
     publishRequestModalOpen, 
     subscribeRequestSave, 
@@ -32,7 +33,8 @@ import {
     publishRequestSave,
     publishRequestDelete,
     publishCollectionModalOpen,
-    
+    listenShortcut,
+    publishNewTabOpen
 } from '@/utils/event_utils'
 
 import {
@@ -50,7 +52,7 @@ import {
 import RCTree from 'rc-tree';
 
 import {queryCollectionMetaById, queryCollectionMetaByParentId} from '@/database/collection_meta'
-import {queryRequestMetaByParentId} from '@/database/request_meta'
+import {queryRequestMetaByParentId, queryRequestMetaById} from '@/database/request_meta'
 import 'rc-tree/assets/index.css'
 
 import 'ui/style/collection_rc_tree.css'
@@ -80,106 +82,17 @@ class CollectionTree extends React.Component {
         this.setState({currentTheme: data})
     }
 
-    componentDidMount = async () => {
-        subscribeCollectionSave(this.refreshData)
-        subscribeRequestSave(this.refreshData)
-        this.refreshData();
-    }
-    
-    handleSelectTreeNode = (selectedKeys, {selected, selectedNodes, node}) => {
-    
-        const {key} = node;
-        let currentTreeRef = this.rcTreeRef.current;
-        let currentExpandKeys = currentTreeRef.state.expandedKeys;
-        let isExpanded = currentExpandKeys.find(item => item === key);
-        let newKeys = isExpanded ? currentExpandKeys.filter(o => o !== key) : [...currentExpandKeys, key];
-        currentTreeRef.setExpandedKeys(newKeys);
-        currentTreeRef.setUncontrolledState({selectedKeys: isExpanded ? [] : [key]});
-        if (node.isLeaf) {
-            publishRequestSelected(node.key)
-        }
-        
-    }
-  
-    handleOpenRequestModal = () => {
-        publishRequestModalOpen();
-    }
+    getTargetNodeByKey = (treeData, key) => {
+        for (let i = 0; i < treeData.length; i++) {
+            let targetNode;
+            if (treeData[i].key === key) targetNode = treeData[i];
+            else if (treeData[i].children) targetNode = this.getTargetNodeByKey(treeData[i].children, key);
 
-    getEmptyNode = (item, isFolder) => {
-        const {id, name} = item;
-        let text1 = isFolder ? 'folder' : 'collection';
-        let text2 = isFolder ? 'subfolders' : 'folders';
-        return {
-            key: id + "_0",
-            name: `${name}下的空节点`,
-            isLeaf: true,
-            isEmptyNode: true,
-            selectable: false,
-            className: 'rc-tree-treenode-empty',
-            title: (
-                <div className="collection-rc-tree-item-title-empty">
-                    <Text type="secondary">
-                        This {text1} is empty. <Link onClick={this.handleOpenRequestModal}>Add requests</Link> to this {text1} and create {text2} to organize them
-                    </Text>
-                </div>
-            )
+            if (targetNode) return targetNode;
         }
     }
 
-    handleRequestRename = async (id, name) => {
-        let saveObj = {id: id, name: name};
-        await saveRequest(saveObj);
-        publishRequestSave({metaData: saveObj});
-    }
-
-    // 递归遍历collection下的folder
-    traverseCollectionItems = (list, parentId) => {
-        return list.map(node => {
-            const {id, name, items} = node;
-            let treeItem = {
-                key: id,
-                name: name,
-            }
-            if (node.items) {
-                treeItem.title = (
-                    <FolderRCItem 
-                        item={{...node, parentId: parentId}} 
-                        onDelete={() => this.handleFolderDelete(node)}
-                        onDuplicate={() => this.handleCollectionDuplicate(id)}
-                        onRename={(value) => this.handleCollectionRename(id, value)}
-                    />
-                );
-                
-                if (node.items.length > 0) {
-                    treeItem.children = this.traverseCollectionItems(items, id);
-                } else {
-                    treeItem.children = [this.getEmptyNode(node, true)]
-                }
-                treeItem.className = 'collection-tree-folder-item-class'
-                
-            } else {
-                treeItem.isLeaf = true;
-                treeItem.title = (
-                    <RequestRCItem 
-                        item={node} 
-                        onDelete={() => this.handleRequestDelete(node)}
-                        onDuplicate={() => this.handleRequestDuplicate(id)}
-                        onRename={(value) => this.handleRequestRename(id, value)}
-                    />
-                )
-                treeItem.className = 'collection-tree-request-item-class'
-            }
-            return treeItem;
-        })
-    }
-
-    // 详情抽屉的变更
-    handleDrawerVisibleChange = (visibleItem) => {
-        this.setState({collectionDrawerVisibleItem: visibleItem})
-    }
-
-    // TODO: 删除request需要广播
-    handleDeleteCollection = async (id) => {
+    doDeleteCollection = async (id) => {
         let childrenReqs = await deleteCollection(id);
         childrenReqs.forEach(child => {
             publishRequestDelete({id: child.id,})
@@ -208,42 +121,14 @@ class CollectionTree extends React.Component {
             okText: 'Delete',
             cancelText: 'Cancel',
             onOk: async () => {
-                await this.handleDeleteCollection(id);
+                await this.doDeleteCollection(id);
                 this.refreshData()
             }
         });
         
     }
 
-
-    handleCollectionRemove = (id) => {
-        Modal.confirm({
-            title: 'REMOVE COLLECTION',
-            icon: null,
-            closable: true,
-            width: 530,
-            content: (
-                <>
-                    <p>
-                        Are you sure you want to remove this collection from this workspace?
-                    </p>
-                    <p>
-                        Removing this collection will also remove any monitors, mock servers and integrations created on this collection from this workspace.
-                    </p>
-                </>
-            ),
-            okText: 'Delete',
-            cancelText: 'Cancel',
-            onOk: async () => {
-                await this.handleDeleteCollection(id);
-                this.refreshData()
-            }
-        });
-        
-    }
-
-    handleFolderDelete = (node) => {
-        const {id, name} = node;
+    handleFolderDelete = (id ,name) => {
         Modal.confirm({
             title: 'DELETE FOLDER',
             icon: null,
@@ -257,14 +142,13 @@ class CollectionTree extends React.Component {
             okText: 'Delete',
             cancelText: 'Cancel',
             onOk: async () => {
-                await this.handleDeleteCollection(id);
+                await this.doDeleteCollection(id);
                 this.refreshData()
             }
         });
     }
 
-    handleRequestDelete = (node) => {
-        const {id, name} = node;
+    handleRequestDelete = (id, name) => {
         Modal.confirm({
             title: 'DELETE REQUEST',
             icon: null,
@@ -285,6 +169,44 @@ class CollectionTree extends React.Component {
         });
     }
 
+    getCurrentSelectedKey = () => {
+        const rcTreeRef = this.rcTreeRef.current;
+        if (!rcTreeRef) return;
+
+        return getCollectionTreeSelectedKey();
+    }
+
+    getCurrentSelectedNode = () => {
+        
+        const rcTreeRef = this.rcTreeRef.current;
+        if (!rcTreeRef) return;
+
+        const selectedKeys = this.rcTreeRef.current.state.selectedKeys;
+        if (!selectedKeys || selectedKeys.length === 0) return;
+
+        const treeData = this.rcTreeRef.current.state.treeData;
+        return this.getTargetNodeByKey(treeData, selectedKeys[0]);
+
+    }
+
+    handleDeleteItem = () => {
+        let targetNode = this.getCurrentSelectedNode()
+        if (targetNode) {
+            const {isCollection, isLeaf, isFolder, key, name} = targetNode;
+            if (isCollection) {
+                this.handleCollectionDelete(key)
+            }
+            if (isLeaf) {
+                this.handleRequestDelete(key, name)
+            }
+            if (isFolder) {
+                this.handleFolderDelete(key, name)
+            }
+        }
+    }
+
+    
+
     handleCollectionDuplicate = async (id) => {
         await duplicateCollection(id);
         this.refreshData();
@@ -295,14 +217,240 @@ class CollectionTree extends React.Component {
         this.refreshData();
     }
 
-    handleCollectionStar = async (id, starred) => {
-        await starCollection(id, starred);
-        this.refreshData();
+    handleDuplicateItem = () => {
+        let targetNode = this.getCurrentSelectedNode()
+        if (targetNode) {
+            const {isCollection, isLeaf, isFolder, key} = targetNode;
+            if (isCollection) {
+                this.handleCollectionDuplicate(key)
+            }
+            if (isLeaf) {
+                this.handleRequestDuplicate(key)
+            }
+            if (isFolder) {
+                this.handleCollectionDuplicate(key)
+            }
+        }
+    }
+
+    handleOpenRequestInNewTab = async () => {
+        let currentSelectedKey = this.getCurrentSelectedKey()
+        if (!currentSelectedKey) {
+            return;
+        }
+
+        let requestMeta = await queryRequestMetaById(currentSelectedKey);
+        if (!requestMeta) return;
+
+        publishNewTabOpen(requestMeta)
+    }
+
+    handleRequestRename = async (id, name) => {
+        let saveObj = {id: id, name: name};
+        await saveRequest(saveObj);
+        publishRequestSave({metaData: saveObj});
     }
 
     handleCollectionRename = async (id, name) => {
         await saveCollection(id, {name: name});
         await this.refreshData()
+    }
+
+    handleExpandItem = () => {
+        let currentSelectedKey = this.getCurrentSelectedKey()
+        if (!currentSelectedKey) {
+            return;
+        }
+
+        let currentTreeRef = this.rcTreeRef.current;
+        let currentExpandKeys = currentTreeRef.state.expandedKeys;
+        let isExpanded = currentExpandKeys.find(item => item === currentSelectedKey);
+        if (!isExpanded) {
+            currentTreeRef.setExpandedKeys([...currentExpandKeys, currentSelectedKey]);
+        }
+
+    }
+
+    handleCollapseitemItem = () => {
+        let currentSelectedKey = this.getCurrentSelectedKey()
+        if (!currentSelectedKey) {
+            return;
+        }
+
+        let currentTreeRef = this.rcTreeRef.current;
+        let currentExpandKeys = currentTreeRef.state.expandedKeys;
+        currentTreeRef.setExpandedKeys(currentExpandKeys.filter(item => item !== currentSelectedKey));
+
+    }
+
+    handleGoToNextItem = () => {
+        let currentSelectedKey = this.getCurrentSelectedKey()
+        if (!currentSelectedKey) {
+            return;
+        }
+
+        let currentTreeRef = this.rcTreeRef.current;
+        let flattenNodes = currentTreeRef.state.flattenNodes;
+        let currentSelectedNodeIndex = flattenNodes.findIndex(node => node.key === currentSelectedKey);
+        if (currentSelectedNodeIndex < 0) return;
+        let newSelectedKey = flattenNodes[(currentSelectedNodeIndex + 1) % flattenNodes.length].key;
+        currentTreeRef.setUncontrolledState({selectedKeys: [newSelectedKey]});
+        
+        setCollectionTreeSelectedKey(newSelectedKey);
+
+        // currentTreeRef.setExpandedKeys(currentExpandKeys.filter(item => item !== currentSelectedKey));
+
+    }
+
+    handleGoToPreviousItem = () => {
+        let currentSelectedKey = this.getCurrentSelectedKey()
+        if (!currentSelectedKey) {
+            return;
+        }
+
+        let currentTreeRef = this.rcTreeRef.current;
+        let flattenNodes = currentTreeRef.state.flattenNodes;
+        let currentSelectedNodeIndex = flattenNodes.findIndex(node => node.key === currentSelectedKey);
+        if (currentSelectedNodeIndex < 0) return;
+        let newSelectedKey = flattenNodes[(currentSelectedNodeIndex - 1 + flattenNodes.length) % flattenNodes.length].key;
+        currentTreeRef.setUncontrolledState({selectedKeys: [newSelectedKey]});
+        
+        setCollectionTreeSelectedKey(newSelectedKey);
+
+        // currentTreeRef.setExpandedKeys(currentExpandKeys.filter(item => item !== currentSelectedKey));
+
+    }
+
+    componentDidMount = async () => {
+        subscribeCollectionSave(this.refreshData)
+        subscribeRequestSave(this.refreshData)
+        this.refreshData();
+        listenShortcut('deleteitem', this.handleDeleteItem)
+        listenShortcut('duplicateitem', this.handleDuplicateItem)
+        listenShortcut('openrequestinanewtab', this.handleOpenRequestInNewTab)
+        listenShortcut('expanditem', this.handleExpandItem)
+        listenShortcut('collapseitem', this.handleCollapseitemItem)
+        listenShortcut('nextitem', this.handleGoToNextItem)
+        listenShortcut('previousitem', this.handleGoToPreviousItem)
+    }
+    
+    handleSelectTreeNode = (selectedKeys, {selected, selectedNodes, node}) => {
+    
+        const {key} = node;
+        let currentTreeRef = this.rcTreeRef.current;
+        console.log(currentTreeRef)
+        let currentExpandKeys = currentTreeRef.state.expandedKeys;
+        let isExpanded = currentExpandKeys.find(item => item === key);
+        let newExpandKeys = isExpanded ? currentExpandKeys.filter(o => o !== key) : [...currentExpandKeys, key];
+        currentTreeRef.setExpandedKeys(newExpandKeys);
+        currentTreeRef.setUncontrolledState({selectedKeys: isExpanded ? [] : [key]});
+        if (node.isLeaf) {
+            publishRequestSelected(node.key)
+        }
+        setCollectionTreeSelectedKey(key);
+    }
+  
+    handleOpenRequestModal = () => {
+        publishRequestModalOpen();
+    }
+
+    getEmptyNode = (item, isFolder) => {
+        const {id, name} = item;
+        let text1 = isFolder ? 'folder' : 'collection';
+        let text2 = isFolder ? 'subfolders' : 'folders';
+        return {
+            key: id + "_0",
+            name: `${name}下的空节点`,
+            isLeaf: true,
+            isEmptyNode: true,
+            selectable: false,
+            className: 'rc-tree-treenode-empty',
+            title: (
+                <div className="collection-rc-tree-item-title-empty">
+                    <Text type="secondary">
+                        This {text1} is empty. <Link onClick={this.handleOpenRequestModal}>Add requests</Link> to this {text1} and create {text2} to organize them
+                    </Text>
+                </div>
+            )
+        }
+    }
+
+    // 递归遍历collection下的folder
+    traverseCollectionItems = (list, parentId) => {
+        return list.map(node => {
+            const {id, name, items} = node;
+            let treeItem = {
+                key: id,
+                name: name,
+            }
+            if (node.items) {
+                treeItem.title = (
+                    <FolderRCItem 
+                        item={{...node, parentId: parentId}} 
+                        onDelete={() => this.handleFolderDelete(id, name)}
+                        onDuplicate={() => this.handleCollectionDuplicate(id)}
+                        onRename={(value) => this.handleCollectionRename(id, value)}
+                    />
+                );
+                
+                if (node.items.length > 0) {
+                    treeItem.children = this.traverseCollectionItems(items, id);
+                } else {
+                    treeItem.children = [this.getEmptyNode(node, true)]
+                }
+                treeItem.className = 'collection-tree-folder-item-class';
+                treeItem.isFolder = true
+                
+            } else {
+                treeItem.isLeaf = true;
+                treeItem.title = (
+                    <RequestRCItem 
+                        item={node} 
+                        onDelete={() => this.handleRequestDelete(id, name)}
+                        onDuplicate={() => this.handleRequestDuplicate(id)}
+                        onRename={(value) => this.handleRequestRename(id, value)}
+                    />
+                )
+                treeItem.className = 'collection-tree-request-item-class'
+            }
+            return treeItem;
+        })
+    }
+
+    // 详情抽屉的变更
+    handleDrawerVisibleChange = (visibleItem) => {
+        this.setState({collectionDrawerVisibleItem: visibleItem})
+    }
+
+    handleCollectionRemove = (id) => {
+        Modal.confirm({
+            title: 'REMOVE COLLECTION',
+            icon: null,
+            closable: true,
+            width: 530,
+            content: (
+                <>
+                    <p>
+                        Are you sure you want to remove this collection from this workspace?
+                    </p>
+                    <p>
+                        Removing this collection will also remove any monitors, mock servers and integrations created on this collection from this workspace.
+                    </p>
+                </>
+            ),
+            okText: 'Delete',
+            cancelText: 'Cancel',
+            onOk: async () => {
+                await this.doDeleteCollection(id);
+                this.refreshData()
+            }
+        });
+        
+    }
+
+    handleCollectionStar = async (id, starred) => {
+        await starCollection(id, starred);
+        this.refreshData();
     }
 
     recursiveGetItem = async (parentId, deep = 1) => {

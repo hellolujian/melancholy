@@ -4,7 +4,8 @@ import {publishThemeChange} from '@/utils/event_utils'
 
 import {getStoreValue, setStoreValue, setStoreValueWithCallback} from '@/utils/store_utils';
 
-import { EDIT_ICON, DARK_THEME_EDIT_ICON , DARK_THEME_ELLIPSIS_ICON, ELLIPSIS_ICON} from '@/ui/constants/icons'
+import { EDIT_ICON, DARK_THEME_EDIT_ICON , DARK_THEME_ELLIPSIS_ICON, 
+    ELLIPSIS_ICON, CLOSE_SVG, DARK_THEME_CLOSE_SVG} from '@/ui/constants/icons'
 
 export const getCurrentTheme = () => {
 
@@ -64,4 +65,8 @@ export const getEllipsisIcon = () => {
 
 export const getByTheme = (defaultCom, darkCom) => {
     return getCurrentTheme() === 'dark' ? darkCom : defaultCom
+}
+
+export const getCloseSvg = () => {
+    return getByTheme(CLOSE_SVG, DARK_THEME_CLOSE_SVG)
 }

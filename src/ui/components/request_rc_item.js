@@ -16,7 +16,8 @@ import Ellipsis from 'react-ellipsis-component';
 
 import {stopClickPropagation} from '@/utils/global_utils';
 import {getEllipsisIcon, getByTheme} from '@/utils/style_utils';
-import {publishNewTabOpen, publishRequestModalOpen, publishRequestSelected} from '@/utils/event_utils'
+import {getCollectionTreeSelectedKey} from '@/utils/store_utils'
+import {publishNewTabOpen, publishRequestModalOpen, listenShortcut} from '@/utils/event_utils'
 import {
     OPEN_NEW_ICON, DARK_THEME_DELETE_ICON, RENAME_ICON, EDIT_ICON, DARK_THEME_OPEN_NEW_ICON, 
     DARK_THEME_RENAME_ICON, DARK_THEME_EDIT_ICON, DARK_THEME_DUPLICATE_ICON, DUPLICATE_ICON,
@@ -41,6 +42,17 @@ class RequestRCItem extends React.Component {
     // 渲染collection输入框
     showCollectionNameInput = (show = true) => {
         this.setState({showCollectionNameInput: show})
+    }
+    
+    handleRenameShortcut = () => {
+        const currentSelectedKey = getCollectionTreeSelectedKey();
+        if (currentSelectedKey === this.props.item.id) {
+            this.showCollectionNameInput()
+        }
+    }
+
+    componentDidMount() {
+        listenShortcut('renameitem', this.handleRenameShortcut)
     }
 
     // 保存collection名称

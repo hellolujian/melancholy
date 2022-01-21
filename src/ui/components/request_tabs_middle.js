@@ -24,7 +24,6 @@ import {
 import {queryRequestMetaById, insertRequestMeta, updateRequestMeta} from '@/database/request_meta'
 import {
   subscribeRequestSelected,
-  subscribeNewTabOpen,
   subscribeRequestSave,
   publishRequestSave,
   publishRequestModalOpen,
@@ -106,6 +105,10 @@ class RequestTabsMiddle extends React.Component {
       }
     }
     this.setState({requestInfo: {...requestInfo, ...value}});
+  }
+
+  handleSaveClick = (saveAs) => {
+    this.props.onSaveClick(saveAs);
   }
 
   render() {

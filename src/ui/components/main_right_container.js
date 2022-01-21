@@ -23,13 +23,6 @@ import {
   multiUpdateTabMeta} from '@/database/tab_meta'
 import {queryRequestMetaById, insertRequestMeta, updateRequestMeta} from '@/database/request_meta'
 import {
-  subscribeRequestSelected,
-  subscribeNewTabOpen,
-  subscribeRequestSave,
-  publishRequestSave,
-  publishRequestModalOpen,
-  subscribeRequestDelete,
-  listenShortcut
 } from '@/utils/event_utils'
 import {
   saveRequest, syncRequestInCollection
@@ -67,6 +60,10 @@ class MainRightContainer extends React.Component {
     this.requestTabsTopRef.current.handleRequestTabContentChange(value)
   }
 
+  handleSaveClick = (saveAs) => {
+    this.requestTabsTopRef.current.handleSaveClick(saveAs)
+  }
+
   render() {
     return (
       <div className="rightBox" style={{marginLeft: this.props.dynamicWidth}}>
@@ -77,6 +74,7 @@ class MainRightContainer extends React.Component {
         <RequestTabsMiddle 
           ref={this.requestTabsMiddleRef}
           onTabContentChange={this.handleTabContentChange}
+          onSaveClick={this.handleSaveClick}
         />
       </div>
     );

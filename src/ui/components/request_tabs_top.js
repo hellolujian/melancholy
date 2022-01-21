@@ -31,6 +31,7 @@ import {
   subscribeRequestDelete,
   listenShortcut,
 } from '@/utils/event_utils'
+
 import {
   saveRequest, syncRequestInCollection
 } from '@/utils/database_utils'
@@ -203,6 +204,11 @@ class RequestTabsTop extends React.Component {
         await this.doCloseTab(closeTabKey)
       }
     }
+  }
+
+  // 关闭tab
+  handleForceCloseTab = async (closeTabKey) => {
+    this.handleCloseTabClick(closeTabKey, true)
   }
 
   // 重复tab
@@ -404,6 +410,38 @@ class RequestTabsTop extends React.Component {
     return tabData;
   }
 
+  switchToTargetTab = (index) => {
+    console.log(index);
+    const {tabData} = this.state;
+    if (tabData.length === 0 || index > tabData.length || index < 0) {
+      return;
+    }
+    let finalIndex = index;
+    if (index >= tabData.length) {
+      finalIndex = tabData.length - 1;
+    } else if (index < 0) {
+      finalIndex = 0;
+    }
+    this.handleActiveTab(tabData[finalIndex]);
+  }
+
+  switchToLastTab = () => {
+    const {tabData} = this.state;
+    this.switchToTargetTab(tabData.length - 1)
+  }
+
+  switchToNextTab = () => {
+    const {tabData, activeTabKey} = this.state;
+    let currentActiveTabIndex = tabData.findIndex(item => activeTabKey === item.id)
+    this.switchToTargetTab(currentActiveTabIndex + 1)
+  }
+
+  switchToPreTab = () => {
+    const {tabData, activeTabKey} = this.state;
+    let currentActiveTabIndex = tabData.findIndex(item => activeTabKey === item.id)
+    this.switchToTargetTab(currentActiveTabIndex - 1)
+  }
+
   componentDidMount = async () => {
     let tabData = await this.refreshData();
     if (tabData.length > 0) {
@@ -414,6 +452,22 @@ class RequestTabsTop extends React.Component {
     subscribeRequestSave(this.handleRequestSave)
     subscribeRequestDelete(this.handleRequestDelete)
     listenShortcut('saverequest', this.handleSaveCurrent)
+    listenShortcut('saverequestas', () => this.handleSaveClick(true))
+    listenShortcut('opennewtab', this.addRequestTab)
+    listenShortcut('closetab', this.handleCloseTabClick)
+    listenShortcut('forceclosetab', this.handleForceCloseTab)
+    listenShortcut('switchtonexttab', this.switchToNextTab)
+    listenShortcut('switchtoprevioustab', this.switchToPreTab)
+    listenShortcut('switchtolasttab', this.switchToLastTab)
+    for (var i = 1; i < 9; i++) {
+      let targetIndex = i - 1;
+      listenShortcut("switchtotab" + i, () => this.switchToTargetTab(targetIndex))
+    } 
+
+    
+    listenShortcut('reopenlastclosedtab', this.openLastClosedTab)
+    // listenShortcut('sendrequest', this.openLastClosedTab)
+
   }
 
   requestItemMenuArr = [
@@ -575,13 +629,31 @@ class RequestTabsTop extends React.Component {
       event: () => this.handleCloseAllTabs(true)
     }
   ]
+
+  openTargetClosedTab = async (closedTabKey) => {
+    const {recentClosedTabs} = this.state;
+    let closedTab = recentClosedTabs.find(item => item.id === closedTabKey)
+    if (!closedTab) {
+      return;
+    }
+
+    await updateTabMeta(closedTabKey, {$set: {closedAt: 0}});
+    await this.refreshData();
+    await this.handleActiveTab(closedTab);
+  }
+
+  openLastClosedTab = async () => {
+    const {recentClosedTabs = []} = this.state;
+    if (recentClosedTabs.length === 0) return;
+    this.openTargetClosedTab(recentClosedTabs[0].id)
+  }
   
   handleMenuClick = async (key, keyPath) => {
-    let firstKey = keyPath[0];
+    let firstKey = keyPath[1];
     if (firstKey === 'recently_closed') {
-      let closedTabKey = keyPath[1];
-      await updateTabMeta(closedTabKey, {$set: {closedAt: 0}});
-      this.refreshData();
+      let closedTabKey = keyPath[0];
+      this.openTargetClosedTab(closedTabKey);
+
     } else {
       const menuItem = this.moreActionMenu.find(item => item.key === key);
       if (menuItem.event) {

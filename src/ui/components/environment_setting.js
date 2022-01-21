@@ -5,6 +5,10 @@ import EnvironmentDetailCard from './environment_detail_card'
 import EnvironmentModal from './environment_modal'
 import {queryEnvironmentMeta} from '@/database/environment_meta'
 import {getCurrentWorkspaceId, getStoreValue, setStoreValue, getCurrentWorkspaceSession, setCurrentWorkspaceSession} from '@/utils/store_utils';
+import {
+    listenShortcut,
+} from '@/utils/event_utils'
+ 
 
 const { Option } = Select;
 class EnvironmentSetting extends React.Component {
@@ -22,13 +26,19 @@ class EnvironmentSetting extends React.Component {
         return environments;
     }
 
+    handleEnvironmentModalVisible = (visible) => {
+        this.setState({environmentModalVisible: visible});
+    }
+
+    handleEnvironmentModalOpen = () => {
+        this.setState({environmentModalVisible: true});
+    }
+
     componentDidMount = async () => {
         let workspaceSession = await getCurrentWorkspaceSession();
         this.refreshData({currentEnvironment: workspaceSession.environmentId})
-    }
 
-    handleEnvironmentModalVisible = (visible) => {
-        this.setState({environmentModalVisible: visible});
+        listenShortcut('manageenvironments', this.handleEnvironmentModalOpen)
     }
 
     handleEnvironmentChange = (value) => {

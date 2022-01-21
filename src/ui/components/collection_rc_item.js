@@ -14,8 +14,9 @@ import RequiredInput from './required_input'
 import Ellipsis from 'react-ellipsis-component';
 import PostmanButton from './postman_button'
 import {stopClickPropagation} from '@/utils/global_utils';
-import {publishCollectionModalOpen, publishRequestModalOpen} from '@/utils/event_utils'
+import {publishCollectionModalOpen, publishRequestModalOpen, listenShortcut} from '@/utils/event_utils'
 import {getByTheme, getEllipsisIcon, getCurrentTheme} from '@/utils/style_utils'
+import {getCollectionTreeSelectedKey} from '@/utils/store_utils'
 import {
     SHARE_COLLECTION_ICON, DARK_THEME_SHARE_COLLECTION_ICON, MANAGE_ROLES_ICON, DARK_THEME_MANAGE_ROLES_ICON, RENAME_ICON, DARK_THEME_RENAME_ICON, 
     EDIT_ICON, DARK_THEME_EDIT_ICON, CREATE_FORK_ICON, DARK_THEME_CREATE_FORK_ICON, 
@@ -41,16 +42,29 @@ class CollectionRCItem extends React.Component {
         }
     }
 
+
+    // 渲染collection输入框
+    showCollectionNameInput = (show = true) => {
+        this.setState({showCollectionNameInput: show})
+    }
+
+
+    handleRenameShortcut = () => {
+        const currentSelectedKey = getCollectionTreeSelectedKey();
+        if (currentSelectedKey === this.props.item.id) {
+            this.showCollectionNameInput()
+        }
+    }
+
+    componentDidMount() {
+        listenShortcut('renameitem', this.handleRenameShortcut)
+    }
+
     // 处理详情抽屉的显示
     handleCollectionDrawerShow = (e) => {
         let {collectionDrawerVisible} = this.state;
         this.setState({collectionDrawerVisible: !collectionDrawerVisible})
         stopClickPropagation(e);
-    }
-
-    // 渲染collection输入框
-    showCollectionNameInput = (show = true) => {
-        this.setState({showCollectionNameInput: show})
     }
 
     // 保存collection名称

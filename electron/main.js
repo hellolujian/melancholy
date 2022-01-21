@@ -119,8 +119,8 @@ let localShortcutList = [
   { key: 'opennewtab', accelerator: 'CmdOrCtrl+T' },
   { key: 'closetab', accelerator: 'CmdOrCtrl+W' },
   { key: 'forceclosetab', accelerator: 'CmdOrCtrl+Alt+W' },
-  { key: 'switchtonexttab', accelerator: 'CmdOrCtrl+Shift+]' },
-  { key: 'switchtoprevioustab', accelerator: 'CmdOrCtrl+Shift+[' },
+  { key: 'switchtonexttab', accelerator: 'CmdOrCtrl+Alt+Right' },
+  { key: 'switchtoprevioustab', accelerator: 'CmdOrCtrl+Alt+Left' },
   { key: 'switchtotab1', accelerator: 'CmdOrCtrl+1' },
   { key: 'switchtotab2', accelerator: 'CmdOrCtrl+2' },
   { key: 'switchtotab3', accelerator: 'CmdOrCtrl+3' },
@@ -134,34 +134,50 @@ let localShortcutList = [
   { key: 'requesturl', accelerator: 'CmdOrCtrl+L' },
   { key: 'saverequest', accelerator: 'CmdOrCtrl+S' },
   { key: 'saverequestas', accelerator: 'CmdOrCtrl+Shift+S' },
+  // TODO:
+  { key: 'sendrequest', accelerator: 'CmdOrCtrl+Enter' },
   { key: 'sendanddownloadrequest', accelerator: 'CmdOrCtrl+Alt+Enter' },
   { key: 'scrolltorequest', accelerator: 'CmdOrCtrl+Alt+PageUp' },
   { key: 'scrolltoresponse', accelerator: 'CmdOrCtrl+Alt+PageDown' },
   { key: 'searchsidebar', accelerator: 'CmdOrCtrl+F' },
-  { key: 'togglesidebar', accelerator: 'CmdOrCtrl+\\' },
-  { key: 'nextitem', accelerator: 'PageDown' },
-  { key: 'previousitem', accelerator: 'PageUp' },
-  { key: 'expanditem', accelerator: 'End' },
-  { key: 'collapseitem', accelerator: 'Home' },
+  // { key: 'togglesidebar', accelerator: 'CmdOrCtrl+\\' },
+  { key: 'nextitem', accelerator: 'Down' },
+  { key: 'previousitem', accelerator: 'Up' },
+  { key: 'expanditem', accelerator: 'Right' },
+  { key: 'collapseitem', accelerator: 'Left' },
   { key: 'selectitem', accelerator: 'Enter' },
-  // { key: 'openrequestinanewtab', accelerator: 'CmdOrCtrl+Shift+Click' },
+  { key: 'openrequestinanewtab', accelerator: 'CmdOrCtrl+Shift+Space' },
   { key: 'renameitem', accelerator: 'CmdOrCtrl+E' },
+
+
+  // TODO:
   { key: 'groupitems', accelerator: 'CmdOrCtrl+G' },
   { key: 'cutitem', accelerator: 'CmdOrCtrl+X' },
   { key: 'copyitem', accelerator: 'CmdOrCtrl+C' },
   { key: 'pasteitem', accelerator: 'CmdOrCtrl+V' },
+
+
   { key: 'duplicateitem', accelerator: 'CmdOrCtrl+D' },
   { key: 'deleteitem', accelerator: 'Delete' },
+
+
+
+  // TODO:
   // { key: 'zoomin', accelerator: 'CmdOrCtrl++' },
   { key: 'zoomout', accelerator: 'CmdOrCtrl+-' },
   { key: 'resetzoom', accelerator: 'CmdOrCtrl+0' },
   { key: 'toggletwopaneview', accelerator: 'CmdOrCtrl+Alt+V' },
   { key: 'switchworkspaceview', accelerator: 'CmdOrCtrl+.' },
   { key: 'new', accelerator: 'CmdOrCtrl+N' },
+
+
+  // TODO:
   { key: 'newpostmanwindow', accelerator: 'CmdOrCtrl+Shift+N' },
   { key: 'newrunnerwindow', accelerator: 'CmdOrCtrl+Shift+R' },
   { key: 'newconsolewindow', accelerator: 'CmdOrCtrl+Alt+C' },
   { key: 'find', accelerator: 'CmdOrCtrl+Shift+F' },
+
+
   { key: 'import', accelerator: 'CmdOrCtrl+O' },
   { key: 'manageenvironments', accelerator: 'CmdOrCtrl+Alt+E' },
   { key: 'settings', accelerator: 'CmdOrCtrl+,' },
