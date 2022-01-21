@@ -70,12 +70,12 @@ class FolderRCItem extends React.Component {
 
     // 菜单配置
     menuItems = [
-        { name: 'rename', label: 'Rename', icon: () => getByTheme(RENAME_ICON, DARK_THEME_RENAME_ICON), event: this.showCollectionNameInput},
+        { name: 'rename', label: 'Rename', shortcut: 'Ctrl+E', icon: () => getByTheme(RENAME_ICON, DARK_THEME_RENAME_ICON), event: this.showCollectionNameInput},
         { name: 'edit', label: 'Edit', icon: () => getByTheme(EDIT_ICON, DARK_THEME_EDIT_ICON), event: () => publishCollectionModalOpen({collectionId: this.props.item.id, scene: 'edit'})},
         { name: 'add_request', label: 'Add Request', icon: () => getByTheme(ADD_REQUEST_ICON, DARK_THEME_ADD_REQUEST_ICON), event: () => publishRequestModalOpen({parentId: this.props.item.id})},
         { name: 'add_folder', label: 'Add Folder', icon: () => getByTheme(ADD_FOLDER_ICON, DARK_THEME_ADD_FOLDER_ICON), event: () => publishCollectionModalOpen({collectionId: this.props.item.id, scene: 'add'})},
-        { name: 'duplicate', label: 'Duplicate', icon: () => getByTheme(DUPLICATE_ICON, DARK_THEME_DUPLICATE_ICON), event: this.duplicateCollection },
-        { name: 'delete', label: 'Delete', icon: () => getByTheme(DELETE_ICON, DARK_THEME_DELETE_ICON), event: this.deleteCollection },
+        { name: 'duplicate', label: 'Duplicate', shortcut: 'Ctrl+D', icon: () => getByTheme(DUPLICATE_ICON, DARK_THEME_DUPLICATE_ICON), event: this.duplicateCollection },
+        { name: 'delete', label: 'Delete', shortcut: 'Del', icon: () => getByTheme(DELETE_ICON, DARK_THEME_DELETE_ICON), event: this.deleteCollection },
     ]
 
     // 处理菜单点击
@@ -97,7 +97,10 @@ class FolderRCItem extends React.Component {
                         <Menu.Item 
                             key={item.name} 
                             icon={item.icon()}>
-                            {item.label}
+                            <div className="justify-content-space-between" style={{width: 120}}>
+                            {item.label} 
+                            <Typography.Text type="secondary">{item.shortcut}</Typography.Text>
+                            </div>
                         </Menu.Item>
                     ))
                 }

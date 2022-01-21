@@ -72,10 +72,10 @@ class RequestRCItem extends React.Component {
     // 菜单配置
     menuItems = [
         { name: 'open', label: 'Open in New Tab', icon: () => getByTheme(OPEN_NEW_ICON, DARK_THEME_OPEN_NEW_ICON), event: () => publishNewTabOpen(this.props.item)},
-        { name: 'rename', label: 'Rename', icon: () => getByTheme(RENAME_ICON, DARK_THEME_RENAME_ICON), event: this.showCollectionNameInput},
+        { name: 'rename', label: 'Rename', shortcut: 'Ctrl+E', icon: () => getByTheme(RENAME_ICON, DARK_THEME_RENAME_ICON), event: this.showCollectionNameInput},
         { name: 'edit', label: 'Edit', icon: () => getByTheme(EDIT_ICON, DARK_THEME_EDIT_ICON), event: () => publishRequestModalOpen({requestId: this.props.item.id})},
-        { name: 'duplicate', label: 'Duplicate', icon: () => getByTheme(DUPLICATE_ICON, DARK_THEME_DUPLICATE_ICON), event: this.duplicateRequest },
-        { name: 'delete', label: 'Delete', icon: () => getByTheme(DELETE_ICON, DARK_THEME_DELETE_ICON), event: this.deleteRequest },
+        { name: 'duplicate', label: 'Duplicate', shortcut: 'Ctrl+D', icon: () => getByTheme(DUPLICATE_ICON, DARK_THEME_DUPLICATE_ICON), event: this.duplicateRequest },
+        { name: 'delete', label: 'Delete', shortcut: 'Del', icon: () => getByTheme(DELETE_ICON, DARK_THEME_DELETE_ICON), event: this.deleteRequest },
     ]
 
     // 处理菜单点击
@@ -97,7 +97,10 @@ class RequestRCItem extends React.Component {
                         <Menu.Item 
                             key={item.name} 
                             icon={item.icon()}>
-                            {item.label}
+                            <div className="justify-content-space-between" style={{width: 120}}>
+                            {item.label} 
+                            <Typography.Text type="secondary">{item.shortcut}</Typography.Text>
+                            </div>
                         </Menu.Item>
                     ))
                 }

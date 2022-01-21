@@ -479,11 +479,13 @@ class RequestTabsTop extends React.Component {
     {
       key: 'close',
       label: 'Close',
+      shortcut: 'Ctrl+W',
       event: this.handleCloseTabClick
     },
     {
       key: 'force_close',
       label: 'Force Close',
+      shortcut: 'Ctrl+Alt+W',
       event: (tabKey) => this.handleCloseTabClick(tabKey, true)
     },
     {
@@ -554,7 +556,12 @@ class RequestTabsTop extends React.Component {
                         <Menu onClick={({key: menuKey}) => this.handleRequestTabItemMenuClick(menuKey, key)}>
                           {
                             this.requestItemMenuArr.map((item => (
-                              <Menu.Item key={item.key}>{item.label}</Menu.Item>
+                              <Menu.Item key={item.key}>
+                                <div className="justify-content-space-between">
+                                <div style={{marginRight: 20}}>{item.label} </div>
+                                <Typography.Text type="secondary">{item.shortcut}</Typography.Text>
+                                </div>
+                              </Menu.Item>
                             )))
                           }
                         </Menu>
@@ -604,11 +611,13 @@ class RequestTabsTop extends React.Component {
     {
       key: 'close',
       label: 'Close Current Tab',
+      shortcut: 'Ctrl+W',
       event: this.handleCloseTabClick
     },
     {
       key: 'force_close',
       label: 'Force Close Current Tab',
+      shortcut: 'Ctrl+Alt+W',
       danger: true,
       event: (tabKey) => this.handleCloseTabClick(tabKey, true)
     },
@@ -725,7 +734,10 @@ class RequestTabsTop extends React.Component {
                           key={item.key}
                           danger={item.danger && tabData.length > 0}
                           disabled={tabData.length === 0}>
-                          {item.label}
+                          <div className="justify-content-space-between">
+                            <div style={{marginRight: 20}}>{item.label}</div> 
+                            <Typography.Text type="secondary">{item.shortcut}</Typography.Text>
+                            </div>
                         </Menu.Item>
                       ))
                     }
