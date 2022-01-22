@@ -1,5 +1,7 @@
 import Pubsub from 'pubsub-js';
 
+import {setStoreValue, getStoreValue} from '@/utils/store_utils'
+
 const COLLECTION_MODAL_EVENT = 'collection_modal_event';
 const COLLECTION_MODAL_EVENT_OPEN = `${COLLECTION_MODAL_EVENT}.open`
 const COLLECTION_MODAL_EVENT_SAVE = `${COLLECTION_MODAL_EVENT}.save`
@@ -104,7 +106,8 @@ const {ipcRenderer} = window.require('electron')
 const LOCAL_SHORTCUT_EVENT = window.require('@electron/remote').getGlobal('LOCAL_SHORTCUT_EVENT');
 export const listenShortcut = (key, handle) => {
     ipcRenderer.on(LOCAL_SHORTCUT_EVENT, (event, msg) => {
-        if (msg.key === key) {
+        let enableShortcut = getStoreValue('shortcutSwitch')
+        if (enableShortcut && msg.key === key) {
             handle()
         }
     })

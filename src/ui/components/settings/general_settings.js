@@ -1,5 +1,6 @@
 import React from 'react';
 import {Tooltip, Button, Typography, Row, Col, List, Switch, Input, Select } from 'antd';
+import {setStoreValue, getStoreValue} from '@/utils/store_utils'
 
 const {Link} = Typography;
 class GeneralSettings extends React.Component {
@@ -7,7 +8,8 @@ class GeneralSettings extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            visible: false
+            visible: false,
+            settings: getStoreValue('generalSettings') || {},
         }
     }
 
@@ -33,59 +35,85 @@ class GeneralSettings extends React.Component {
     }
 
     REQUEST_SETTNIGS = [
-        { label: 'Trim keys and values in request body'},
-        { label: 'Experimental Codegen mode'},
-        { label: 'SSL certificate verification'},
-        { label: 'Always open requests in new tab'},
-        { label: 'Always ask when closing unsaved tabs'},
+        { label: 'Trim keys and values in request body', key: 'trimKVInBody', defaultValue: false},
+        { label: 'Experimental Codegen mode', key: 'expCodegenMode', defaultValue: false},
+        { label: 'SSL certificate verification', key: 'sslVerification', defaultValue: true},
+        { label: 'Always open requests in new tab', key: 'openReqInNewTab'},
+        { label: 'Always ask when closing unsaved tabs', key: 'confirmWhenCloseTabs', defaultValue: true},
         { label: 'Language detection', type: 'select', attributes: {
             options: [{ label: 'Auto', value: 'auto'}, { label: 'JSON', value: 'json'}]
-        }},
-        { label: 'Request timeout in ms (0 for infinity)', type: 'input', },
-        { label: 'Max response size in MB (0 to infinity)', type: 'input', },
+        }, key: 'lanDetection', defaultValue: 'auto'},
+        { label: 'Request timeout in ms (0 for infinity)', type: 'input', key: 'reqTimeout'},
+        { label: 'Max response size in MB (0 to infinity)', type: 'input', key: 'maxResSize'},
         { 
             label: 'Automatically persist variable values', 
             desc: 'Enabling this will persist the current value of variables to the initial value at the end of every request execution.',
-            help: 'variable_values'
+            help: 'variable_values', key: 'autoPersistVariable', defaultValue: false
         },
-        { label: 'Working Directory', type: 'file', help: 'working_directory'},
-        { label: 'Allow reading files outside working directory' },
+        { label: 'Working Directory', type: 'file', help: 'working_directory', key: 'workingDir'},
+        { label: 'Allow reading files outside working directory' , 
+            key: 'allowReadingFilesOverWorkingDir', defaultValue: false},
     ]
 
     HEAD_SETTINGS = [
-        {label: 'Send no-cache header'},
-        {label: 'Send Postman Token header'},
-        {label: 'Retain headers when clicking on links'},
-        {label: 'Automatically follow redirects'},
-        {label: 'Send anonymous usage data to Postman'},
+        {label: 'Send no-cache header', key: 'sendNoCacheHeader', defaultValue: true},
+        {label: 'Send Postman Token header', key: 'sendTokenHeader', defaultValue: true},
+        {label: 'Retain headers when clicking on links', key: 'retainHeaderClickLink', defaultValue: false},
+        {label: 'Automatically follow redirects', key: 'autoFollowRedir', defaultValue: true},
+        {label: 'Send anonymous usage data to Postman', key: 'sendAnonymousData', defaultValue: true},
         
     ]
 
     USER_INTERFACE_SETTINGS = [
-        {label: 'Editor Font Size (px)', type: 'input'},
-        {label: 'Two-pane view'},
-        {label: 'Show icons with tab names'},
-        {label: 'Variable autocomplete'},
+        {label: 'Editor Font Size (px)', type: 'input', key: 'fontSize'},
+        {label: 'Two-pane view', key: 'twoPaneView', defaultValue: false},
+        {label: 'Show icons with tab names', key: 'requestTabShowIcon', defaultValue: true},
+        {label: 'Variable autocomplete', key: 'autoCompleteVar', defaultValue: true},
     ]
 
+    handleItemChange = (item, value) => {
+        const {settings = {}} = this.state;
+        settings[item.key] = value;
+        this.setState({settings: settings});
+        return settings;
+    }
+
+    handleItemSave = (item, value) => {
+        let newValue = this.handleItemChange(item, value);
+        setStoreValue('generalSettings', newValue);
+
+    }
+
     renderItemSetting = (item) => {
+        const {settings = {}} = this.state;
+        let itemValue = settings.hasOwnProperty(item.key) ? settings[item.key] : item.defaultValue;
+       
         let dataComponent = (
             <Switch 
                 size="small"
                 checkedChildren="ON" 
-                unCheckedChildren="关闭" defaultChecked 
+                unCheckedChildren="OFF" 
+                checked={itemValue} 
+                onChange={(checked) => this.handleItemSave(item, checked)}
             />
         )
         switch (item.type) {
             case 'input': 
                 dataComponent = (
-                    <Input style={{width:80}} />
+                    <Input 
+                        style={{width:80}} 
+                        value={itemValue}
+                        onChange={(e) => this.handleItemChange(item, e.target.value)}
+                        onBlur={(e) => this.handleItemSave(item, e.target.value)}
+                        onPressEnter={(e) => this.handleItemSave(item, e.target.value)}
+                    />
                 )
                 break;
             case 'select': 
                 dataComponent = (
                     <Select 
-                        defaultValue={item.attributes.options[0].value}
+                        value={itemValue}
+                        onChange={(value) => this.handleItemSave(item, value)}
                         style={{width:80}}
                         {...item.attributes}
                     />
