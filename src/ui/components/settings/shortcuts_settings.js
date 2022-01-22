@@ -1,5 +1,6 @@
 import React from 'react';
 import {Divider, Tooltip, Button, Typography, Row, Col, List, Switch, Input, Select } from 'antd';
+import {setStoreValue, getStoreValue} from '@/utils/store_utils'
 
 const {Link} = Typography;
 class ShortcutsSettings extends React.Component {
@@ -7,32 +8,14 @@ class ShortcutsSettings extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            visible: false
+            visible: false,
+            switchChecked: getStoreValue('shortcutSwitch')
         }
     }
 
     componentDidMount() {
       
     }
-
-    handleBtnClick = (e) => {
-        const { buttonProps = {}, onClick} = this.props;
-        let customClick = buttonProps.onClick || onClick;
-        if (customClick) {
-            customClick(e);
-        }
-        this.setState({visible: false});
-    }
-
-    handleMouseLeave = (e) => {
-        this.setState({visible: false});
-    }
-
-    handleMouseEnter = (e) => {
-        this.setState({visible: true});
-    }
-
-
 
     SHORTCUTS_SETTINGS = [
         {
@@ -41,8 +24,8 @@ class ShortcutsSettings extends React.Component {
                 {label: 'Open New Tab', shortcut: 'Ctrl + T'},
                 {label: 'Close Tab', shortcut: 'Ctrl + W'},
                 {label: 'Force Close Tab', shortcut: 'Ctrl +  Alt + W'},
-                {label: 'Switch To Next Tab', shortcut: 'Ctrl + Shift + ]'},
-                {label: 'Switch To Previous Tab', shortcut: 'Ctrl + Shift + ['},
+                {label: 'Switch To Next Tab', shortcut: 'Ctrl + Shift + →'},
+                {label: 'Switch To Previous Tab', shortcut: 'Ctrl + Shift + ←'},
                 {label: 'Switch To Tab at Position', shortcut: 'Ctrl + 1 through Ctrl + 8'},
                 {label: 'Switch To Last Tab', shortcut: 'Ctrl + 9'},
                 {label: 'Reopen Last Closed Tab', shortcut: 'Ctrl + Shift + t'},
@@ -107,54 +90,14 @@ class ShortcutsSettings extends React.Component {
         }
     ]
 
-    renderItemSetting = (item) => {
-        let dataComponent = (
-            <Switch 
-                checkedChildren="ON" 
-                unCheckedChildren="OFF" defaultChecked 
-            />
-        )
-        switch (item.type) {
-            case 'input': 
-                dataComponent = (
-                    <Input style={{width:80}} />
-                )
-                break;
-            case 'select': 
-                dataComponent = (
-                    <Select 
-                        defaultValue={item.attributes.options[0].value}
-                        style={{width:80}}
-                        {...item.attributes}
-                    />
-                )
-                break;
-            default: break
-        }
-        return dataComponent
-    }
-
-    renderSettings = (header, items) => {
-        return (
-            
-            <List
-                size="small"
-                split={false}
-                header={<Typography.Text strong>{header}</Typography.Text>}
-                dataSource={items}
-                renderItem={item => {
-                    return (
-                        <List.Item className="justify-content-space-between">
-                            {item.label}
-                            {this.renderItemSetting(item)}
-                        </List.Item>
-                    )
-                }}
-            />
-        )
+    handleSwitchChange = (checked) => {
+        this.setState({switchChecked: checked});
+        setStoreValue('shortcutSwitch', checked);
     }
 
     render() {
+
+        const {switchChecked = true} = this.state;
     
         return (
             <>
@@ -162,7 +105,9 @@ class ShortcutsSettings extends React.Component {
                     <Typography.Text strong>Shortcuts</Typography.Text>
                     <Switch 
                         checkedChildren="ON" 
-                        unCheckedChildren="OFF" defaultChecked 
+                        unCheckedChildren="OFF" 
+                        checked={switchChecked} 
+                        onChange={this.handleSwitchChange}
                     />
                 </p>
                 <Divider />
@@ -178,8 +123,12 @@ class ShortcutsSettings extends React.Component {
                                 return (
                                     <Row className="full-width" gutter={[16, 16]}>
                                         <Col flex="10px"></Col>
-                                        <Col span={15}>{item.label}</Col>
-                                        <Col span={8}>{item.shortcut}</Col>
+                                        <Col span={15}>
+                                            <Typography.Text type={!switchChecked && "secondary"}>{item.label}</Typography.Text>
+                                        </Col>
+                                        <Col span={8}>
+                                            <Typography.Text type={!switchChecked && "secondary"}>{item.shortcut}</Typography.Text>
+                                        </Col>
                                     </Row>
                                 )
                             }}

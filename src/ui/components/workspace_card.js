@@ -6,11 +6,12 @@ import { AppstoreFilled, CaretDownFilled, } from '@ant-design/icons';
 
 import {stopClickPropagation} from '@/utils/global_utils';
 import {confirmModal} from '@/utils/common_utils';
+import {getByTheme, getEllipsisIcon} from '@/utils/style_utils';
 import {getCurrentWorkspaceId, setStoreValue} from '@/utils/store_utils';
 import RequiredInput from './required_input'
 import WorkspaceModal from './workspace_modal'
 import Ellipsis from 'react-ellipsis-component';
-import {ELLIPSIS_ICON, GOU_ICON} from '@/ui/constants/icons'
+import {ELLIPSIS_ICON, GOU_ICON, DARK_THEME_GOU_ICON} from '@/ui/constants/icons'
 import {queryWorkspaceMeta, updateWorkspaceMeta} from '@/database/workspace_meta'
 import {OptType} from '@/enums'
 
@@ -143,7 +144,7 @@ class WorkspaceCard extends React.Component {
                                         <Row align="middle" gutter={[6]} style={{flexFlow: 'row nowrap'}} className="full-width">
                                 
                                             <Col flex="none" className={currentWorkspaceId === item.id ? "visibility-visible" : "visibility-hidden"}>
-                                                {GOU_ICON}
+                                                {getByTheme(GOU_ICON, DARK_THEME_GOU_ICON)}
                                             </Col>
                                             <Col flex="auto">
                                                 {
@@ -178,7 +179,7 @@ class WorkspaceCard extends React.Component {
                                                     <TooltipButton 
                                                         type="text" 
                                                         title="View more actions" 
-                                                        icon={ELLIPSIS_ICON} 
+                                                        icon={getEllipsisIcon()} 
                                                         buttonProps={{className: "workspace-item-more-action-display", size: 'small'}}
                                                         onClick={stopClickPropagation} 
                                                     />
