@@ -12,10 +12,11 @@ import CollectionRCTree from 'ui/components/collection_rc_tree'
 import ResponseTab from 'ui/components/response_tab'
 
 import MainRightContainer from 'ui/components/main_right_container';
+import MainLeftContainer from 'ui/components/main_left_container';
 import { setTheme } from '@/utils/style_utils';
 import {Rnd} from 'react-rnd';
 import {ADD_ICON} from 'ui/constants/icons'
-import {publishCollectionModalOpen, subscribeThemeChange} from '@/utils/event_utils'
+import {listenShortcut, subscribeThemeChange} from '@/utils/event_utils'
 import {getStoreValue} from '@/utils/store_utils'
 import 'ui/style/common.css'
 import 'ui/style/layout.css'
@@ -39,30 +40,9 @@ class Home extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-          width: 350,
-          tabActiveKey: 'collections',
-          
-          snippetContainerHeight: 200,
-          outContainerHeight: 350, 
-          dynamicWidth: 350
+          dynamicWidth: getStoreValue('leftSideBarWidth', 280)
         }
     }
-
-    
-
-    handleResizeStop = (e, direction, ref, delta, position) => {
-      this.setState({
-        width: this.state.width + delta.width
-      });
-    }
-
-  handleResize = (e, direction, ref, delta, position) => {
-    console.log(delta.width);
-      let newWidth = this.state.width + delta.width;
-      this.setState({dynamicWidth: newWidth });
-  }
-
-
 
     handleWindowResize = (e) => {
       console.log(document.body.clientHeight);
@@ -75,6 +55,15 @@ class Home extends React.Component {
 
     handleChangeTheme = (theme, data) => {
         this.setState({currentTheme: data})
+    }
+
+    handleToggleSidebar = () => {
+      const {dynamicWidth, lastTimeWidth} = this.state;
+      if (dynamicWidth === 0) {
+        this.setState({dynamicWidth: lastTimeWidth})
+      } else {
+        this.setState({dynamicWidth: 0, lastTimeWidth: dynamicWidth})
+      }
     }
 
     componentDidMount() {
@@ -214,113 +203,31 @@ class Home extends React.Component {
 
       
         
-      subscribeThemeChange(this.handleChangeTheme)
+      subscribeThemeChange(this.handleChangeTheme);
+      listenShortcut('togglesidebar', this.handleToggleSidebar)
     }
 
     componentWillUnmount() {
       window.removeEventListener('resize', this.handleWindowResize)
     }
 
-    onResize = (event, {element, size, handle}) => {
-      if (size.width < 250) {
-        return;
-      }
-      this.setState({width: size.width, height: size.height});
-    }
-
-    handleSelectTreeNode = (selectedKeys, e) => {
-      console.log(e);
-      this.setState({expandedKeys: selectedKeys});
-    }
-
-    handleNewCollectionClick = () => {
-      publishCollectionModalOpen();
-    }
-
-    handleTabChange = (key) => {
-      this.setState({tabActiveKey: key})
+    handleSideBarRize = (width) => {
+      this.setState({dynamicWidth: width})
     }
 
     render() {
 
-      const {tabActiveKey, dynamicWidth} = this.state;
+      const {dynamicWidth} = this.state;
         return (
 
           <div id="rootPage">
             <ToastContainer />
             <LayoutHeader />
             <div class="mainBox">
-                <Rnd  
-                    style={{zIndex: 11}}
-                    // minHeight={200}
-                    // maxHeight={600}
-                    disableDragging
-                    enableResizing={{ 
-                        top:false, right:true, 
-                        bottom:false, left:false, 
-                        topRight:false, bottomRight:false, 
-                        bottomLeft:false, topLeft:false 
-                    }}
-                    size={{ width: dynamicWidth, height: '100%' }}
-                    onResizeStop={this.handleResizeStop}
-                    onResize={this.handleResize}>
-                <div className="leftBox" style={{boxShadow: '5px 0px 5px -5px #888888', width: dynamicWidth}}>
-
-                    <Row style={{padding: '10px 10px 0px 10px'}}>
-                      <Col span={24}>
-                        <Input style={{borderRadius:'20px'}} placeholder="Filter" prefix={<SearchOutlined />} />
-                      </Col>
-                    </Row>
-
-                    <Tabs 
-                      defaultActiveKey="collections" 
-                      className="common-tabs-class left-side-tabs"
-                      onChange={this.handleTabChange} 
-                      tabBarStyle={{width: '100%'}}  >
-                      <TabPane tab="History" key="history" />
-                        
-                      <TabPane tab="Collections" key="collections" />
-                        
-                      <TabPane tab="APIs" key="apis" />
-                    </Tabs>
-
-                    {
-                      tabActiveKey === 'collections' && (
-                        <Space className="justify-content-space-between" style={{margin: '8px 0px'}}>
-                              <TooltipButton 
-                                label="New Collection"
-                                onClick={this.handleNewCollectionClick}
-                                tooltipProps={{title: 'Create new Collection'}}
-                                buttonProps={{icon: ADD_ICON, type: 'link'}}
-                              />
-                              <TooltipButton 
-                                label="Trash" 
-                                tooltipProps={{title: "Recover your deleted collections"}}
-                                buttonProps={{type: 'text'}}
-                              />
-
-                            </Space>
-                      )
-                    }
-
-                    
-                    <div style={{height: 'calc(100% - 140px)',  overflowY: 'auto', overflowX: 'hidden', paddingBottom: 20}} >
-                      {
-                        tabActiveKey === 'collections' && (
-                          <>
-                            
-
-                            <CollectionRCTree 
-                              // height={this.state.collectionTreeHeight} 
-                            />
-                          </>
-                        )
-                      }
-                      {/* </StickyContainer> */}
-                    </div>
-                    
-                </div>
-                </Rnd>
+                <MainLeftContainer 
+                  dynamicWidth={dynamicWidth}
+                  onResize={this.handleSideBarRize} 
+                />
                 <MainRightContainer 
                   dynamicWidth={dynamicWidth}
                 />

@@ -52,6 +52,7 @@
   padding: 0px;
   margin-left: 4px;
   border: 0px;
+  min-width: unset;
 }
 
 .request-tabs-class .ant-tabs-tab-remove {

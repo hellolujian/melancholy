@@ -3,8 +3,9 @@ const storeUtil = window.require('@electron/remote').getGlobal('STORE_UTIL');
 const currentWorkspace = window.require('@electron/remote').getGlobal('CURRENT_WORKSPACE');
 
 const {getValue, setValue} = storeUtil;
-const getStoreValue = (key) => {
-    return getValue(key)
+const getStoreValue = (key, defaultValue) => {
+    let storeValue = getValue(key)
+    return storeValue === undefined || storeValue === null ? defaultValue : storeValue;
 }
 
 const setStoreValue = (key, value, fileName, callback) => {

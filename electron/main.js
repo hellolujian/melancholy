@@ -140,7 +140,7 @@ let localShortcutList = [
   { key: 'scrolltorequest', accelerator: 'CmdOrCtrl+Alt+PageUp' },
   { key: 'scrolltoresponse', accelerator: 'CmdOrCtrl+Alt+PageDown' },
   { key: 'searchsidebar', accelerator: 'CmdOrCtrl+F' },
-  // { key: 'togglesidebar', accelerator: 'CmdOrCtrl+\\' },
+  { key: 'togglesidebar', accelerator: 'CmdOrCtrl+\\' },
   { key: 'nextitem', accelerator: 'Down' },
   { key: 'previousitem', accelerator: 'Up' },
   { key: 'expanditem', accelerator: 'Right' },
