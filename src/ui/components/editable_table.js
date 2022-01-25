@@ -133,17 +133,23 @@ class EditableTable extends React.Component {
         delete newRecord.src;
       }
       dataSource[changedRecordIndex] = newRecord
+
+      this.setState({dataSource: dataSource})
+
+
     } else {
       let newObj = {...record, [dataIndex]: value, [rowKey]: UUID()};
       if (showCheckbox) {
         newObj[showCheckbox] = false;
       }
       dataSource.push(newObj)
+
+      this.setState({dataSource: dataSource}, () => {
+        document.getElementById(cellId).focus()
+        document.getElementById(cellId).setSelectionRange(value.length, value.length);
+      })
     }
-    this.setState({dataSource: dataSource}, () => {
-      document.getElementById(cellId).focus()
-      // document.getElementById(cellId).setSelectionRange(value.length, value.length);
-    })
+    
     this.props.onChange(dataSource, false);
   }
 
