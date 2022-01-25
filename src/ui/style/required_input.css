@@ -19,3 +19,19 @@
 .not-edit-container:hover .not-editing-edit-icon {
   display: inline-block;
 }
+
+.editable-text-container {
+  
+  border: 1px solid rgba(255, 255, 255, 0)
+}
+
+.editable-text-container .ecitable-icon-class {
+  /* display: none; */
+  visibility: hidden;
+  cursor: pointer;
+}
+
+.editable-text-container:hover .ecitable-icon-class {
+  /* display: inline-block; */
+  visibility: visible
+}

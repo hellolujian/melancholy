@@ -12,10 +12,11 @@ import {
     GLOBAL_LINK_TIPS
 } from 'ui/constants/tips'
 import { EyeOutlined, SettingFilled  } from '@ant-design/icons';
-import {queryEnvironmentMetaById} from '@/database/environment_meta'
+import {queryEnvironmentMetaById, updateEnvironmentMeta, insertEnvironmentMeta} from '@/database/environment_meta'
 import {getCurrentWorkspace} from '@/utils/store_utils';
 import {insertWorkspaceMeta, updateWorkspaceMeta} from '@/database/workspace_meta'
 import EnvironmentModal from './environment_modal'
+import EditableText from './editable_text'
 
 
 class EnvironmentDetailCard extends React.Component {
@@ -30,21 +31,6 @@ class EnvironmentDetailCard extends React.Component {
     componentDidMount() {
       
     }
-
-    columns: [
-        {
-            title: "VARIABLE", 
-            dataIndex: 'variable',
-        },
-        {
-            title: "INITIAL VALUE", 
-            dataIndex: 'initialValue',
-        },
-        {
-            title: "CURRENT VALUE", 
-            dataIndex: 'currentValue',
-        },
-    ]
 
     handleVisibleChange = async (visible) => {
         if (visible) {
@@ -86,6 +72,22 @@ class EnvironmentDetailCard extends React.Component {
         this.environmentModalRef.handleGlobalClick();
     }
 
+    handleCurrentValueSave = (variableId, value, scope) => {
+        let {currentEnvironment = {}, currentWorkspace = {},} = this.state;
+        if (scope === 'env') {
+            let {id: envId, variable: currentEnvironmentVariable = []} = currentEnvironment;
+            let targetVariable = currentEnvironmentVariable.find(item => item.id === variableId);
+            targetVariable.currentValue = value;
+            updateEnvironmentMeta(envId, {$set: {variable: currentEnvironmentVariable}})
+        } else if (scope === 'workspace') {
+            let {id: workspaceId, variable: globalVariable = []} = currentWorkspace;
+            let targetVariable = globalVariable.find(item => item.id === variableId);
+            targetVariable.currentValue = value;
+            updateWorkspaceMeta(workspaceId, {$set: {variable: globalVariable}})
+        }
+        
+    }
+
     render() {
      
         let {currentEnvironment = {}, currentWorkspace = {}, environmentModalVisible, popoverVisible} = this.state;
@@ -95,10 +97,10 @@ class EnvironmentDetailCard extends React.Component {
         let enableGlobalVariable = globalVariable.filter(variable => !variable.disabled)
         let {currentEnvironmentId} = this.props;
       
-        let columns = [
+        let columns = (scope) => [
             {
                 title: "VARIABLE", 
-                dataIndex: 'name',
+                dataIndex: 'key',
             },
             {
                 title: "INITIAL VALUE", 
@@ -107,8 +109,19 @@ class EnvironmentDetailCard extends React.Component {
             {
                 title: "CURRENT VALUE", 
                 dataIndex: 'currentValue',
+                render: (text, record, index) => {
+                    return (
+                        <EditableText 
+                            defaultValue={text}
+                            // editIconClass={sourceRequestExist ? "request-intro-edit-icon" : 'request-intro-edit-icon-none'}
+                            onSave={(value) => this.handleCurrentValueSave(record.id, value, scope)}
+                            // onChange={this.handleNameChange}
+                        />
+                    )
+                }
             },
         ]
+
         let cardContent = (
             <Space direction="vertical">
                 <Space direction="vertical" className="full-width">
@@ -120,7 +133,9 @@ class EnvironmentDetailCard extends React.Component {
                     {
                         enableEnvironmentVariable.length > 0 ? (
                             <Table 
-                                columns={columns} 
+                                rowKey="id"
+                                tableLayout="fixed"
+                                columns={columns('env')} 
                                 dataSource={enableEnvironmentVariable} 
                                 pagination={false} 
                             />
@@ -144,7 +159,9 @@ class EnvironmentDetailCard extends React.Component {
                     {
                         enableGlobalVariable.length > 0 ? (
                             <Table 
-                                columns={columns} 
+                                rowKey="id"
+                                tableLayout="fixed"
+                                columns={columns('workspace')} 
                                 dataSource={enableGlobalVariable} 
                                 pagination={false} 
                             />

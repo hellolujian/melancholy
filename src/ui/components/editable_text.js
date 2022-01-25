@@ -35,21 +35,23 @@ class EditableText extends React.Component {
     }
 
     handleChange = (value) => {
+        this.setState({value: value});
         this.props.onChange(value)
     }
 
     render() {
      
-        const {editIconClass, editWhenHover, value} = this.props;
+        const {editIconClass, editWhenHover} = this.props;
         
-        const {editing} = this.state;
+        const {editing, value} = this.state;
+        let realValue = this.props.hasOwnProperty('value') ? this.props.value : value;
 
         return (
             <>
                 {            
                     editing ? (
                         <RequiredInput 
-                            value={value} 
+                            value={realValue} 
                             onSave={this.handleSave} 
                             onChange={this.handleChange}
                         />
@@ -60,9 +62,9 @@ class EditableText extends React.Component {
                         //     </span>
                         //     <span className={'not-editing-edit-icon ' + (editIcon.className ? editIcon.className : "")} onClick={this.handleEditIconClick}>{EDIT_ICON}</span>
                         // </Space>
-                        <Space align="center">
-                            <Ellipsis text={value} />
-                            <span className={editIconClass} onClick={this.handleEditIconClick}>{getEditIcon()}</span>
+                        <Space align="center" className="editable-text-container">
+                            <Ellipsis text={realValue} />
+                            <span className={`ecitable-icon-class ${editIconClass}`} onClick={this.handleEditIconClick}>{getEditIcon()}</span>
                         </Space>
                     )
                 }

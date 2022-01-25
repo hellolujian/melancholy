@@ -249,35 +249,47 @@ class EnvironmentModal extends React.Component {
         return `${currentWorkspace.name}.postman_globals.json`;
     }
 
+    handleVariableValuesTipClose = () => {
+        sessionStorage.setItem("variableTipClose", true);
+        this.setState({variableTipClose: true});
+    }
+
     render() {
      
         const {visible} = this.props;
-        const { environments, scene, editValues, variable, globalVariableChange, workspaceList = []} = this.state;
+        const { environments, scene, editValues, variable, globalVariableChange, 
+            workspaceList = []} = this.state;
+
+        let variableTipClose = sessionStorage.getItem("variableTipClose")
 
         let variableAndTips = (
-            <>
-                <div style={{maxHeight: 350, overflow: 'auto'}}>
+            <div style={{height: 'calc(80vh - 225px)', position: 'relative'}}>
+                <div style={{height: variableTipClose ? 'calc(80vh - 230px)' : 'calc(80vh - 330px)', overflow: 'auto'}}>
                     <VariablesTable 
                         value={variable}
                         onChange={this.handleVariableChange}
                     />
                 </div>
                                 
-                <Alert
-                    style={{position: 'absolute', bottom: 70, left: 20, right: 20}}
-                    description={VARIABLE_VALUE_TIPS}
-                    type="info"
-                    showIcon
-                    closable
-                    onClose={this.handleVariableValuesTipClose}
-                />
-            </>
+                {
+                    !variableTipClose && (
+                        <Alert
+                            style={{position: 'absolute', bottom: 0}}
+                            description={VARIABLE_VALUE_TIPS}
+                            type="info"
+                            showIcon
+                            closable
+                            onClose={this.handleVariableValuesTipClose}
+                        />
+                    )
+                }
+            </div>
         )
         return (
             <Modal 
                 title="MANAGE ENVIRONMENTS" 
                 centered
-                bodyStyle={{ height: 600}}
+                // bodyStyle={{ height: 600}}
                 okButtonProps={{}}
                 footer={(
                     <div className="justify-content-flex-end">

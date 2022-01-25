@@ -149,6 +149,7 @@ class NewButtonModal extends React.Component {
                 },
                 {
                     key: 'mockserver',
+                    disabled: true,
                     icon: () => getByTheme(MOCK_COLLECTION_48, DARK_THEME_MOCK_COLLECTION_48),
                     smallIcon: () => getByTheme(MOCK_COLLECTION, DARK_THEME_MOCK_COLLECTION),
                     label: 'Mock Server',
@@ -159,6 +160,7 @@ class NewButtonModal extends React.Component {
                     icon: () => getByTheme(MONITOR_COLLECTION_ICON_48, DARK_THEME_MONITOR_COLLECTION_ICON_48),
                     smallIcon: () => getByTheme(MONITOR_COLLECTION_ICON, DARK_THEME_MONITOR_COLLECTION_ICON),
                     label: 'Monitor',
+                    disabled: true,
                     desc: 'Schedule automated tests and check performance of your APIs'
                 },  
             ]
@@ -236,7 +238,12 @@ class NewButtonModal extends React.Component {
                                     <Menu.ItemGroup title={operation.title} key={index}>
                                         {
                                             operation.items.map(item => (
-                                                <Menu.Item key={item.key} icon={item.smallIcon()}>{item.label}</Menu.Item>
+                                                <Menu.Item 
+                                                    key={item.key} 
+                                                    disabled={item.disabled}
+                                                    icon={item.smallIcon()}>
+                                                    {item.label}
+                                                </Menu.Item>
                                             ))
                                         }
                                     </Menu.ItemGroup>

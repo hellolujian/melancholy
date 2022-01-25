@@ -20,7 +20,7 @@ class RequiredInput extends React.Component {
 
     handleInputChange = (e) => {
         this.setState({value: e.target.value, showRed: true});
-        this.props.onChange(e);
+        this.props.onChange(e.target.value);
     }
 
     handleSave = (e) => {
@@ -41,6 +41,7 @@ class RequiredInput extends React.Component {
         
         const {value, showRed} = this.state;
         let inputValue = this.props.hasOwnProperty('value') ? this.props.value : value;
+        console.log(inputValue);
         let borderColor = !(inputValue && inputValue.trim()) && showRed ? 'red' : 'gray';
         return (
             <div style={{border: '1px solid ' + borderColor, display: 'inline-block'}} className="full-width">

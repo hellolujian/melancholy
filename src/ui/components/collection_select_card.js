@@ -60,7 +60,9 @@ class CollectionSelectCard extends React.Component {
         chooseChain.push(choosedCollection)
         await this.refreshData({chooseChain: chooseChain, });
         this.setState({creating: false})
-        publishCollectionSave()
+        publishCollectionSave();
+        
+        this.props.onChange(choosedCollection);
     }
 
     handleCollectionCreateInputChange = (e) => {
@@ -134,6 +136,7 @@ class CollectionSelectCard extends React.Component {
                                     CLOSE_ICON(this.handleCloseBtnClick)
                                 )}
                                 addonAfter={collectionName && (YES_ICON(this.handleYesBtnClick))}
+                                onPressEnter={this.handleYesBtnClick}
                                 // onBlur={this.handleCreateBtnBlur}
                             />
                         </div>
