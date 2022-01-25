@@ -10,8 +10,6 @@ import {
     VARIABLE_TIPS,
     VARIABLE_VALUE_TIPS,
     COLLECTION_DESCRIPTION_TIPS,
-    DESCRIPTION_TIPS,
-    DESCRIPTION_MARKDOWN_TIPS,
     AUTHORIZATION_TIPS,
     PRE_REQUEST_SCRIPTS_TIPS,
     TESTS_TIPS
@@ -118,6 +116,7 @@ class DAPTVSettingTabs extends React.Component {
                             scene="form" 
                             defaultValue={description}
                             mdEditorShow 
+                            editorClassName="add-placeholder-class"
                             mdEditorProps={{style: {height: "300px"}}}
                             onChange={this.handleDescChange}
                         />

@@ -113,7 +113,7 @@ class DescriptionEditor extends React.Component {
 
     render() {
         const {mdEditorShow, value, currentTheme} = this.state;
-        const {mdEditorProps, scene = "single"} = this.props;
+        const {mdEditorProps = {}, scene = "single"} = this.props;
 
         let editIcon = getEditIcon()
 
@@ -125,6 +125,13 @@ class DescriptionEditor extends React.Component {
             lineNumbers: 'off',
             roundedSelection: false,
             scrollBeyondLastLine: false,
+            wordWrap: 'on',
+            // editorClassName: 'editor-class-name',
+            extraEditorClassName: this.props.editorClassName,
+            autoClosingBrackets: "always",
+            autoClosingDelete: 'always',
+            autoClosingQuotes: 'always',
+            autoClosingOvertype: "always"
           };
 
         return mdEditorShow ? (
@@ -138,6 +145,7 @@ class DescriptionEditor extends React.Component {
                         options={options}
                         onChange={this.handleMonacoEditorChange}
                         editorDidMount={this.editorDidMount}
+                        {...mdEditorProps}
                     />
                 </div>
                     

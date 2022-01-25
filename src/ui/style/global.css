@@ -24,9 +24,21 @@
   background-color: #ACB1BF;
  
   border-radius: 4px;
- 
+
 }
 /* 
 textarea::placeholder {
   font-size: 10px;
 } */
+
+
+.test-placeholder:empty:before {
+  content: "这是占位符"; /* element attribute*/
+  /*content: 'this is content';*/
+  color: #dedede;
+  font-size: 12px
+}
+
+.test-placeholder:focus:before {
+  content: none;
+}

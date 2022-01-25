@@ -38,9 +38,9 @@ module.exports = {
     //     },
     //   },
     // },
-    {
-      plugin: new MonacoWebpackPlugin()
-    }
+    // {
+    //   plugin: new MonacoWebpackPlugin()
+    // }
   ],
   babel:{  
     plugins: [
@@ -58,6 +58,7 @@ module.exports = {
     plugins: [
       new SimpleProgressWebpackPlugin(),
       // new AntDesignThemePlugin(options)
+      new MonacoWebpackPlugin()
     ],
     alias: {
       "@": path.resolve(__dirname, "src"),
