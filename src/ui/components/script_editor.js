@@ -80,17 +80,13 @@ class ScriptEditor extends React.Component {
 
     render() {
      
-        let {aceEditorProps, height = '360px', value = '', mode = 'javascript'} = this.props;
+        let {aceEditorProps = {}, height = '360px', value = '', mode = 'javascript'} = this.props;
         let {currentTheme} = this.state
 
+        const {styleProps = {}} = aceEditorProps;
         return (
             <>
                 <AceEditor
-                    style={{
-                        border: '1px solid var(--common-border-color, lightgray)', 
-                        width: '100%', 
-                        // height: '300px',
-                    }}
                     ref={this.onRef}
                     height={height}
                     mode={mode}
@@ -112,6 +108,11 @@ class ScriptEditor extends React.Component {
                         showLineNumbers: true
                     }}
                     {...aceEditorProps}
+                    style={{
+                        border: '1px solid var(--common-border-color, lightgray)', 
+                        width: '100%', 
+                        ...styleProps
+                    }}
                 />
             </>
             

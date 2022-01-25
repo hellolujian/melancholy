@@ -108,7 +108,7 @@ class VariablesTable extends React.Component {
                 className: 'drag-visible',
             }
         ]
-        const {value, editable = true, draggable = true,} = this.props;
+        const {value, editable = true, draggable = true, tableClassName} = this.props;
         return (
             <EditableTable 
                 rowKey='id'
@@ -173,6 +173,7 @@ class VariablesTable extends React.Component {
                     //     maxWidth: 750
                     // }
                 }}
+                tableClassName={tableClassName}
                 onChange={this.handleVariableChange}
                 onCellBlur={this.handleCellBlur}
             />

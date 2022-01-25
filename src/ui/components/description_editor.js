@@ -131,7 +131,8 @@ class DescriptionEditor extends React.Component {
             autoClosingBrackets: "always",
             autoClosingDelete: 'always',
             autoClosingQuotes: 'always',
-            autoClosingOvertype: "always"
+            autoClosingOvertype: "always",
+            automaticLayout: true
           };
 
         return mdEditorShow ? (

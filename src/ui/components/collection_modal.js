@@ -99,9 +99,9 @@ class CollectionModal extends React.Component {
         return (
             <Modal 
                 title={collectionId ? (scene === 'edit' ? (parentId ? 'EDIT FOLDER' : "EDIT COLLECTION") :  `ADD FOLDER TO ${parentName}`) : "CREATE A NEW COLLECTION" }
-                // centered
+                centered
                 destroyOnClose
-                bodyStyle={{ height: 600}}
+                // bodyStyle={{ position: 'relative' }}
                 okText={collectionId ? "Update" : "Create"}
                 width={800}
                 visible={visible} 

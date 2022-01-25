@@ -41,7 +41,7 @@ textarea.description-md-editor::placeholder {
 .description-editor-html-class {
   color: unset !important;
 }
-.add-placeholder-class .lines-content .view-lines .view-line span:empty:before {
+.add-placeholder-class .lines-content .view-lines .view-line:first-child span:empty:before {
   content: "Make things easier for your teammates with a complete request description. "; /* element attribute*/
   /*content: 'this is content';*/
   color: #dedede;

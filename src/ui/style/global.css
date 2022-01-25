@@ -42,3 +42,24 @@ textarea::placeholder {
 .test-placeholder:focus:before {
   content: none;
 }
+
+.ant-modal {
+  max-height: 720px;
+  height: calc(80vh);
+}
+
+.ant-modal-body {
+  padding: 12px 24px 0px 24px;
+  height: calc(80vh - 108px);
+  overflow-y: scroll;
+}
+
+.daptv-setting-variable-table1 .ant-table {
+  height: calc(80vh - 310px);
+  overflow-y: scroll;
+}
+
+.daptv-setting-variable-table2 .ant-table {
+  height: calc(80vh - 420px);
+  overflow-y: scroll;
+}

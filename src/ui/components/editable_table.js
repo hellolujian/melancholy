@@ -415,7 +415,7 @@ class EditableTable extends React.Component {
   }
 
   render() {
-    const {rowKey, tableProps, editable = true} = this.props;
+    const {rowKey, tableProps, editable = true, tableClassName = ""} = this.props;
     let realDataSource = this.getRealDataSource();
     const components = {
       body: {
@@ -426,7 +426,7 @@ class EditableTable extends React.Component {
 
     return (
       <Table
-          className="common-editable-table"
+          className={`common-editable-table ${tableClassName}`}
          
           tableLayout="fixed"
           components={components}

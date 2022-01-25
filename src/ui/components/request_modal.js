@@ -96,7 +96,7 @@ class RequestModal extends React.Component {
             <Modal 
                 title={(hasParentId ? "EDIT" : "SAVE") + " REQUEST"} 
                 centered
-                // bodyStyle={{ height: 600}}
+                // bodyStyle={{}}
                 destroyOnClose
                 okText={hasParentId ? "update" : `Save${collectionInfo ? (" to " + collectionInfo.name) : ""}`}
                 okButtonProps={{disabled: !(collectionInfo || hasParentId)}}

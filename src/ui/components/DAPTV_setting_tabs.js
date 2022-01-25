@@ -35,7 +35,8 @@ class DAPTVSettingTabs extends React.Component {
         super(props);
         this.state = {
             value: props.value || {},
-            activeKey: props.activeKey
+            activeKey: props.activeKey,
+            variableTipClose: sessionStorage.getItem("variableTipClose")
         }
     }
 
@@ -90,10 +91,15 @@ class DAPTVSettingTabs extends React.Component {
         this.setState({activeKey: activeKey})
     }
 
+    handleVariableValuesTipClose = () => {
+        sessionStorage.setItem("variableTipClose", true);
+        this.setState({variableTipClose: true});
+    }
+
     render() {
      
         const {value, scene, parentId} = this.props;
-        const { activeKey } = this.state;
+        const { activeKey, variableTipClose } = this.state;
         const { description, auth, prerequest, test, variable } = value;
         let authDot = false;
         if (AuthSceneType.COLLECTION.name() === scene) {
@@ -107,8 +113,13 @@ class DAPTVSettingTabs extends React.Component {
                 }
             }
         }
+
         return (
-            <Tabs activeKey={activeKey} defaultActiveKey="description" onChange={this.handleTabChange} style={{height: '100%', position: 'relative'}}>
+            <Tabs 
+                activeKey={activeKey} defaultActiveKey="variables" 
+                onChange={this.handleTabChange} 
+                // style={{height: '100%', position: 'relative'}}
+                >
                 <TabPane tab="Description" key="description">
                     <Space direction="vertical" className="full-width">
                         {COLLECTION_DESCRIPTION_TIPS}
@@ -117,7 +128,7 @@ class DAPTVSettingTabs extends React.Component {
                             defaultValue={description}
                             mdEditorShow 
                             // editorClassName="add-placeholder-class"
-                            mdEditorProps={{style: {height: "300px"}}}
+                            mdEditorProps={{height: "calc(80vh - 350px)"}}
                             onChange={this.handleDescChange}
                         />
                     </Space>
@@ -147,6 +158,12 @@ class DAPTVSettingTabs extends React.Component {
                         <ScriptEditor 
                             name="prerequestscripts" 
                             value={prerequest}
+                            aceEditorProps={{
+                                style: {
+                                    height: 'calc(80vh - 330px)',
+                                    minHeight: '100px',
+                                }
+                            }}
                             onChange={this.handlePrerequestChange}
                         />
                     </Space>
@@ -169,23 +186,28 @@ class DAPTVSettingTabs extends React.Component {
                     <div className="vertical-end">
                         Variables {variable && variable.length > 0 && GREEN_DOT_ICON}
                     </div>
-                } key="variables">
+                } key="variables" style={{ height: 'calc(80vh - 275px)'}}>
                     <Space direction="vertical">
                         {VARIABLE_TIPS}
-                        <VariablesTable     
+                        <VariablesTable    
                             value={variable}
                             source="collection"
+                            tableClassName={variableTipClose ? "daptv-setting-variable-table1" : "daptv-setting-variable-table2"}
                             onChange={this.handleVariableChange}
                         />
                     </Space>
-                    <Alert
-                        style={{position: 'absolute', top: 380}}
-                        description={VARIABLE_VALUE_TIPS}
-                        type="info"
-                        showIcon
-                        closable
-                        onClose={this.handleVariableValuesTipClose}
-                    />
+                    {
+                        !variableTipClose && (
+                            <Alert
+                                style={{marginTop: 10}}
+                                description={VARIABLE_VALUE_TIPS}
+                                type="info"
+                                showIcon
+                                closable
+                                onClose={this.handleVariableValuesTipClose}
+                            />
+                        )
+                    }
                 </TabPane>
             </Tabs>
         );

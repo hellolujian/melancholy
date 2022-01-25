@@ -216,10 +216,10 @@ class NewButtonModal extends React.Component {
                     
                     
                 </TabPane>
-                <TabPane tab="Templates" key="templates">
+                <TabPane tab="Templates" key="templates" disabled>
                 Content of Tab Pane 2
                 </TabPane>
-                <TabPane tab="API Network" key="apinetwork">
+                <TabPane tab="API Network" key="apinetwork" disabled>
                 Content of Tab Pane 3
                 </TabPane>
             </Tabs>
