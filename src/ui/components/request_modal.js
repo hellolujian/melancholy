@@ -134,7 +134,7 @@ class RequestModal extends React.Component {
                             defaultValue={requestInfo && requestInfo.description}
                             value={requestInfo && requestInfo.description}
                             mdEditorShow 
-                            editorClassName="add-placeholder-class"
+                            // editorClassName="add-placeholder-class"
                             mdEditorProps={{height: "120px"}}
                         />
                             

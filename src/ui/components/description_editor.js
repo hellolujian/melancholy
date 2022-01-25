@@ -127,7 +127,7 @@ class DescriptionEditor extends React.Component {
             scrollBeyondLastLine: false,
             wordWrap: 'on',
             // editorClassName: 'editor-class-name',
-            extraEditorClassName: this.props.editorClassName,
+            extraEditorClassName: 'add-placeholder-class',
             autoClosingBrackets: "always",
             autoClosingDelete: 'always',
             autoClosingQuotes: 'always',

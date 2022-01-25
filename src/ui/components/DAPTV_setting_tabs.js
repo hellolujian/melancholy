@@ -116,7 +116,7 @@ class DAPTVSettingTabs extends React.Component {
                             scene="form" 
                             defaultValue={description}
                             mdEditorShow 
-                            editorClassName="add-placeholder-class"
+                            // editorClassName="add-placeholder-class"
                             mdEditorProps={{style: {height: "300px"}}}
                             onChange={this.handleDescChange}
                         />
