@@ -133,12 +133,14 @@ class RequestRCItem extends React.Component {
                             <Col flex="auto">
                                 {
                                     showCollectionNameInput ? (
-                                        <RequiredInput 
-                                            size="small"
-                                            defaultValue={name}
-                                            onSave={this.saveRequestName}
-                                            onClick={stopClickPropagation} 
-                                        />
+                                        <div style={{width: 'calc(100% - 10px)'}}>
+                                            <RequiredInput 
+                                                size="small"
+                                                defaultValue={name}
+                                                onSave={this.saveRequestName}
+                                                onClick={stopClickPropagation} 
+                                            />
+                                        </div>
                                     ) : (
                                         <Ellipsis text={name} />
                                     )

@@ -175,11 +175,12 @@ class CollectionRCItem extends React.Component {
                         <Col flex="auto" style={{paddingLeft: 0}}>
                             {
                                 showCollectionNameInput ? (
-                                    <RequiredInput 
-                                        defaultValue={name}
-                                        onSave={this.saveCollectionName}
-                                    />
-                                    
+                                    <div style={{width: 'calc(100% - 10px)'}}>
+                                        <RequiredInput 
+                                            defaultValue={name}
+                                            onSave={this.saveCollectionName}
+                                        />
+                                    </div>
                                 ) : (
                                     <Space align="center">
                                         <Ellipsis text={name} maxLine={1} />

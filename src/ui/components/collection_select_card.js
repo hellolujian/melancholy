@@ -1,6 +1,6 @@
 import React from 'react';
 import { render } from 'react-dom';
-import {List, PageHeader, Button, Row, Col, Input, Typography, Space} from 'antd'
+import {List, PageHeader, Button, Row, Col, Input, Typography, Space, Divider } from 'antd'
 import { CaretLeftOutlined, SearchOutlined, CaretRightOutlined, CheckOutlined} from '@ant-design/icons';
 import 'ui/style/collection_select_card.css'
 import {POST_REQUEST_ICON, YES_ICON, COLLECTION_ICON_20, GET_REQUEST_ICON, ENVIRONMENT_ICON, ENVIRONMENT_ICON_48,
@@ -34,10 +34,6 @@ class CollectionSelectCard extends React.Component {
             chooseChain = await getParentArr(defaultValue.id)
         }
         await this.refreshData({chooseChain: chooseChain});
-    }
-
-    onChange(newValue, e) {
-        console.log('onChange', newValue, e);
     }
 
     handleCreateBtnClick = () => {
@@ -79,6 +75,16 @@ class CollectionSelectCard extends React.Component {
         this.props.onChange(item);
     }
 
+    handleSearchListItemClick = (item) => {
+        // const {chooseChain} = this.state;
+        // if (!item.items && chooseChain.length > 0) {
+        //     return;
+        // }
+        // chooseChain.push({id: item.id, name: item.name})
+        this.setState({chooseChain: item, searchValue: ''});
+        // this.props.onChange(item);
+    }
+
     handleBackIconClick = () => {
         const {chooseChain} = this.state;
         chooseChain.pop();
@@ -96,15 +102,57 @@ class CollectionSelectCard extends React.Component {
         return listData;
     }
 
+    searchCollection = (searchValue, arr) => {
+        let result = [];
+        for (let i = 0; i < arr.length; i++) {
+            let searchItem = arr[i];
+            const {items, id, name} = searchItem;
+            if (!items) {
+                continue;
+            }
+            
+            let matchObj = {id: id, name: name}
+            if (name.toLowerCase().indexOf(searchValue.toLowerCase()) >= 0) {
+                result.push([matchObj]);
+            }
+            
+            let itemResult = this.searchCollection(searchValue, items);
+            result = result.concat(itemResult.map(item => [matchObj, ...item]));
+        }
+        return result;
+    }
+
+    handleSearchChange = (e) => {
+        let searchValue = e.target.value;
+        this.setState({searchValue: searchValue});
+        // if (!searchValue) return;
+
+        // const {collectionData} = this.state;
+        // if (!collectionData) return;
+
+        // let result = this.searchCollection(searchValue, collectionData)
+        // console.log(result);
+
+    }
+
+    getSearchResult = () => {
+        const {collectionData, searchValue} = this.state;
+        return this.searchCollection(searchValue, collectionData);
+    }
+
     render() {
-        const {creating, collectionName, chooseChain} = this.state;
+        const {creating, collectionName, chooseChain, searchValue} = this.state;
         const selectedCollection = chooseChain.length > 0 ? chooseChain[chooseChain.length - 1] : null;
         return (
             <PageHeader 
                 className="collection-select-card"
                 breadcrumbRender={() => (
                     <div className="collection-select-card-top">
-                        <Input placeholder="Search for a collection or folder" prefix={<SearchOutlined />} />
+                        <Input 
+                            value={searchValue}
+                            placeholder="Search for a collection or folder" 
+                            onChange={this.handleSearchChange}
+                            prefix={<SearchOutlined />} />
                     </div>
                 )}
                 backIcon={selectedCollection ? (
@@ -143,31 +191,58 @@ class CollectionSelectCard extends React.Component {
                     )
                 }
 
-                <List
-                    size="small"
-                    // bordered
-                    dataSource={this.getListData()}
-                    renderItem={item => (
-                        <List.Item 
-                            key={item.id}
-                            className={`collection-select-card-item ${chooseChain.length > 0 && !item.items ? 'collection-select-card-request-item' : 'collection-select-card-collection-item'}`}
-                            actions={[
-                                <CaretRightOutlined className="collection-select-card-item-right" />
-                            ]}
-                            onClick={() => this.handleListItemClick(item)}>
-        
-                            <div className="vertical-center">
-                                {
-                                    chooseChain.length === 0 || item.items ? COLLECTION_ICON_20 : (
-                                        item.method === 'POST' ? POST_REQUEST_ICON : GET_REQUEST_ICON
-                                    )
-                                }
-                                <Typography.Text style={{marginLeft: 8}}>{item.name}</Typography.Text>
-                            </div>
+                {
+                    searchValue ? (
+                        <List
+                            size="small"
+                            // bordered
+                            dataSource={this.getSearchResult()}
+                            renderItem={(item, index) => (
+                                <List.Item 
+                                    key={index}
+                                    className={`collection-select-card-collection-item`}
+                                    onClick={() => this.handleSearchListItemClick(item)}>
+                                    <div>
+                                        <div>{item[item.length - 1].name}</div>
+                                        <div style={{color: 'gray'}} dangerouslySetInnerHTML={{ __html: item.map(o => o.name).join(' / ')
+                                                .replace(new RegExp(searchValue, "gi"), (text) => {
+                                                    return `<span style="color: black">${text}</span>`
+                                                }) 
+                                        }} />
+                                    </div>
 
-                        </List.Item>
-                    )}
-                />
+                                </List.Item>
+                            )}
+                        />
+                    ) : (
+                        <List
+                            size="small"
+                            // bordered
+                            dataSource={this.getListData()}
+                            renderItem={item => (
+                                <List.Item 
+                                    key={item.id}
+                                    className={`collection-select-card-item ${chooseChain.length > 0 && !item.items ? 'collection-select-card-request-item' : 'collection-select-card-collection-item'}`}
+                                    actions={[
+                                        <CaretRightOutlined className="collection-select-card-item-right" />
+                                    ]}
+                                    onClick={() => this.handleListItemClick(item)}>
+                
+                                    <div className="vertical-center">
+                                        {
+                                            chooseChain.length === 0 || item.items ? COLLECTION_ICON_20 : (
+                                                item.method === 'POST' ? POST_REQUEST_ICON : GET_REQUEST_ICON
+                                            )
+                                        }
+                                        <Typography.Text style={{marginLeft: 8}}>{item.name}</Typography.Text>
+                                    </div>
+
+                                </List.Item>
+                            )}
+                        />
+                    )
+                }
+                
 
             </PageHeader>
         )

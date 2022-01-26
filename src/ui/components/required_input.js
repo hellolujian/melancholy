@@ -41,10 +41,9 @@ class RequiredInput extends React.Component {
         
         const {value, showRed} = this.state;
         let inputValue = this.props.hasOwnProperty('value') ? this.props.value : value;
-        console.log(inputValue);
         let borderColor = !(inputValue && inputValue.trim()) && showRed ? 'red' : 'gray';
         return (
-            <div style={{border: '1px solid ' + borderColor, display: 'inline-block'}} className="full-width">
+            <div className="full-width" style={{border: '1px solid ' + borderColor, display: 'inline-block'}} >
                 <Input
                     autoFocus
                     size="small"

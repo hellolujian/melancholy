@@ -57,7 +57,7 @@
 }
 
 .collection-select-card .ant-page-header-content {
-  max-height: 100px;
+  height: 102px;
   overflow: auto
 }
 
@@ -66,4 +66,8 @@
   border: none;
   cursor: pointer;
   padding: 0px 7px;
+}
+
+.collection-select-card .ant-list-empty-text .ant-empty-normal {
+  margin: 0px;
 }

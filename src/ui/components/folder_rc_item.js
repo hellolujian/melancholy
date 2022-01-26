@@ -129,10 +129,12 @@ class FolderRCItem extends React.Component {
                         <Col flex="auto" style={{paddingLeft: 0}}>
                             {
                                 showCollectionNameInput ? (
-                                    <RequiredInput 
-                                        defaultValue={name}
-                                        onSave={this.saveFolderName}
-                                    />
+                                    <div style={{width: 'calc(100% - 10px)'}}>
+                                        <RequiredInput 
+                                            defaultValue={name}
+                                            onSave={this.saveFolderName}
+                                        />
+                                    </div>
                                 ) : (
                                     <Ellipsis text={name} />
                                 )
