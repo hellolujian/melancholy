@@ -1,5 +1,5 @@
 import React from 'react';
-import {Popover, Button, Typography, Table, Space, Divider, Alert} from 'antd';
+import {Popover, Button, Typography, Table, Space, Alert} from 'antd';
 import TooltipButton from './tooltip_button'
 import {
     GLOBAL_TEXT_TIPS,
@@ -11,11 +11,13 @@ import {
     NO_ENVIRONMENT_TIPS,
     GLOBAL_LINK_TIPS
 } from 'ui/constants/tips'
-import { EyeOutlined, SettingFilled  } from '@ant-design/icons';
-import {queryEnvironmentMetaById, updateEnvironmentMeta, insertEnvironmentMeta} from '@/database/environment_meta'
+import { EyeOutlined } from '@ant-design/icons';
+import {queryEnvironmentMetaById, updateEnvironmentMeta} from '@/database/environment_meta'
 import {getCurrentWorkspace} from '@/utils/store_utils';
-import {insertWorkspaceMeta, updateWorkspaceMeta} from '@/database/workspace_meta'
-import EnvironmentModal from './environment_modal'
+import {
+    publishEnvironmentOpen
+} from '@/utils/event_utils'
+import {updateWorkspaceMeta} from '@/database/workspace_meta'
 import EditableText from './editable_text'
 
 
@@ -32,12 +34,10 @@ class EnvironmentDetailCard extends React.Component {
       
     }
 
-    handleVisibleChange = async (visible) => {
+    handlePopoverVisibleChange = async (visible) => {
         if (visible) {
             const {currentEnvironmentId} = this.props;
-            let currentEnvironment = currentEnvironmentId 
-                ? await queryEnvironmentMetaById(currentEnvironmentId)
-                : {};
+            let currentEnvironment = currentEnvironmentId ? await queryEnvironmentMetaById(currentEnvironmentId) : {};
             let currentWorkspace = await getCurrentWorkspace();
             this.setState({popoverVisible: true, currentEnvironment: currentEnvironment, currentWorkspace: currentWorkspace})
         } else {
@@ -46,30 +46,20 @@ class EnvironmentDetailCard extends React.Component {
     }
 
     handleCurrentEnvironmentSave = () => {
-        this.setState({environmentModalVisible: true, popoverVisible: false})
+        this.setState({popoverVisible: false})
         const {currentEnvironmentId} = this.props;
         const {currentEnvironment} = this.state;
         if (currentEnvironmentId) {
-            this.environmentModalRef.handleEnvironmentItemClick(currentEnvironment)
+            publishEnvironmentOpen({scene: 'update', envData: currentEnvironment})
         } else {
-            this.environmentModalRef.handleAddClick()
+            publishEnvironmentOpen({scene: 'add'})
         }
         
     }
 
-    handleEnvironmentModalVisible = (visible) => {
-        this.setState({environmentModalVisible: visible});
-    }
-
-    handleEnvironmentModalRef = (ref) => {
-        if (ref) {
-            this.environmentModalRef = ref;
-        }
-    }
-
     handleEditGlobalClick = () => {
-        this.setState({environmentModalVisible: true, popoverVisible: false})
-        this.environmentModalRef.handleGlobalClick();
+        this.setState({popoverVisible: false})
+        publishEnvironmentOpen({scene: 'global'})
     }
 
     handleCurrentValueSave = (variableId, value, scope) => {
@@ -85,12 +75,11 @@ class EnvironmentDetailCard extends React.Component {
             targetVariable.currentValue = value;
             updateWorkspaceMeta(workspaceId, {$set: {variable: globalVariable}})
         }
-        
     }
 
     render() {
      
-        let {currentEnvironment = {}, currentWorkspace = {}, environmentModalVisible, popoverVisible} = this.state;
+        let {currentEnvironment = {}, currentWorkspace = {}, popoverVisible} = this.state;
         let {variable: currentEnvironmentVariable = [], name: currentEnvironmentName} = currentEnvironment;
         let {variable: globalVariable = []} = currentWorkspace;
         let enableEnvironmentVariable = currentEnvironmentVariable.filter(variable => !variable.disabled)
@@ -184,14 +173,7 @@ class EnvironmentDetailCard extends React.Component {
                     closable
                     onClose={this.handleVariableValuesTipClose}
                 />
-
                 
-            <EnvironmentModal 
-                visible={environmentModalVisible} 
-                ref={this.handleEnvironmentModalRef}
-                onSave={this.props.onSave}
-                onVisibleChange={this.handleEnvironmentModalVisible}
-            />
             </Space>
             
         );
@@ -202,7 +184,7 @@ class EnvironmentDetailCard extends React.Component {
                 trigger="click"
                 visible={popoverVisible}
                 arrowPointAtCenter
-                onVisibleChange={this.handleVisibleChange}
+                onVisibleChange={this.handlePopoverVisibleChange}
             >
                 <TooltipButton title="Environment quick look"
                     buttonProps={{type: 'default', icon: <EyeOutlined />}}

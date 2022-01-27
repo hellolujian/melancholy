@@ -22,6 +22,7 @@ import {queryCommonMeta, updateCommonMeta, queryCommonMetaByType} from '@/databa
 import {UUID, writeJsonFileSync, getCurrentTimeISOString} from '@/utils/global_utils'
 import {importFromFile, importFromFilePath} from '@/utils/business_utils'
 import {getVariableExportEnabledArr, getCopyMelancholyDBVariables} from '@/utils/common_utils'
+import {subscribeEnvironmentOpen, publishEnvironmentSave, listenShortcut} from '@/utils/event_utils'
 import VariablesTable from './variables_table';
 import ButtonModal from './button_modal'
 import CommonSelectFile from './common_select_file'
@@ -64,36 +65,14 @@ class EnvironmentModal extends React.Component {
         }
     }
 
-    componentDidMount = async () => {
-        await this.refreshData();
-      
-    }
-
-    handleModalCancel = () => {
-        this.props.onVisibleChange(false);
-        this.setState({scene: 'view'})
+    handleGlobalClick = async () => {
+        let currentWorkspace = await getCurrentWorkspace();
+        let {variable = []} = currentWorkspace;
+        this.setState({scene: 'global', variable: variable, globalVariableChange: false})
     }
 
     handleEnvironmentItemClick = (item) => {
         this.setState({scene: 'update', editValues: item, variable: item.variable})
-    }
-
-    handleFormFinish = async (values) => {
-        const {variable} = this.state;
-        const {id, name} = values;
-        if (id) {
-            await updateEnvironmentMeta(id, {$set: {name: name, variable: variable}})
-        } else {
-            await insertEnvironmentMeta(
-                {
-                    id: UUID(),
-                    name: name,
-                    variable: variable
-                }
-            )
-        }
-        await this.refreshData({scene: 'view'})
-        this.props.onSave()
     }
 
     handleAddClick = () => {
@@ -103,6 +82,53 @@ class EnvironmentModal extends React.Component {
         } else {
             this.setState({scene: 'add', editValues: {}, variable: []})
         }
+    }
+
+    openModal = (key, msg = {}) => {
+        let {scene, envData} = msg;
+        switch (scene) {
+            case 'global': 
+                this.handleGlobalClick()
+                break;
+            case 'update':
+                this.handleEnvironmentItemClick(envData)
+                break;
+            case 'add':        
+                this.handleAddClick();
+                break;
+            default: break;
+        }
+        this.setState({visible: true})
+    }
+
+    componentDidMount = async () => {
+        await this.refreshData();
+        subscribeEnvironmentOpen(this.openModal) 
+        listenShortcut('manageenvironments', this.openModal)
+      
+    }
+
+    handleModalCancel = () => {
+        this.setState({scene: 'view', visible: false})
+    }
+
+    handleFormFinish = async (values) => {
+        const {variable} = this.state;
+        const {id, name} = values;
+        let newId = id || UUID()
+        if (id) {
+            await updateEnvironmentMeta(id, {$set: {name: name, variable: variable}})
+        } else {
+            await insertEnvironmentMeta(
+                {
+                    id: newId,
+                    name: name,
+                    variable: variable
+                }
+            )
+        }
+        await this.refreshData({scene: 'view'})
+        publishEnvironmentSave(newId)
     }
 
     handleImportClick = () => {
@@ -124,27 +150,22 @@ class EnvironmentModal extends React.Component {
         this.formRef.current.submit()  
     }
 
-    handleGlobalClick = async () => {
-        let currentWorkspace = await getCurrentWorkspace();
-        let {variable = []} = currentWorkspace;
-        this.setState({scene: 'global', variable: variable, globalVariableChange: false})
-    }
-
     handleDuplicateClick = async (item) => {
         const {name, variable} = item;
+        let newId = UUID();
         await insertEnvironmentMeta({
-            id: UUID(),
+            id: newId,
             name: name + " Copy",
             variable: getCopyMelancholyDBVariables(variable),
         })
         await this.refreshData();
-        this.props.onSave()
+        publishEnvironmentSave(newId)
     } 
 
     handleDeleteEnvironmentMeta = async (id) => {
         await updateEnvironmentMeta(id, {$set: {deleted: true}})
         await this.refreshData();
-        this.props.onSave()
+        publishEnvironmentSave(id)
     }
 
     handleMoreActionClick = async (key, item) => {
@@ -256,9 +277,9 @@ class EnvironmentModal extends React.Component {
 
     render() {
      
-        const {visible} = this.props;
+        // const {} = this.props;
         const { environments, scene, editValues, variable, globalVariableChange, 
-            workspaceList = []} = this.state;
+            workspaceList = [], visible} = this.state;
 
         let variableTipClose = sessionStorage.getItem("variableTipClose")
 
@@ -498,8 +519,7 @@ class EnvironmentModal extends React.Component {
 export default EnvironmentModal;
 
 EnvironmentModal.defaultProps = {
-    onVisibleChange: () => {},
-    onSave: () => {},
+    onVisibleChange: () => {}
 }
 
 

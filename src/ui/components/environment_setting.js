@@ -6,10 +6,9 @@ import EnvironmentModal from './environment_modal'
 import {queryEnvironmentMeta} from '@/database/environment_meta'
 import {getCurrentWorkspaceId, getStoreValue, setStoreValue, getCurrentWorkspaceSession, setCurrentWorkspaceSession} from '@/utils/store_utils';
 import {
-    listenShortcut,
+    listenShortcut, subscribeEnvironmentSave, publishEnvironmentOpen
 } from '@/utils/event_utils'
  
-
 const { Option } = Select;
 class EnvironmentSetting extends React.Component {
 
@@ -26,19 +25,14 @@ class EnvironmentSetting extends React.Component {
         return environments;
     }
 
-    handleEnvironmentModalVisible = (visible) => {
-        this.setState({environmentModalVisible: visible});
-    }
-
     handleEnvironmentModalOpen = () => {
-        this.setState({environmentModalVisible: true});
+        publishEnvironmentOpen()
     }
 
     componentDidMount = async () => {
         let workspaceSession = await getCurrentWorkspaceSession();
         this.refreshData({currentEnvironment: workspaceSession.environmentId})
-
-        listenShortcut('manageenvironments', this.handleEnvironmentModalOpen)
+        subscribeEnvironmentSave(this.refreshData)
     }
 
     handleEnvironmentChange = (value) => {
@@ -48,50 +42,42 @@ class EnvironmentSetting extends React.Component {
 
     render() {
     
-        const {environments = [], environmentModalVisible, currentEnvironment = ''} = this.state;
+        const {environments = [], currentEnvironment = ''} = this.state;
         
        
         return (
             <Space style={{marginLeft: 20}}>
-            <Select 
-                // defaultValue={0} 
-                allowClear 
-                showSearch 
-                value={currentEnvironment}
-                onChange={this.handleEnvironmentChange}
-                placeholder="Type to filter"
-                style={{ width: 200 }}
-                optionFilterProp="label"
-                filterOption={(input, option) => {
-                    return option.value && option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0
-                }
+                <Select 
+                    // defaultValue={0} 
+                    allowClear 
+                    showSearch 
+                    value={currentEnvironment}
+                    onChange={this.handleEnvironmentChange}
+                    placeholder="Type to filter"
+                    style={{ width: 200 }}
+                    optionFilterProp="label"
+                    filterOption={(input, option) => {
+                        return option.value && option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                    }}
+                    options={[{label: 'No Environment', value: ''}, ...environments.map(item => {return {label: item.name, value: item.id}})]}
+                    filterSort={(optionA, optionB) =>
+                        optionA.label.toLowerCase().localeCompare(optionB.label.toLowerCase())
+                    }
+                    >
+                        {/* {
+                            environments.map(item => (
+                                <Option value={item.id} key={item.id}>{item.name}sdfsdf</Option>
+                            ))
+                        } */}
                     
-                }
-                options={[{label: 'No Environment', value: ''}, ...environments.map(item => {return {label: item.name, value: item.id}})]}
-                filterSort={(optionA, optionB) =>
-                    optionA.label.toLowerCase().localeCompare(optionB.label.toLowerCase())
-                }
-                >
-                    {/* {
-                        environments.map(item => (
-                            <Option value={item.id} key={item.id}>{item.name}sdfsdf</Option>
-                        ))
-                    } */}
+                </Select>
+
+                <EnvironmentDetailCard 
+                    currentEnvironmentId={currentEnvironment}
+                />
                 
-            </Select>
+                <Button icon={<SettingFilled  />} onClick={this.handleEnvironmentModalOpen} />
 
-            <EnvironmentDetailCard 
-                currentEnvironmentId={currentEnvironment}
-                onSave={this.refreshData}
-            />
-            
-            <Button icon={<SettingFilled  />} onClick={() => this.handleEnvironmentModalVisible(true)} />
-
-            <EnvironmentModal 
-                visible={environmentModalVisible} 
-                onSave={this.refreshData}
-                onVisibleChange={this.handleEnvironmentModalVisible}
-            />
             </Space>
         )
     }

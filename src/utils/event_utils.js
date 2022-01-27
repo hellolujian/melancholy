@@ -30,6 +30,26 @@ export const subscribeCollectionSave = (handle) => {
     subscribe(COLLECTION_MODAL_EVENT_SAVE, handle);
 }
 
+const ENVIRONMENT_MODAL_EVENT = 'environment_modal_event';
+const ENVIRONMENT_MODAL_EVENT_OPEN = `${ENVIRONMENT_MODAL_EVENT}.open`
+const ENVIRONMENT_MODAL_EVENT_SAVE = `${ENVIRONMENT_MODAL_EVENT}.save`
+
+export const publishEnvironmentOpen = (data) => {
+    publish(ENVIRONMENT_MODAL_EVENT_OPEN, data);
+}
+
+export const subscribeEnvironmentOpen = (handle) => {
+    subscribe(ENVIRONMENT_MODAL_EVENT_OPEN, handle);
+}
+
+export const publishEnvironmentSave = (data) => {
+    publish(ENVIRONMENT_MODAL_EVENT_SAVE, data);
+}
+
+export const subscribeEnvironmentSave = (handle) => {
+    subscribe(ENVIRONMENT_MODAL_EVENT_SAVE, handle);
+}
+
 /**
  * ======================================保存请求==========================================
  */

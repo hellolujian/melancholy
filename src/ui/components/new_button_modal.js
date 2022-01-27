@@ -44,7 +44,9 @@ import EnvironmentModal from './environment_modal'
 import DocumentationModal from './documentation_modal'
 
 import {IMPORT_TITLE, SYNC_DATA_TITLE, CREATE_NEW, ACCOUNT_TITLE, NOTIFICATIONS_TITLE, SETTINGS_TITLE, RUNNER_TITLE} from '@/ui/constants/titles'
-import {publishCollectionModalOpen, publishRequestModalOpen, listenShortcut} from '@/utils/event_utils'
+import {publishCollectionModalOpen, publishRequestModalOpen, 
+    listenShortcut, publishEnvironmentOpen
+} from '@/utils/event_utils'
 import {getByTheme, getCloseSvg} from '@/utils/style_utils'
 import 'ui/style/new_button_modal.css'
 const { Header,} = Layout;
@@ -90,7 +92,7 @@ class NewButtonModal extends React.Component {
                 publishCollectionModalOpen();
                 break;
             case 'environment':
-                this.setState({environmentModalVisible: visible, newModalVisible: false});
+                publishEnvironmentOpen()
                 break;
             case 'documentation': 
                 this.setState({documentationModalVisible: visible, newModalVisible: parentModalVisible ? true : false})
@@ -290,7 +292,10 @@ class NewButtonModal extends React.Component {
 
                 <RequestModal />
                 <CollectionModal />
-                <EnvironmentModal visible={environmentModalVisible} onVisibleChange={(visible) => this.handleRCEModalVisibleChange('environment', visible)} />
+                <EnvironmentModal 
+                    visible={environmentModalVisible} 
+                    onVisibleChange={(visible) => this.handleRCEModalVisibleChange('environment', visible)} 
+                />
                 {
                     documentationModalVisible && (
                         <DocumentationModal visible={documentationModalVisible} onVisibleChange={(visible, parentModalVisible) => this.handleRCEModalVisibleChange('documentation', visible, parentModalVisible)}/>
