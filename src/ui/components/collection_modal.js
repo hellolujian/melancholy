@@ -4,6 +4,7 @@ import {Input, Tabs, Button, Form, Modal, Space, Typography, Alert} from 'antd';
 import DAPTVSettingTabs from './DAPTV_setting_tabs'
 
 import {queryCollectionMetaById} from '@/database/collection_meta'
+import Ellipsis from 'react-ellipsis-component';
 
 import {UUID} from '@/utils/global_utils'
 import {subscribeCollectionModalOpen, publishCollectionSave} from '@/utils/event_utils'
@@ -96,9 +97,10 @@ class CollectionModal extends React.Component {
      
         const {collectionSettings = {}, visible, collectionId, extend = {}, scene, parentName} = this.state;
         const {parentId} = collectionSettings;
+        let title = collectionId ? (scene === 'edit' ? (parentId ? 'EDIT FOLDER' : "EDIT COLLECTION") :  `ADD FOLDER TO ${parentName}`) : "CREATE A NEW COLLECTION"
         return (
             <Modal 
-                title={collectionId ? (scene === 'edit' ? (parentId ? 'EDIT FOLDER' : "EDIT COLLECTION") :  `ADD FOLDER TO ${parentName}`) : "CREATE A NEW COLLECTION" }
+                title={<div style={{marginRight: 20}}><Ellipsis text={title} /></div> }
                 centered
                 destroyOnClose
                 // bodyStyle={{ position: 'relative' }}

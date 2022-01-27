@@ -178,6 +178,12 @@ class DAPTVSettingTabs extends React.Component {
                         <ScriptEditor 
                             name="tests" 
                             value={test}
+                            aceEditorProps={{
+                                style: {
+                                    height: 'calc(80vh - 330px)',
+                                    minHeight: '100px',
+                                }
+                            }}
                             onChange={this.handleTestChange}
                         />
                     </Space>

@@ -3,8 +3,7 @@ import { render } from 'react-dom';
 import {List, PageHeader, Button, Row, Col, Input, Typography, Space, Divider } from 'antd'
 import { CaretLeftOutlined, SearchOutlined, CaretRightOutlined, CheckOutlined} from '@ant-design/icons';
 import 'ui/style/collection_select_card.css'
-import {POST_REQUEST_ICON, YES_ICON, COLLECTION_ICON_20, GET_REQUEST_ICON, ENVIRONMENT_ICON, ENVIRONMENT_ICON_48,
-    MOCK_COLLECTION, MOCK_COLLECTION_48, MONITOR_COLLECTION_ICON, CIRCLE_DOT_ICON, DOCUMENTATION_ICON, DOCUMENTATION_ICON_48, CLOSE_SVG,CLOSE_ICON
+import {POST_REQUEST_ICON, YES_ICON, COLLECTION_ICON_20, GET_REQUEST_ICON, CLOSE_ICON
 } from 'ui/constants/icons';
 
 import Ellipsis from 'react-ellipsis-component';

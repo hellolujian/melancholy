@@ -1,6 +1,6 @@
 .collection-select-card {
   padding: 0px !important;
-  border: 1px solid lightgrey;
+  border: 1px solid var(--common-border-color, lightgray);
   border-radius: 4px;
   -webkit-border-radius: 4px;
   -moz-border-radius: 4px;
@@ -32,7 +32,7 @@
 }
 
 .collection-select-card .collection-select-card-collection-item:hover {
-  background-color: lightgray;  
+  background-color: var(--common-border-color, lightgray);
   cursor: pointer;
 }
 
@@ -42,7 +42,7 @@
 
 .collection-select-card .collection-select-card-top {
   padding: 8px 8px 0px 8px;
-  background-color: #e6e6e6;
+  background-color: var(--tree-item-selected-background-color, #e6e6e6);
 }
 
 .collection-select-card .collection-select-card-create-collection-input {
@@ -50,8 +50,8 @@
 }
 
 .collection-select-card .ant-page-header-heading {
-  border-bottom: 1px solid lightgray;
-  background-color: #e6e6e6;
+  border-bottom: 1px solid var(--common-border-color, lightgray);
+  background-color: var(--tree-item-selected-background-color, #e6e6e6);
   border-bottom-right-radius:4px;
   border-bottom-left-radius:4px;
   padding-left: 4px;
