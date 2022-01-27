@@ -98,7 +98,7 @@ class EnvironmentDetailCard extends React.Component {
             {
                 title: "CURRENT VALUE", 
                 dataIndex: 'currentValue',
-                render: (text, record, index) => {
+                render: (text = '', record, index) => {
                     return (
                         <EditableText 
                             defaultValue={text}

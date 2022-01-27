@@ -98,7 +98,7 @@ class RequestModal extends React.Component {
             <Modal 
                 title={(hasParentId ? "EDIT" : "SAVE") + " REQUEST"} 
                 centered
-                className="request-modal-class"
+                className="request-modal-class height-auto-modal"
                 // bodyStyle={{}}
                 destroyOnClose
                 okText={<Ellipsis text={okText} />}

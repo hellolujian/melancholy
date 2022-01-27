@@ -310,6 +310,7 @@ class EnvironmentModal extends React.Component {
             <Modal 
                 title="MANAGE ENVIRONMENTS" 
                 centered
+                className="height-auto-modal"
                 // bodyStyle={{ height: 600}}
                 okButtonProps={{}}
                 footer={(

@@ -63,7 +63,11 @@ class EditableText extends React.Component {
                         //     <span className={'not-editing-edit-icon ' + (editIcon.className ? editIcon.className : "")} onClick={this.handleEditIconClick}>{EDIT_ICON}</span>
                         // </Space>
                         <Space align="center" className="editable-text-container">
-                            <Ellipsis text={realValue} />
+                            {
+                                realValue && (
+                                    <Ellipsis text={realValue} />
+                                )
+                            }
                             <span className={`ecitable-icon-class ${editIconClass}`} onClick={this.handleEditIconClick}>{getEditIcon()}</span>
                         </Space>
                     )

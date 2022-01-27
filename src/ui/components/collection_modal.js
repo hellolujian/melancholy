@@ -103,6 +103,7 @@ class CollectionModal extends React.Component {
                 title={<div style={{marginRight: 20}}><Ellipsis text={title} /></div> }
                 centered
                 destroyOnClose
+                className="height-auto-modal"
                 // bodyStyle={{ position: 'relative' }}
                 okText={collectionId ? "Update" : "Create"}
                 width={800}

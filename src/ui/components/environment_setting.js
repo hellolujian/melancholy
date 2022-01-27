@@ -60,9 +60,12 @@ class EnvironmentSetting extends React.Component {
                         return option.value && option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0
                     }}
                     options={[{label: 'No Environment', value: ''}, ...environments.map(item => {return {label: item.name, value: item.id}})]}
-                    filterSort={(optionA, optionB) =>
-                        optionA.label.toLowerCase().localeCompare(optionB.label.toLowerCase())
-                    }
+                    // filterSort={(optionA, optionB) =>{
+                    //     console.log(optionA)
+                    //     return optionA.label === 'No Environment' ? -1 : optionA.label.toLowerCase().localeCompare(optionB.label.toLowerCase())
+                        
+                    // }
+                    // }
                     >
                         {/* {
                             environments.map(item => (
