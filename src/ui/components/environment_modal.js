@@ -33,6 +33,7 @@ import {ImportType, VariableScopeType} from '@/enums'
 
 import PostmanSDK from 'postman-collection'
 import { ToastContainer, toast } from 'react-toastify';
+import Ellipsis from 'react-ellipsis-component';
 
 import {CommonValueType} from '@/enums'
 import 'ui/style/environment_modal.css'
@@ -232,10 +233,19 @@ class EnvironmentModal extends React.Component {
             _postman_variable_scope: VariableScopeType.ENVIRONMENT.code,
             _postman_exported_at: getCurrentTimeISOString()
         }
-        writeJsonFileSync(filePath, fileJson);
-        toast.success(`Your environment was exported successfully.`, {
-            position: toast.POSITION.BOTTOM_RIGHT,
-        })
+        writeJsonFileSync(filePath, fileJson, (err) => {
+            if (err) {
+                toast.error(err, {
+                    position: toast.POSITION.BOTTOM_RIGHT,
+                })
+            } else {
+                toast.success(`Your environment was exported successfully.`, {
+                    position: toast.POSITION.BOTTOM_RIGHT,
+                })
+            }
+            
+        });
+        
     }
 
     handleDownloadGlobalSelect = async (filePath) => {
@@ -470,7 +480,13 @@ class EnvironmentModal extends React.Component {
                                                 
                                             )
                                         ]}>
-                                            <Button type="text" size="small" onClick={() => this.handleEnvironmentItemClick(item)}>{item.name}</Button>
+                                            <Button 
+                                                type="text" 
+                                                className="white-space-unset-class"
+                                                size="small" 
+                                                onClick={() => this.handleEnvironmentItemClick(item)}>
+                                                <Ellipsis text={item.name} />
+                                            </Button>
                                         </List.Item>
                                     )}
                                 />

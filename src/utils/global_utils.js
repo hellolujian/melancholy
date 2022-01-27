@@ -102,11 +102,11 @@ const getSpecificFieldObj = (source = {}, keys = []) => {
     return newObj;
 }
 
-const writeFileSync = (filePath, fileContent) => {
+const writeFileSync = (filePath, fileContent, callback) => {
     if (!filePath) return;
     const fs = window.require('fs');
     
-    let result = fs.writeFileSync(  
+    let result = fs.writeFile(  
         filePath,
         fileContent, 
         (err) => {
@@ -115,7 +115,9 @@ const writeFileSync = (filePath, fileContent) => {
             } else {
                 console.log('写入成功')
             }
+            callback(err);
     });
+    console.log(result)
     return result;
 }
 

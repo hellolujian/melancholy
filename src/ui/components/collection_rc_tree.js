@@ -50,6 +50,7 @@ import {
 } from '@/utils/database_utils'
 
 import RCTree from 'rc-tree';
+import { toast } from 'react-toastify';
 
 import {queryCollectionMetaById, queryCollectionMetaByParentId} from '@/database/collection_meta'
 import {queryRequestMetaByParentId, queryRequestMetaById} from '@/database/request_meta'
@@ -518,7 +519,19 @@ class CollectionTree extends React.Component {
         if (auth) exportObj.auth = auth;
         if (variable && variable.length  > 0) exportObj.variable = getVariableExportDisabledArr(variable);
         if (test || prerequest) exportObj.event = getEventExportObj(prerequest, test);
-        saveJsonFileSync(exportObj, {defaultPath: `${name}.postman_collection.json`}); 
+        saveJsonFileSync(exportObj, {defaultPath: `${name}.postman_collection.json`}, (err) => {
+            console.log('callbak');
+            if (err) {
+                toast.error(err, {
+                    position: toast.POSITION.BOTTOM_RIGHT,
+                })
+            } else {
+                toast.success(`Your collection was exported successfully.`, {
+                    position: toast.POSITION.BOTTOM_RIGHT,
+                })
+            }
+            
+        }); 
     }
 
     checkDraggable = (node) => {

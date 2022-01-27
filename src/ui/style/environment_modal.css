@@ -1,4 +1,5 @@
-.environment_modal_list .ant-list-item {
+.environment_modal_list .ant-list-item .white-space-unset-class {
 
+  white-space: unset;
   /* padding: 8px 4px; */
 }
