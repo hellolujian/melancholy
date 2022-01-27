@@ -184,6 +184,7 @@ let localShortcutList = [
   { key: 'submitmodal', accelerator: 'CmdOrCtrl+Enter' },
   { key: 'openshortcuthelp', accelerator: 'CmdOrCtrl+/' },
 ];
+
 isDev && require('electron-debug')({ enabled: true, showDevTools: false });
 
 function createDevTools() {

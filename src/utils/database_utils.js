@@ -134,7 +134,8 @@ export const newCollection = async (doc, parentId) => {
         return await insertCollection({
             id: doc.id,
             name: doc.name, 
-            requestCount: 0
+            requestCount: 0,
+            items: []
         })
     }
 }

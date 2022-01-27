@@ -7,6 +7,7 @@ import {POST_REQUEST_ICON, YES_ICON, COLLECTION_ICON_20, GET_REQUEST_ICON, ENVIR
     MOCK_COLLECTION, MOCK_COLLECTION_48, MONITOR_COLLECTION_ICON, CIRCLE_DOT_ICON, DOCUMENTATION_ICON, DOCUMENTATION_ICON_48, CLOSE_SVG,CLOSE_ICON
 } from 'ui/constants/icons';
 
+import Ellipsis from 'react-ellipsis-component';
 import {loadCollection, getParentArr, newCollection} from '@/utils/database_utils'
 import {publishCollectionSave} from '@/utils/event_utils'
 
@@ -36,10 +37,6 @@ class CollectionSelectCard extends React.Component {
         await this.refreshData({chooseChain: chooseChain});
     }
 
-    handleCreateBtnClick = () => {
-        this.setState({creating: true});
-    }
-
     handleCloseBtnClick = () => {
         this.setState({creating: false});
     }
@@ -59,6 +56,19 @@ class CollectionSelectCard extends React.Component {
         publishCollectionSave();
         
         this.props.onChange(choosedCollection);
+    }
+
+    handleCreateBtnClick = async () => {
+        const {searchValue} = this.state;
+        if (searchValue) {
+            let choosedCollection = {id: UUID(), name: searchValue}
+            await newCollection(choosedCollection);
+            await this.refreshData({chooseChain: [choosedCollection], searchValue: ''});
+            publishCollectionSave();
+            this.props.onChange(choosedCollection);
+        } else {
+            this.setState({creating: true});
+        }
     }
 
     handleCollectionCreateInputChange = (e) => {
@@ -150,6 +160,7 @@ class CollectionSelectCard extends React.Component {
                     <div className="collection-select-card-top">
                         <Input 
                             value={searchValue}
+                            allowClear
                             placeholder="Search for a collection or folder" 
                             onChange={this.handleSearchChange}
                             prefix={<SearchOutlined />} />
@@ -158,17 +169,18 @@ class CollectionSelectCard extends React.Component {
                 backIcon={selectedCollection ? (
                     <Space>
                         <CaretLeftOutlined />
-                        <div style={{paddingBottom: 3}}>{selectedCollection.name}</div>
+                        <Ellipsis text={selectedCollection.name} />                            
                     </Space>
                 ) : false}
                 onBack={this.handleBackIconClick}
             
-                subTitle={selectedCollection ? null : 'All Collections'}
+                subTitle={selectedCollection ? null : `${searchValue ? 'Search Results' : 'All Collections'}`}
                 extra={[
                     <Button 
                         type="link" 
+                        className="create-btn-class"
                         onClick={this.handleCreateBtnClick}>
-                        + Create {chooseChain.length > 0 ? 'Folder' : 'Collection'}
+                        <Ellipsis text={searchValue ? `+ Create Collection "${searchValue}"` : `+ Create ${chooseChain.length > 0 ? 'Folder' : 'Collection'}`} />                            
                     </Button>
                 ]}
             >
@@ -223,9 +235,9 @@ class CollectionSelectCard extends React.Component {
                                 <List.Item 
                                     key={item.id}
                                     className={`collection-select-card-item ${chooseChain.length > 0 && !item.items ? 'collection-select-card-request-item' : 'collection-select-card-collection-item'}`}
-                                    actions={[
+                                    actions={item.items ? [
                                         <CaretRightOutlined className="collection-select-card-item-right" />
-                                    ]}
+                                    ] : []}
                                     onClick={() => this.handleListItemClick(item)}>
                 
                                     <div className="vertical-center">
@@ -234,7 +246,12 @@ class CollectionSelectCard extends React.Component {
                                                 item.method === 'POST' ? POST_REQUEST_ICON : GET_REQUEST_ICON
                                             )
                                         }
-                                        <Typography.Text style={{marginLeft: 8}}>{item.name}</Typography.Text>
+
+                                        <Typography.Text style={{marginLeft: 8}}>
+                                            <Ellipsis 
+                                                text={item.name} 
+                                            />  
+                                        </Typography.Text>
                                     </div>
 
                                 </List.Item>

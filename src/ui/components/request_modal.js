@@ -7,6 +7,7 @@ import DescriptionEditor from './description_editor'
 import {queryRequestMetaById} from '@/database/request_meta'
 
 import {queryCollectionMetaById} from '@/database/collection_meta'
+import Ellipsis from 'react-ellipsis-component';
 
 import {UUID} from '@/utils/global_utils'
 import {subscribeRequestModalOpen, publishRequestSave} from '@/utils/event_utils'
@@ -92,14 +93,16 @@ class RequestModal extends React.Component {
         const {requestInfo, visible, collectionInfo} = this.state;
         const hasParentId = requestInfo && requestInfo.parentId;
         const hasRequestId = requestInfo && requestInfo.id;
+        let okText = hasParentId ? "update" : `Save${collectionInfo ? (" to " + collectionInfo.name) : ""}`;
         return (
             <Modal 
                 title={(hasParentId ? "EDIT" : "SAVE") + " REQUEST"} 
                 centered
+                className="request-modal-class"
                 // bodyStyle={{}}
                 destroyOnClose
-                okText={hasParentId ? "update" : `Save${collectionInfo ? (" to " + collectionInfo.name) : ""}`}
-                okButtonProps={{disabled: !(collectionInfo || hasParentId)}}
+                okText={<Ellipsis text={okText} />}
+                okButtonProps={{disabled: !(collectionInfo || hasParentId), className: 'request-modal-ok-button'}}
                 width={560}
                 visible={visible} 
                 onOk={this.handleModalOk} 

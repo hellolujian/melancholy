@@ -83,7 +83,7 @@ class ScriptEditor extends React.Component {
         let {aceEditorProps = {}, height = '360px', value = '', mode = 'javascript'} = this.props;
         let {currentTheme} = this.state
 
-        const {styleProps = {}} = aceEditorProps;
+        const {style = {}} = aceEditorProps;
         return (
             <>
                 <AceEditor
@@ -111,7 +111,7 @@ class ScriptEditor extends React.Component {
                     style={{
                         border: '1px solid var(--common-border-color, lightgray)', 
                         width: '100%', 
-                        ...styleProps
+                        ...style
                     }}
                 />
             </>

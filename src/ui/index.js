@@ -21,6 +21,7 @@ import {getStoreValue} from '@/utils/store_utils'
 import 'ui/style/common.css'
 import 'ui/style/layout.css'
 import 'ui/style/global.css'
+import 'ui/style/content_modal.css'
 
 import 'react-toastify/dist/ReactToastify.css';
 import PostmanSDK from 'postman-collection'
