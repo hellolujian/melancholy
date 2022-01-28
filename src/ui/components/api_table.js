@@ -62,7 +62,7 @@ class ApiTable extends React.Component {
 
     render() {
      
-        const {scene, editable = true, draggable = true, tableProps} = this.props;
+        const {scene, editable = true, draggable = true, tableProps, tableClassName} = this.props;
         return (
             <EditableTable 
                 rowKey='id'
@@ -132,6 +132,7 @@ class ApiTable extends React.Component {
                     ]
                 }
                 onChange={this.handleChange}
+                tableClassName={tableClassName}
             />
         )
     }

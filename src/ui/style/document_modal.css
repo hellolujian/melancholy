@@ -1,0 +1,17 @@
+.exist-collection-card {
+  height: calc(80vh - 250px);
+  overflow: auto;
+}
+.exist-collection-card-meta .ant-card-meta-title {
+  white-space: unset
+}
+
+.exist-collection-card-grid {
+  cursor: pointer;
+  box-shadow: none;
+}
+
+.documentation-api-table .ant-table {
+  height: calc(80vh - 230px);
+  overflow-y: auto;
+}

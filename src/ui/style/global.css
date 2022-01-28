@@ -51,7 +51,7 @@ textarea::placeholder {
 .height-auto-modal.ant-modal .ant-modal-body {
   padding: 12px 24px 0px 24px;
   height: calc(80vh - 108px);
-  overflow-y: scroll;
+  overflow-y: auto;
 }
 
 .daptv-setting-variable-table1 .ant-table {

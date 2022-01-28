@@ -10,6 +10,8 @@
 
 .new-modal-tabs .ant-tabs-content-holder {
   padding: 0px 20px;
+  height: calc(80vh - 200px);
+  overflow: auto
 }
 
 

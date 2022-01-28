@@ -190,7 +190,7 @@ class NewButtonModal extends React.Component {
                                     <Typography.Title level={5}>
                                         {operation.title}
                                     </Typography.Title>
-                                    <Row gutter={[16, 16]}>
+                                    <Row>
                                         {
                                             operation.items.map(item => (
                                                 <Col 
@@ -267,12 +267,12 @@ class NewButtonModal extends React.Component {
                                 modalContent={modalContent}
                                 modalProps={{
                                     destroyOnClose: true,
-                                    className: 'new-button-modal-class',
+                                    className: 'new-button-modal-class height-auto-modal',
                                     closable: false,
                                     title: null,
                                     bodyStyle: {
                                         padding: 0,
-                                        height: 600
+                                        // height: 600
                                     },
                                     footer: (
                                         <div className="justify-content-space-between">

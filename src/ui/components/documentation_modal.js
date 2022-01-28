@@ -28,7 +28,12 @@ import {
 import {UUID} from '@/utils/global_utils'
 import {parseFullUrl} from '@/utils/common_utils'
 
+import Ellipsis from 'react-ellipsis-component';
+
 import ApiTable from './api_table'
+
+import 'ui/style/document_modal.css'
+
 const { Step } = Steps;
 const { Meta } = Card;
 const {Text, Link} = Typography;
@@ -187,6 +192,7 @@ Is there a limit to the number of requests an user can send?`
                 centered
                 // bodyStyle={{ height: 400}}
                 destroyOnClose={true}
+                className="height-auto-modal"
                 okText="Create"
                 width={900}
                 visible={visible} 
@@ -247,24 +253,30 @@ Is there a limit to the number of requests an user can send?`
 
                             {
                                 createDocWay === 'fromexist' ? (
-                                    <Card>
-                                        <Space wrap>
+                                    <Card className="exist-collection-card">
+                                        {/* <Card.Grid style={{width: '25', border: '1px solid red'}}> */}
                                         {
                                             collectionList.map((item, index) => (
-                                                <Card bordered={false} hoverable key={index} onClick={() => this.handleCollectionItemClick(item)}>
-                                                    <Meta
+                                                <Card.Grid className="exist-collection-card-grid">
+                                                {/* <Card bordered={false} hoverable key={index} onClick={() => this.handleCollectionItemClick(item)}> */}
+                                                    <Meta 
+                                                        key={index} 
+                                                        className="exist-collection-card-meta"
+                                                        onClick={() => this.handleCollectionItemClick(item)}
                                                         avatar={getByTheme(COLLECTION_ICON_32, DARK_THEME_COLLECTION_ICON_32)}
-                                                        title={item.name}
+                                                        title={<Ellipsis text={item.name} />}
                                                         description={`${item.requestCount} ${item.requestCount > 1 ? 'requests' : 'request'}`}
                                                     />
-                                                </Card>
+                                                {/* </Card> */}
+                                                </Card.Grid>
                                             ))
                                         }
-                                        </Space>
+                                        {/* </Card.Grid> */}
                                         
                                     </Card>
                                 ) : (
                                     <ApiTable 
+                                        tableClassName="documentation-api-table"
                                         onChange={this.handleRequestTableChange}
                                     />
                                 )
@@ -299,7 +311,7 @@ Is there a limit to the number of requests an user can send?`
                                         <DescriptionEditor 
                                             mdEditorShow
                                             scene="document"
-                                            // mdEditorProps={{style: {height: "300px"}}} 
+                                            mdEditorProps={{height: "calc(80vh - 320px)"}}
                                             defaultValue={description} 
                                             onChange={this.handleDescriptionChange}
                                         />
