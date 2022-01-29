@@ -25,7 +25,7 @@ import {
     COLLECTION_ICON_48, ENVIRONMENT_ICON, ENVIRONMENT_ICON_48,
     MOCK_COLLECTION, MOCK_COLLECTION_48, MONITOR_COLLECTION_ICON, 
     MONITOR_COLLECTION_ICON_48, DOCUMENTATION_ICON, DOCUMENTATION_ICON_48, 
-    CLOSE_SVG, CLOSE_ICON, DARK_THEME_ADD_REQUEST_ICON, DARK_THEME_ENVIRONMENT_ICON,
+    DARK_THEME_ADD_REQUEST_ICON, DARK_THEME_ENVIRONMENT_ICON,
     DARK_THEME_COLLECTION_ICON, DARK_THEME_DOCUMENTATION_ICON,DARK_THEME_MOCK_COLLECTION,
     DARK_THEME_MONITOR_COLLECTION_ICON, DARK_THEME_ADD_REQUEST_ICON_48, DARK_THEME_COLLECTION_ICON_48,
     DARK_THEME_ENVIRONMENT_ICON_48, DARK_THEME_DOCUMENTATION_ICON_48, DARK_THEME_MOCK_COLLECTION_48,
@@ -48,6 +48,7 @@ import {publishCollectionModalOpen, publishRequestModalOpen,
     listenShortcut, publishEnvironmentOpen
 } from '@/utils/event_utils'
 import {getByTheme, getCloseSvg} from '@/utils/style_utils'
+import {getStoreValue, setStoreValue} from '@/utils/store_utils'
 import 'ui/style/new_button_modal.css'
 const { Header,} = Layout;
 const { TabPane } = Tabs;
@@ -58,10 +59,8 @@ class NewButtonModal extends React.Component {
         super(props);
         this.state = {
             newModalVisible: false,
-            requestModalVisible: false,
-            collectionModalVisible: false,
-            environmentModalVisible: false,
-            documentationModalVisible: false
+            documentationModalVisible: false,
+            showNewModalOnLaunch: getStoreValue('showNewModalOnLaunch', true)
         }
     }
 
@@ -74,12 +73,18 @@ class NewButtonModal extends React.Component {
     }
 
     // 处理新增按钮大弹框事件
-    handleNewModalOpen = (visible) => {
+    handleNewModalOpen = () => {
         this.handleNewModalVisibleChange(true)
     }
 
     componentDidMount() {
-        listenShortcut('new', this.handleNewModalOpen)
+        listenShortcut('new', this.handleNewModalOpen);
+        const {showNewModalOnLaunch} = this.state;
+        const hasShowDuringSession = sessionStorage.getItem("hasShowNewModalOnLaunch");
+        if (showNewModalOnLaunch && !hasShowDuringSession) {
+            this.handleNewModalOpen()
+            sessionStorage.setItem("hasShowNewModalOnLaunch", true);
+        }
     }
 
     // 处理rce弹框显示或隐藏
@@ -155,7 +160,7 @@ class NewButtonModal extends React.Component {
                     icon: () => getByTheme(MOCK_COLLECTION_48, DARK_THEME_MOCK_COLLECTION_48),
                     smallIcon: () => getByTheme(MOCK_COLLECTION, DARK_THEME_MOCK_COLLECTION),
                     label: 'Mock Server',
-                    desc: 'Create a mock server for your in-development APIs'
+                    desc: 'Create a mock server for your in-development APIs',
                 },
                 {
                     key: 'monitor',
@@ -169,9 +174,16 @@ class NewButtonModal extends React.Component {
         }
     ]
 
+    handleCheckboxChange = (e) => {
+        let checked = e.target.checked
+        setStoreValue('showNewModalOnLaunch', checked)
+        this.setState({showNewModalOnLaunch: checked})
+    }
+
     render() {
 
-        const {environmentModalVisible, collectionModalVisible, requestModalVisible, documentationModalVisible, workspaceList, newModalVisible} = this.state;
+        const {showNewModalOnLaunch, documentationModalVisible, newModalVisible} = this.state;
+
         let modalContent = (
             <Tabs 
                 defaultActiveKey="createnew" 
@@ -199,7 +211,7 @@ class NewButtonModal extends React.Component {
                                                     onClick={() => this.handleNewMenuClick({key: item.key})}>
                                                     <Card 
                                                         bordered={false} 
-                                                        hoverable >
+                                                        hoverable={!item.disabled} >
                                                         <Meta
                                                             avatar={item.icon()}
                                                             title={item.label}
@@ -276,7 +288,7 @@ class NewButtonModal extends React.Component {
                                     },
                                     footer: (
                                         <div className="justify-content-space-between">
-                                            <Checkbox onChange={this.onChange}>
+                                            <Checkbox checked={showNewModalOnLaunch} onChange={this.handleCheckboxChange}>
                                                 Show this window on launch
                                             </Checkbox>
                                             {POSTMAN_DOCS_TIPS}
@@ -292,10 +304,7 @@ class NewButtonModal extends React.Component {
 
                 <RequestModal />
                 <CollectionModal />
-                <EnvironmentModal 
-                    visible={environmentModalVisible} 
-                    onVisibleChange={(visible) => this.handleRCEModalVisibleChange('environment', visible)} 
-                />
+                <EnvironmentModal />
                 {
                     documentationModalVisible && (
                         <DocumentationModal visible={documentationModalVisible} onVisibleChange={(visible, parentModalVisible) => this.handleRCEModalVisibleChange('documentation', visible, parentModalVisible)}/>
