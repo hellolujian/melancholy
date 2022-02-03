@@ -8,6 +8,7 @@ import { PlusOutlined, SearchOutlined,} from '@ant-design/icons';
 import CollectionModal from 'ui/components/collection_modal'
 import TooltipButton from 'ui/components/tooltip_button';
 import LayoutHeader from 'ui/components/layout_header'
+import LayoutFooter from 'ui/components/layout_footer'
 import CollectionRCTree from 'ui/components/collection_rc_tree'
 import ResponseTab from 'ui/components/response_tab'
 
@@ -233,7 +234,7 @@ class Home extends React.Component {
                   dynamicWidth={dynamicWidth}
                 />
             </div>
-            <div className="bottom">底部，高度40px</div>
+            <LayoutFooter />
           </div>
             
         )

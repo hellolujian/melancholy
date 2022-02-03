@@ -116,7 +116,7 @@ class DAPTVSettingTabs extends React.Component {
 
         return (
             <Tabs 
-                activeKey={activeKey} defaultActiveKey="variables" 
+                activeKey={activeKey} defaultActiveKey="description" 
                 onChange={this.handleTabChange} 
                 // style={{height: '100%', position: 'relative'}}
                 >

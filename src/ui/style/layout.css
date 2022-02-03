@@ -35,14 +35,15 @@
 
 .bottom{
   width:100%;
-  height:40px;
-  background:#000;
-  color:#fff;
+  height:30px;
+  /* background:#000; */
+  /* color:#fff; */
   position:absolute;
+  border-top: 1px solid var(--common-border-color, lightgrey);
   bottom:0;
   /*以上设置是重点必须的*/
-  text-align:center;
-  line-height:40px;
+  /* text-align:center; */
+  /* line-height:40px; */
 }
 .mainBox{
   width:100%;

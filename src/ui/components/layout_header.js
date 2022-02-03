@@ -62,7 +62,11 @@ class LayoutHeader extends React.Component {
                 <Space>
                     <NewButtonModal />
                     <ImportModal />
-                    <TooltipButton title={RUNNER_TITLE} label="Runner" />
+                    <TooltipButton 
+                        title={RUNNER_TITLE} 
+                        label="Runner" 
+                        buttonProps={{disabled: true}}
+                    />
                  
                     <DropdownTooltip 
                         trigger="click"
@@ -70,8 +74,8 @@ class LayoutHeader extends React.Component {
                             <Menu mode="horizontal" onClick={this.handleOpenNewBtnClick}>
                                 <Menu.ItemGroup title="OPEN NEW">
                                     <Menu.Item key="tab">Tab</Menu.Item>
-                                    <Menu.Item key="melancholywindow">Melancholy Window</Menu.Item>
-                                    <Menu.Item key="runnerwindow">Runner Window</Menu.Item>
+                                    <Menu.Item key="melancholywindow" disabled>Melancholy Window</Menu.Item>
+                                    <Menu.Item key="runnerwindow" disabled>Runner Window</Menu.Item>
                                 </Menu.ItemGroup>
                             </Menu>
                         }

@@ -68,10 +68,6 @@ class ImportModal extends React.Component {
         
     }
 
-    handleModalVisibleChange = (visible) => {
-        this.setState({modalVisible: visible})
-    }
-
     handleRawTextChange = (e) => {
         this.setState({pasteRawText: e.target.value})
     }
@@ -107,6 +103,7 @@ class ImportModal extends React.Component {
                         footer: activeTabKey === 'file' || activeTabKey === 'folder' ? null : (
                             <Button type="primary" onClick={this.handleImportClick}>Import</Button>
                         ),
+                        centered: true,
                         // bodyStyle: { height: 400},
                     }} 
                     modalVisible={modalVisible}
@@ -114,7 +111,7 @@ class ImportModal extends React.Component {
                     modalContent={(
                         <Space direction="vertical">
                             {IMPORT_FILE_TIPS}
-                            <Tabs size="small" defaultActiveKey="raw" value={activeTabKey} onChange={this.handleTabKeyChange}>
+                            <Tabs size="small" defaultActiveKey="file" value={activeTabKey} onChange={this.handleTabKeyChange}>
                                 <TabPane tab="Import File" key="file">
                                     <Dragger
                                         multiple

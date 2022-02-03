@@ -76,9 +76,10 @@ class WorkspaceModal extends React.Component {
             <Modal 
                 title="CREATE NEW WORKSPACE" 
                 zIndex={999999}
+                className="height-auto-modal"
                 centered
                 destroyOnClose
-                bodyStyle={{ height: 600}}
+                // bodyStyle={{ height: 600}}
                 okButtonProps={{}}
                 okText="Create Workspace"
                 width={800}
