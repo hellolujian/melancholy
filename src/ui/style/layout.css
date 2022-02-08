@@ -92,3 +92,11 @@
 .import-file-dragger-class {
   height: 250px !important
 }
+
+.bottom-find-popover-class {
+  width: 100%;
+}
+
+.bottom-find-popover-class .ant-popover-content .ant-popover-inner .ant-popover-inner-content {
+  padding: 0px;
+}
