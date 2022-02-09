@@ -1,5 +1,5 @@
 
-import {query, findOne, update, insert} from '@/database/database'
+import {query, findOne, update, insert, count} from '@/database/database'
 import {currentWorkspaceIdQuery} from '@/utils/store_utils'
 
 const COLLECTION = 'collection';
@@ -23,5 +23,10 @@ export const insertCollection = async (doc) => {
 
 export const updateCollection = (id, doc) => {
     return update(COLLECTION, {id: id}, doc);
+}
+
+export const queryCollectionCount = async () => {
+    let workspaceIdQuery = await currentWorkspaceIdQuery();
+    return count(COLLECTION, workspaceIdQuery);
 }
 

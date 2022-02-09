@@ -34,7 +34,7 @@ import NewButtonModal from './new_button_modal'
 import SettingsModal from './settings_modal'
 import WorkspaceCard from './workspace_card'
 
-import LayoutFooterFind from './layout_footer_find'
+import FindEntityCollection from './find_entity_collection'
 
 import {HIDE_SIDEBAR_TITLE, BOTTOM_FIND_TITLE, CREATE_NEW, ACCOUNT_TITLE, NOTIFICATIONS_TITLE, SETTINGS_TITLE, RUNNER_TITLE} from '@/ui/constants/titles'
 const { Header,} = Layout;
@@ -52,20 +52,43 @@ class LayoutHeader extends React.Component {
       
     }
 
+    handleFindWayChange = (checkedValues) => {
+        this.setState({findWays: checkedValues})
+    }
+
+    handleFindWhereChange = (e) => {
+        this.setState({findWhere: e.target.value})
+    }
+
     render() {
      
-        const {findWhere = 'everything', findWays = ["ignorecase"], 
-            enviromentCount, collectionCount, collectionPopoverVisible, envPopoverVisible,
-            collectionCheckboxGroupValue, } = this.state;
+        const {findWays = ["ignorecase"], } = this.state;
 
         return (
-            <div class="bottom">
-                <Space className="vertical-center full-height">
-                    {/* <TooltipButton size="small" type='link' title={HIDE_SIDEBAR_TITLE} icon={TOGGLE_SIDEBAR_ICON} /> */}
-                    <TooltipButton size="small" type='link' title={BOTTOM_FIND_TITLE} icon={<SearchOutlined  />} />
-                    <LayoutFooterFind />
-                </Space>
-            </div>
+            <Space direction="vertical" className="full-width">
+                <Typography.Text>FIND</Typography.Text>
+                <Row>
+                    <Col flex="auto">
+                        <Input placeholder="Enter text to find" />
+                    </Col>
+                    <Col flex="15px" />
+                    <Col flex="none">
+                        <Button type="primary">Find</Button>
+                    </Col>
+                </Row>
+                <Checkbox.Group
+                    options={[
+                        {
+                            label: 'Regex', value: 'regex'
+                        }, 
+                        {
+                            label: 'Ignore Case', value: 'ignorecase'
+                        }
+                    ]}
+                    value={findWays}
+                    onChange={this.handleFindWayChange}
+                />
+            </Space>
 
         )
     }
