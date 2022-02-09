@@ -46,6 +46,7 @@ class FindEntityCollection extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            collectionCheckboxGroupValue: []
         }
     }
 
@@ -60,11 +61,9 @@ class FindEntityCollection extends React.Component {
     }
 
     handleCollectionCheckboxGroupsChange = (checkedValue) => {
-        const {allCollection} = this.state;
         this.setState({
             collectionCheckboxGroupValue: checkedValue, 
             collectionCheckboxChecked: checkedValue.length > 0,
-            collectionSelectAll: checkedValue.length === allCollection.length
         })
     }
 
@@ -78,13 +77,32 @@ class FindEntityCollection extends React.Component {
         }
     }
 
+    getSearchedCollection = () => {
+        const {allCollection = [], collectionSearchValue} = this.state;
+        return collectionSearchValue ? allCollection.filter(item => item.name.toLowerCase().indexOf(collectionSearchValue) !== -1) : allCollection
+    }
+
     handleCollectionSelectAll = () => {
-        const {collectionSelectAll, allCollection} = this.state;
+        const {allCollection, collectionCheckboxGroupValue = []} = this.state;
+        let collectionSelectAll = allCollection.length === collectionCheckboxGroupValue.length;
         this.setState({
-            collectionSelectAll: !collectionSelectAll, 
-            collectionCheckboxGroupValue: collectionSelectAll ? [] : allCollection.map(item => item.id),
+            collectionCheckboxGroupValue: collectionSelectAll ? [] : this.getSearchedCollection().map(item => item.id),
             collectionCheckboxChecked: !collectionSelectAll
         })
+    }
+
+    handleCollectionSearchValueChange = (e) => {
+        this.setState({collectionSearchValue: e.target.value})
+    }
+
+    handleCollectionItemCheckboxChange = (key, checked) => {
+        let {collectionCheckboxGroupValue} = this.state;
+        if (checked) {
+            collectionCheckboxGroupValue.push(key)
+        } else {
+            collectionCheckboxGroupValue = collectionCheckboxGroupValue.filter(item => item !== key)
+        }
+        this.setState({collectionCheckboxGroupValue: collectionCheckboxGroupValue})
     }
 
     render() {
@@ -92,14 +110,20 @@ class FindEntityCollection extends React.Component {
         const {disabled} = this.props;
      
         const {allCollection = [], collectionPopoverVisible, collectionCheckboxChecked,
-            collectionCheckboxGroupValue = [], collectionSelectAll} = this.state;
+            collectionCheckboxGroupValue = [], collectionSearchValue} = this.state;
 
+        let collectionSelectAll = allCollection.length === collectionCheckboxGroupValue.length;
         let allCollectionCount = allCollection.length;
         let selectedCollectionCount = collectionCheckboxGroupValue.length;
+        let searchedCollection = this.getSearchedCollection()
 
         let findCollectionPopoverContent = (
             <Space direction="vertical">
-                <Input placeholder="Search for collections" prefix={<SearchOutlined />} />
+                <Input 
+                    placeholder="Search for collections" 
+                    value={collectionSearchValue}
+                    prefix={<SearchOutlined />} 
+                    onChange={this.handleCollectionSearchValueChange} />
                 <Space size={64}>
                     <Typography.Text type="secondary">
                         {`All collections (${allCollectionCount})`}
@@ -115,21 +139,22 @@ class FindEntityCollection extends React.Component {
                     </Space>
                 </Space>
                 <Divider style={{margin: 0}} />
-                <Checkbox.Group 
-                    className="collection-checkbox-group-class"
-                    onChange={this.handleCollectionCheckboxGroupsChange} 
-                    value={collectionCheckboxGroupValue}>
-                    <Space direction="vertical">
-                        {
-                            allCollection.map(item => (
-                                <Checkbox value={item.id}>
-                                    <Ellipsis text={item.name} />
-                                </Checkbox>
-                            ))
-                        }
-                        
-                    </Space>
-                </Checkbox.Group>
+                <Space 
+                    style={{paddingTop: 4, paddingBottom: 4}} 
+                    direction="vertical" 
+                    className="collection-checkbox-group-class full-width">
+                    {
+                        searchedCollection.map(item => (
+                            <Checkbox 
+                                key={item.id} 
+                                checked={collectionCheckboxGroupValue.includes(item.id)} 
+                                onChange={(e) => this.handleCollectionItemCheckboxChange(item.id, e.target.checked)}>
+                                <Ellipsis text={item.name} />
+                            </Checkbox>
+                        ))
+                    }
+                    
+                </Space>
             </Space>
         )
 
