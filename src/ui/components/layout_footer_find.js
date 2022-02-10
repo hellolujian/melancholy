@@ -37,6 +37,8 @@ import WorkspaceCard from './workspace_card'
 import FindEntityCollection from './find_entity_collection'
 import FindCommonSettings from './find_common_settings'
 import FindWhereSettings from './find_where_settings'
+import FindReplaceSettings from './find_replace_settings'
+import FindResult from './layout_footer_find_result'
 
 import {HIDE_SIDEBAR_TITLE, BOTTOM_FIND_TITLE, CREATE_NEW, ACCOUNT_TITLE, NOTIFICATIONS_TITLE, SETTINGS_TITLE, RUNNER_TITLE} from '@/ui/constants/titles'
 const { Header,} = Layout;
@@ -60,31 +62,18 @@ class LayoutFooterFind extends React.Component {
 
         let findContent = (
 
-            <Row>
+            <Row wrap={false}>
                 <Col flex="400px" style={{borderRight: '1px solid var(--common-border-color, lightgray)', padding: '12px 16px'}} className="">
                     <Space direction="vertical" className="full-width" size={16}>
                         <FindCommonSettings />
                         <FindWhereSettings />
                     </Space>
                     <Divider />
-                    <Space direction="vertical" className="full-width">
-                        <Typography.Text>REPLACE WITH</Typography.Text>
-                            <Row>
-                                <Col flex="auto">
-                                    <Input placeholder="Enter text to replace with..." />
-                                </Col>
-                                <Col flex="15px" />
-                                <Col flex="none">
-                                    <Button type="primary">Replace in 0 selected</Button>
-                                </Col>
-                            </Row>
-                            <Checkbox onChange={this.handleEnvCheckboxChange}>
-                                Select all
-                            </Checkbox>
-                        
-                    </Space>
+                    <FindReplaceSettings />
                 </Col>
-                <Col flex="auto">Fill Rest</Col>
+                <Col flex="auto">
+                    <FindResult />
+                </Col>
             </Row>
         )
         return (

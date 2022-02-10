@@ -33,7 +33,7 @@ import NewButtonModal from './new_button_modal'
 
 import SettingsModal from './settings_modal'
 import WorkspaceCard from './workspace_card'
-import {queryCollectionCount, queryCollection} from '@/database/collection'
+import {queryEnvironmentMeta} from '@/database/environment_meta'
 import Ellipsis from 'react-ellipsis-component';
 
 
@@ -41,7 +41,7 @@ import Ellipsis from 'react-ellipsis-component';
 import {HIDE_SIDEBAR_TITLE, BOTTOM_FIND_TITLE, CREATE_NEW, ACCOUNT_TITLE, NOTIFICATIONS_TITLE, SETTINGS_TITLE, RUNNER_TITLE} from '@/ui/constants/titles'
 const { Header,} = Layout;
 
-class FindEntityCollection extends React.Component {
+class FindEntityEnvironment extends React.Component {
 
     constructor(props) {
         super(props);
@@ -51,7 +51,7 @@ class FindEntityCollection extends React.Component {
     }
 
     refreshCollection = async () => {
-        let allCollection = await queryCollection();
+        let allCollection = await queryEnvironmentMeta();
         this.setState({allCollection: allCollection});
     }
 
@@ -108,13 +108,13 @@ class FindEntityCollection extends React.Component {
         let findCollectionPopoverContent = (
             <Space direction="vertical">
                 <Input 
-                    placeholder="Search for collections" 
+                    placeholder="Search for environments" 
                     value={collectionSearchValue}
                     prefix={<SearchOutlined />} 
                     onChange={this.handleCollectionSearchValueChange} />
                 <Space size={64}>
                     <Typography.Text type="secondary">
-                        {`All collections (${allCollectionCount})`}
+                        {`All environments (${allCollectionCount})`}
                     </Typography.Text>
                     <Space size={0}>
                         <Typography.Text type="secondary">
@@ -149,7 +149,7 @@ class FindEntityCollection extends React.Component {
         return (
             <Popover 
                 content={findCollectionPopoverContent}
-                title="Collections"
+                title="Environments"
                 trigger="click"
                 placement="bottomLeft"
                 autoAdjustOverflow={false}
@@ -162,7 +162,7 @@ class FindEntityCollection extends React.Component {
                     disabled={disabled}
                     checked={selectedCollectionCount > 0}>
                     <Space>
-                        {`Collections (${selectedCollectionCount})`}
+                        {`Environments (${selectedCollectionCount})`}
                         <CaretDownOutlined />
                     </Space>
                 </Checkbox>
@@ -172,7 +172,7 @@ class FindEntityCollection extends React.Component {
     }
 }
 
-export default FindEntityCollection;
+export default FindEntityEnvironment;
 
 
 

@@ -35,18 +35,18 @@ import SettingsModal from './settings_modal'
 import WorkspaceCard from './workspace_card'
 
 import FindEntityCollection from './find_entity_collection'
-import FindEntityEnvironment from './find_entity_enviroment'
 import FindCommonSettings from './find_common_settings'
+import FindWhereSettings from './find_where_settings'
 
 import {HIDE_SIDEBAR_TITLE, BOTTOM_FIND_TITLE, CREATE_NEW, ACCOUNT_TITLE, NOTIFICATIONS_TITLE, SETTINGS_TITLE, RUNNER_TITLE} from '@/ui/constants/titles'
 const { Header,} = Layout;
 
-class FindWhereSettings extends React.Component {
+class FindReplaceSettings extends React.Component {
 
     constructor(props) {
         super(props);
         this.state = {
-           
+            selectCount: 0
         }
     }
 
@@ -54,45 +54,39 @@ class FindWhereSettings extends React.Component {
       
     }
 
-    handleFindWhereChange = (e) => {
-        this.setState({findWhere: e.target.value})
+    handleSelectAllChange = (e) => {
+        this.props.onSelectAll(e.target.checked);
     }
 
     render() {
-     
-        const {findWhere = 'everything', 
-            enviromentCount, } = this.state;
-
+        const {selectCount} = this.state;
         return (
             <Space direction="vertical" className="full-width">
-                <Typography.Text>WHERE</Typography.Text>
-                <Radio.Group onChange={this.handleFindWhereChange} value={findWhere}>
-                    <Space direction="vertical">
-                        <Radio value='everything'>Everything</Radio>
-                        <Radio value='choose'>Choose entities to find in</Radio>
-                    </Space>
-                </Radio.Group>
-                <Space direction="vertical" style={{paddingLeft: 40}}>
-                    <FindEntityCollection disabled={findWhere !== 'choose'} />
-                    <FindEntityEnvironment disabled={findWhere !== 'choose'} />
-                    <Checkbox 
-                        disabled={findWhere !== 'choose'}
-                        onChange={this.handleGlobalCheckboxChange}>
-                        Globals
-                    </Checkbox>
-                    <Checkbox 
-                        disabled={findWhere !== 'choose'}
-                        onChange={this.handleTabCheckboxChange}>
-                        Open tabs
-                    </Checkbox>
-                </Space>
+                <Typography.Text>REPLACE WITH</Typography.Text>
+                <Row>
+                    <Col flex="auto">
+                        <Input placeholder="Enter text to replace with..." />
+                    </Col>
+                    <Col flex="15px" />
+                    <Col flex="none">
+                        <Button type="primary">
+                            {`Replace in ${selectCount} selected`}
+                        </Button>
+                    </Col>
+                </Row>
+                <Checkbox onChange={this.handleSelectAllChange}>
+                    Select all
+                </Checkbox>
             </Space>
-
         )
     }
 }
 
-export default FindWhereSettings;
+export default FindReplaceSettings;
+
+FindReplaceSettings.defaultProps = {
+    onSelectAll: () => {}
+}
 
 
 

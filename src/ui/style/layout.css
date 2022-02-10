@@ -110,3 +110,11 @@
   overflow: auto;
 }
 
+.find-result-field-overlay-class .ant-dropdown-menu {
+  width: 200px;
+  max-height: 300px;
+  overflow: auto;
+  padding-top: 10px;
+  padding-right: 10px;
+}
+
