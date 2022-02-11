@@ -64,6 +64,7 @@ const { TabPane } = Tabs;
 class CollectionTree extends React.Component {
 
     rcTreeRef = React.createRef();
+
     constructor(props) {
         super(props);
         this.state = {
@@ -74,8 +75,28 @@ class CollectionTree extends React.Component {
         }
     }
 
+    traverseFilterCollectionData = (collectionData, filterText) => {
+        let result = [];
+        for (let i = 0; i < collectionData.length; i++) {
+            let item = collectionData[i];
+            if (item.name.indexOf(filterText) !== -1) {
+                result.push(item);
+            } else if (item.items) {
+                item.items = this.traverseFilterCollectionData(item.items, filterText)
+                if (item.items.length !== 0) {
+                    result.push(item)
+                }
+            }
+        }
+        return result;
+    }
+
     refreshData = async () => {
         let collectionData = await loadCollection();
+        const {filterText} = this.props;
+        if (filterText) {
+            collectionData = this.traverseFilterCollectionData(collectionData, filterText)
+        }
         this.setState({collectionData: collectionData});
     }
 

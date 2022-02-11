@@ -36,6 +36,8 @@ const {Option} = Select;
 
 class MainLeftContainer extends React.Component {
 
+  collectionTreeRef = React.createRef();
+
     constructor(props) {
         super(props);
         this.state = {
@@ -88,10 +90,15 @@ class MainLeftContainer extends React.Component {
       this.setState({tabActiveKey: key})
     }
 
+    handleFilterTextChange = (e) => {
+      this.setState({filterText: e.target.value});
+      this.collectionTreeRef.current.refreshData(e.target.value)
+    }
+
     render() {
 
       const {dynamicWidth} = this.props;
-      const {tabActiveKey, } = this.state;
+      const {tabActiveKey, filterText} = this.state;
         return (
 
           
@@ -119,7 +126,13 @@ class MainLeftContainer extends React.Component {
 
                 <Row style={{padding: '10px 10px 0px 10px'}}>
                   <Col span={24}>
-                    <Input style={{borderRadius:'20px'}} placeholder="Filter" prefix={<SearchOutlined />} />
+                    <Input 
+                      value={filterText}
+                      style={{borderRadius:'20px'}} 
+                      placeholder="Filter" 
+                      prefix={<SearchOutlined />} 
+                      onChange={this.handleFilterTextChange}
+                    />
                   </Col>
                 </Row>
 
@@ -160,7 +173,9 @@ class MainLeftContainer extends React.Component {
                     tabActiveKey === 'collections' && (
                       <>
                         <CollectionRCTree 
+                          ref={this.collectionTreeRef}
                           // height={this.state.collectionTreeHeight} 
+                          filterText={filterText}
                         />
                       </>
                     )
