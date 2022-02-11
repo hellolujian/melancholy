@@ -49,7 +49,7 @@ class FindResultFieldDropdown extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-           selectedFields: []
+           notSelectedFields: []
         }
     }
 
@@ -57,13 +57,14 @@ class FindResultFieldDropdown extends React.Component {
       
     }
 
-    handleTabsKeyChange = () => {
-
+    handleFieldCheckboxChange = (fieldValue, checked) => {
+        const {notSelectedFields} = this.state;
+        this.setState({notSelectedFields: checked ? notSelectedFields.filter(item => item !== fieldValue) : [...notSelectedFields, fieldValue]});
     }
 
     render() {
      
-        const {} = this.state;
+        const {notSelectedFields} = this.state;
         const {menuList} = this.props;
 
         let allField = [];
@@ -73,35 +74,41 @@ class FindResultFieldDropdown extends React.Component {
         
         const menu = (
             <Menu>
-                <Typography.Text style={{paddingLeft: 10}} type="secondary">INCLUDE FIELDS</Typography.Text>
+                <Typography.Text type="secondary">INCLUDE FIELDS</Typography.Text>
                 {
                     menuList.map(menuItem => (
                         <>
                             <Divider 
                                 orientation="left" 
                                 orientationMargin="0"
-                                style={{fontSize: 'unset', margin: '4px 0px', paddingLeft:10}}>
+                                style={{fontSize: 'unset', margin: '8px 0px'}}>
                                 {menuItem.title}
                             </Divider>
-
+                            <Space direction="vertical">
                             {
-                                menuItem.items.map(item => (
-                                    <Menu.Item key={item.value}>
-                                        <Checkbox>{item.label}</Checkbox>
-                                    </Menu.Item>
-                                ))
+                                menuItem.items.map(item => {
+                                    let fieldKey = menuItem.title + "_" + item.value;
+                                    return (
+                                        <Checkbox 
+                                            key={fieldKey}
+                                            checked={!notSelectedFields.includes(fieldKey)}
+                                            onChange={(e) => this.handleFieldCheckboxChange(fieldKey, e.target.checked)}>
+                                            {item.label}
+                                        </Checkbox>
+                                    )
+                                })
                             }
+                            </Space>
                         </>
-                        
                     ))
                 }
             </Menu>
           );
 
         return (
-            <Dropdown overlay={menu} visible overlayClassName="find-result-field-overlay-class">
+            <Dropdown overlay={menu} overlayClassName="find-result-field-overlay-class">
                 <Button type="text">
-                    Button <DownOutlined />
+                {`FILTER (${notSelectedFields.length === 0 ? 'ALL' : (allField.length - notSelectedFields.length)} FIELDS)`} <DownOutlined />
                 </Button>
             </Dropdown>
         )

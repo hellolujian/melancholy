@@ -114,7 +114,9 @@
   width: 200px;
   max-height: 300px;
   overflow: auto;
-  padding-top: 10px;
-  padding-right: 10px;
+  padding: 10px;
 }
 
+.find-result-tabs .ant-tabs-nav {
+  margin-bottom: 8px;
+}

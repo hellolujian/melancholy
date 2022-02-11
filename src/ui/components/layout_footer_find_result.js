@@ -65,114 +65,110 @@ class LayoutFooterFind extends React.Component {
     render() {
      
         const {} = this.state;
-        const {menuList = [
-            {
-                title: 'Requests',
-                items: [
-                    {label: 'Name', value: 'name'},
-                    {label: 'Description', value: 'desc'},
-                    {label: 'URL', value: 'url'},
-                    {label: 'Query parameters', value: 'queryparam'},
-                    {label: 'Path variables', value: 'pathvariable'},
-                    {label: 'Headers', value: 'header'},
-                    {label: 'Pre-request script', value: 'prescript'},
-                    {label: 'Tests', value: 'tests'},
-                    {label: 'Authorization', value: 'authorization'},
-                    {label: 'Request body', value: 'requestbody'},
-                ]
-            },
-            {
-                title: 'Examples',
-                items: [
-                    {label: 'Name', value: 'name'},
-                    {label: 'URL', value: 'url'},
-                    {label: 'Query parameters', value: 'queryparam'},
-                    {label: 'Path Variables', value: 'pathvariable'},
-                    {label: 'Request headers', value: 'requestheader'},
-                    {label: 'Request body', value: 'requestbody'},
-                    {label: 'Headers', value: 'header'},
-                ]
-            }
-        ]} = this.props;
 
-        let allField = [];
-        menuList.forEach(item => {
-            allField = allField.concat(item.items)
-        })
+        const requestField = {
+            title: 'Requests',
+            items: [
+                {label: 'Name', value: 'name'},
+                {label: 'Description', value: 'desc'},
+                {label: 'URL', value: 'url'},
+                {label: 'Query parameters', value: 'queryparam'},
+                {label: 'Path variables', value: 'pathvariable'},
+                {label: 'Headers', value: 'header'},
+                {label: 'Pre-request script', value: 'prescript'},
+                {label: 'Tests', value: 'tests'},
+                {label: 'Authorization', value: 'authorization'},
+                {label: 'Request body', value: 'requestbody'},
+            ]
+        }
 
-        const menu = (
-            <Menu>
-                <Typography.Text style={{paddingLeft: 10}} type="secondary">INCLUDE FIELDS</Typography.Text>
-                {
-                    menuList.map(menuItem => (
-                        <>
-                            <Divider 
-                                orientation="left" 
-                                orientationMargin="0"
-                                style={{fontSize: 'unset', margin: '4px 0px', paddingLeft:10}}>
-                                {menuItem.title}
-                            </Divider>
+        const exampleField = {
+            title: 'Examples',
+            items: [
+                {label: 'Name', value: 'name'},
+                {label: 'URL', value: 'url'},
+                {label: 'Query parameters', value: 'queryparam'},
+                {label: 'Path Variables', value: 'pathvariable'},
+                {label: 'Request headers', value: 'requestheader'},
+                {label: 'Request body', value: 'requestbody'},
+                {label: 'Headers', value: 'header'},
+            ]
+        };
 
-                            {
-                                menuItem.items.map(item => (
-                                    <Menu.Item key={item.value}>
-                                        <Checkbox>{item.label}</Checkbox>
-                                    </Menu.Item>
-                                ))
-                            }
-                        </>
-                        
-                    ))
-                }
-            </Menu>
-          );
+        const folderField = {
+            title: 'Folders',
+            items: [
+                {label: 'Name', value: 'name'},
+                {label: 'Description', value: 'desc'},
+                {label: 'Pre-request script', value: 'prescript'},
+                {label: 'Tests', value: 'tests'},
+                {label: 'Authorization', value: 'authorization'},
+            ]
+        }
+
+        const collectionField = {
+            title: 'Collections',
+            items: [
+                {label: 'Name', value: 'name'},
+                {label: 'Description', value: 'desc'},
+                {label: 'Pre-request script', value: 'prescript'},
+                {label: 'Tests', value: 'tests'},
+                {label: 'Authorization', value: 'authorization'},
+                {label: 'Variable', value: 'variable'},
+            ]
+        }
+
+        const environmentField = {
+            title: 'Environments',
+            items: [
+                {label: 'Name', value: 'name'},
+                {label: 'Variables', value: 'variable'}
+            ]
+        }
+
+        const globalField = {
+            title: 'Globals',
+            items: [
+                {label: 'Variables', value: 'variable'}
+            ]
+        }
 
         return (
             <Tabs 
                 defaultActiveKey="1" 
-                className="common-tabs-class" 
+                className="common-tabs-class find-result-tabs" 
                 onChange={this.handleTabsKeyChange}>
                 <TabPane tab="Open tabs (0)" key="1">
                     <FindResultFieldDropdown 
                         menuList={[
-                            {
-                                title: 'Requests',
-                                items: [
-                                    {label: 'Name', value: 'name'},
-                                    {label: 'Description', value: 'desc'},
-                                    {label: 'URL', value: 'url'},
-                                    {label: 'Query parameters', value: 'queryparam'},
-                                    {label: 'Path variables', value: 'pathvariable'},
-                                    {label: 'Headers', value: 'header'},
-                                    {label: 'Pre-request script', value: 'prescript'},
-                                    {label: 'Tests', value: 'tests'},
-                                    {label: 'Authorization', value: 'authorization'},
-                                    {label: 'Request body', value: 'requestbody'},
-                                ]
-                            },
-                            {
-                                title: 'Examples',
-                                items: [
-                                    {label: 'Name', value: 'name'},
-                                    {label: 'URL', value: 'url'},
-                                    {label: 'Query parameters', value: 'queryparam'},
-                                    {label: 'Path Variables', value: 'pathvariable'},
-                                    {label: 'Request headers', value: 'requestheader'},
-                                    {label: 'Request body', value: 'requestbody'},
-                                    {label: 'Headers', value: 'header'},
-                                ]
-                            }
+                            requestField,
+                            exampleField
                         ]}
                     />
                 </TabPane>
                 <TabPane tab="Collections (0)" key="2">
-                Content of Tab Pane 2
+                    <FindResultFieldDropdown 
+                        menuList={[
+                            collectionField,
+                            folderField,
+                            requestField,
+                            exampleField
+                        ]}
+                    />
                 </TabPane>
                 <TabPane tab="Environments (0)" key="3">
-                Content of Tab Pane 3
+                    <FindResultFieldDropdown 
+                        menuList={[
+                            environmentField
+                        ]}
+                    />
                 </TabPane>
                 <TabPane tab="Globals (0)" key="4">
-                Content of Tab Pane 3
+                    <FindResultFieldDropdown 
+                        menuList={[
+                            globalField
+                        ]}
+                    />
                 </TabPane>
             </Tabs>
 
